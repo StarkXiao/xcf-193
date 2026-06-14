@@ -96,4 +96,46 @@ export const worldApi = {
   }
 }
 
+export const userApi = {
+  getUser(id) {
+    return api.get(`/users/${id}`)
+  },
+  
+  getUserStories(id, params = {}) {
+    return api.get(`/users/${id}/stories`, { params })
+  },
+  
+  getUserWorlds(id, params = {}) {
+    return api.get(`/users/${id}/worlds`, { params })
+  },
+  
+  getFavorites(id, params = {}) {
+    return api.get(`/users/${id}/favorites`, { params })
+  },
+  
+  addFavorite(id, data) {
+    return api.post(`/users/${id}/favorites`, data)
+  },
+  
+  removeFavorite(id, data) {
+    return api.delete(`/users/${id}/favorites`, { data })
+  },
+  
+  checkFavorite(id, params = {}) {
+    return api.get(`/users/${id}/favorites/check`, { params })
+  },
+  
+  getNotifications(id, params = {}) {
+    return api.get(`/users/${id}/notifications`, { params })
+  },
+  
+  markAsRead(id, data = {}) {
+    return api.post(`/users/${id}/notifications/read`, data)
+  },
+  
+  deleteNotification(id, notificationId) {
+    return api.delete(`/users/${id}/notifications/${notificationId}`)
+  }
+}
+
 export default api

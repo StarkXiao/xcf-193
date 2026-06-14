@@ -11,6 +11,10 @@ import StoryEditor from './views/StoryEditor.vue'
 import WorldLibrary from './views/WorldLibrary.vue'
 import WorldDetail from './views/WorldDetail.vue'
 import WorldEditor from './views/WorldEditor.vue'
+import UserProfile from './views/UserProfile.vue'
+import UserCreations from './views/UserCreations.vue'
+import UserMessages from './views/UserMessages.vue'
+import UserFavorites from './views/UserFavorites.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -20,7 +24,11 @@ const routes = [
   { path: '/worlds', name: 'WorldLibrary', component: WorldLibrary },
   { path: '/world/:id', name: 'WorldDetail', component: WorldDetail },
   { path: '/world-editor', name: 'WorldEditor', component: WorldEditor },
-  { path: '/world-editor/:id', name: 'WorldEditorEdit', component: WorldEditor }
+  { path: '/world-editor/:id', name: 'WorldEditorEdit', component: WorldEditor },
+  { path: '/user/profile', name: 'UserProfile', component: UserProfile },
+  { path: '/user/creations', name: 'UserCreations', component: UserCreations },
+  { path: '/user/messages', name: 'UserMessages', component: UserMessages },
+  { path: '/user/favorites', name: 'UserFavorites', component: UserFavorites }
 ]
 
 const router = createRouter({

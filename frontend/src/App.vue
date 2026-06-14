@@ -20,10 +20,21 @@
             </div>
           </div>
           <div class="user-area">
-            <n-avatar round size="medium">
-              {{ currentUser.avatar }}
-            </n-avatar>
-            <span class="username">{{ currentUser.username }}</span>
+            <n-dropdown 
+              :options="userMenuOptions" 
+              @select="handleUserMenuSelect"
+              trigger="click"
+            >
+              <div class="user-dropdown-trigger">
+                <n-badge :value="unreadCount" :max="99" :show="unreadCount > 0" type="error">
+                  <n-avatar round size="medium">
+                    {{ currentUser.avatar }}
+                  </n-avatar>
+                </n-badge>
+                <span class="username">{{ currentUser.username }}</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+            </n-dropdown>
           </div>
         </div>
       </n-layout-header>
@@ -47,9 +58,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar } from 'naive-ui'
+import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar, NDropdown, NBadge } from 'naive-ui'
+import { userApi } from './api'
 
 const route = useRoute()
 const router = useRouter()
@@ -72,10 +84,58 @@ const currentUser = ref({
   avatar: '🌸'
 })
 
+const unreadCount = ref(0)
+
+const loadUnreadCount = async () => {
+  try {
+    const res = await userApi.getUser(currentUser.value.id)
+    unreadCount.value = res.data.stats.unreadCount
+  } catch (err) {
+    console.error('加载未读消息数失败:', err)
+  }
+}
+
 const menuItems = [
   { key: 'home', label: '首页', icon: '🏠' },
   { key: 'worlds', label: '世界设定', icon: '🌍' },
   { key: 'editor', label: '创作', icon: '✏️' }
+]
+
+const userMenuOptions = [
+  {
+    label: '个人主页',
+    key: 'profile',
+    icon: () => '👤'
+  },
+  {
+    label: '创作记录',
+    key: 'creations',
+    icon: () => '✏️'
+  },
+  {
+    label: () => unreadCount.value > 0 ? `互动消息 (${unreadCount.value})` : '互动消息',
+    key: 'messages',
+    icon: () => '💬'
+  },
+  {
+    label: '收藏管理',
+    key: 'favorites',
+    icon: () => '⭐'
+  },
+  {
+    type: 'divider',
+    key: 'd1'
+  },
+  {
+    label: '创作新故事',
+    key: 'editor',
+    icon: () => '📝'
+  },
+  {
+    label: '新建世界设定',
+    key: 'world-editor',
+    icon: () => '🌍'
+  }
 ]
 
 const activeMenu = computed(() => {
@@ -100,9 +160,36 @@ const handleMenuClick = (key) => {
   }
 }
 
+const handleUserMenuSelect = (key) => {
+  switch (key) {
+    case 'profile':
+      router.push('/user/profile')
+      break
+    case 'creations':
+      router.push('/user/creations')
+      break
+    case 'messages':
+      router.push('/user/messages')
+      break
+    case 'favorites':
+      router.push('/user/favorites')
+      break
+    case 'editor':
+      router.push('/editor')
+      break
+    case 'world-editor':
+      router.push('/world-editor')
+      break
+  }
+}
+
 const goHome = () => {
   router.push('/')
 }
+
+onMounted(() => {
+  loadUnreadCount()
+})
 </script>
 
 <style scoped>
@@ -185,6 +272,25 @@ const goHome = () => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.user-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.user-dropdown-trigger:hover {
+  background: rgba(199, 125, 255, 0.1);
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  color: #c77dff;
 }
 
 .username {

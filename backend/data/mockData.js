@@ -1348,10 +1348,80 @@ const worldSettings = [
   }
 ];
 
+const favorites = {
+  'user-1': {
+    stories: ['story-2', 'story-3'],
+    worlds: ['world-2', 'world-3']
+  },
+  'user-2': {
+    stories: ['story-1', 'story-3'],
+    worlds: ['world-1', 'world-3']
+  },
+  'user-3': {
+    stories: ['story-1', 'story-2'],
+    worlds: ['world-1', 'world-2']
+  }
+};
+
+const notifications = [
+  {
+    id: 'notif-1',
+    userId: 'user-1',
+    type: 'like',
+    content: '星河漫步者 点赞了你的故事《浮城之恋》',
+    relatedId: 'story-1',
+    relatedType: 'story',
+    isRead: false,
+    createdAt: '2024-05-12 10:30'
+  },
+  {
+    id: 'notif-2',
+    userId: 'user-1',
+    type: 'comment',
+    content: '梦境织者 评论了你的故事：第一章就很有画面感！',
+    relatedId: 'story-1',
+    relatedType: 'story',
+    isRead: false,
+    createdAt: '2024-05-11 14:20'
+  },
+  {
+    id: 'notif-3',
+    userId: 'user-1',
+    type: 'favorite',
+    content: '星河漫步者 收藏了你的世界设定《浮城世界观》',
+    relatedId: 'world-1',
+    relatedType: 'world',
+    isRead: true,
+    createdAt: '2024-05-10 09:15'
+  },
+  {
+    id: 'notif-4',
+    userId: 'user-1',
+    type: 'system',
+    content: '欢迎来到浮城回声！开始你的创作之旅吧~',
+    relatedId: null,
+    relatedType: null,
+    isRead: true,
+    createdAt: '2024-01-15 00:00'
+  },
+  {
+    id: 'notif-5',
+    userId: 'user-1',
+    type: 'like',
+    content: '梦境织者 点赞了你的评论',
+    relatedId: 'comment-4',
+    relatedType: 'comment',
+    isRead: false,
+    createdAt: '2024-05-13 16:45'
+  }
+];
+
 module.exports = {
   users,
   stories,
   storyNodes,
   comments,
-  worldSettings
+  worldSettings,
+  favorites,
+  notifications
 };
