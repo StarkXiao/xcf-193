@@ -1413,6 +1413,22 @@ const notifications = [
     relatedType: 'comment',
     isRead: false,
     createdAt: '2024-05-13 16:45'
+  },
+  {
+    id: 'notif-6',
+    userId: 'user-1',
+    type: 'invitation',
+    content: '星河漫步者 邀请你共同维护世界设定「星际时代」',
+    relatedId: 'invite-4',
+    relatedType: 'invitation',
+    relatedWorldId: 'world-2',
+    relatedWorldName: '星际时代',
+    invitationRole: 'editor',
+    invitationCategories: ['科技', '政治'],
+    inviterId: 'user-2',
+    inviterName: '星河漫步者',
+    isRead: false,
+    createdAt: '2024-05-18 14:00'
   }
 ];
 
@@ -1532,6 +1548,20 @@ const invitations = [
     categories: ['地理'],
     status: 'pending',
     createdAt: '2024-05-20 08:00',
+    respondedAt: null
+  },
+  {
+    id: 'invite-4',
+    worldId: 'world-2',
+    worldName: '星际时代',
+    inviterId: 'user-2',
+    inviterName: '星河漫步者',
+    inviteeId: 'user-1',
+    inviteeName: '月下独酌',
+    role: 'editor',
+    categories: ['科技', '政治'],
+    status: 'pending',
+    createdAt: '2024-05-18 14:00',
     respondedAt: null
   }
 ];

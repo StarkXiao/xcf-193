@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { users, collaborators, invitations, changeRequests, versionHistory } = require('../data/mockData');
+const { users, collaborators, invitations, changeRequests, versionHistory, notifications, worldSettings } = require('../data/mockData');
 
 let collaboratorsData = JSON.parse(JSON.stringify(collaborators));
 let invitationsData = [...invitations];
 let changeRequestsData = [...changeRequests];
 let versionHistoryData = [...versionHistory];
+let notificationsData = [...notifications];
+let worldSettingsData = JSON.parse(JSON.stringify(worldSettings));
 
 router.get('/:worldId/members', (req, res) => {
   const { worldId } = req.params;
@@ -46,6 +48,25 @@ router.post('/:worldId/invite', (req, res) => {
   };
 
   invitationsData.push(invitation);
+
+  const inviteNotif = {
+    id: `notif-${uuidv4()}`,
+    userId: inviteeId,
+    type: 'invitation',
+    content: `${inviterName} 邀请你共同维护世界设定「${worldName}」`,
+    relatedId: invitation.id,
+    relatedType: 'invitation',
+    relatedWorldId: worldId,
+    relatedWorldName: worldName,
+    invitationRole: role || 'editor',
+    invitationCategories: categories || [],
+    inviterId,
+    inviterName,
+    isRead: false,
+    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+  };
+  notificationsData.push(inviteNotif);
+
   res.status(201).json(invitation);
 });
 
@@ -99,7 +120,7 @@ router.get('/:worldId/invitations', (req, res) => {
 
 router.post('/:worldId/invitations/:inviteId/respond', (req, res) => {
   const { worldId, inviteId } = req.params;
-  const { accept } = req.body;
+  const { accept, responderId, responderName } = req.body;
 
   const invitation = invitationsData.find(
     inv => inv.id === inviteId && inv.worldId === worldId && inv.status === 'pending'
@@ -133,6 +154,26 @@ router.post('/:worldId/invitations/:inviteId/respond', (req, res) => {
     };
     collaboratorsData[worldId].push(newMember);
   }
+
+  const notif = notificationsData.find(
+    n => n.relatedId === inviteId && n.type === 'invitation'
+  );
+  if (notif) {
+    notif.isRead = true;
+    notif.invitationStatus = accept ? 'accepted' : 'rejected';
+  }
+
+  const resultNotif = {
+    id: `notif-${uuidv4()}`,
+    userId: invitation.inviterId,
+    type: 'system',
+    content: `${responderName || invitation.inviteeName} ${accept ? '接受了' : '拒绝了'}你关于「${invitation.worldName}」的协作邀请`,
+    relatedId: worldId,
+    relatedType: 'world',
+    isRead: false,
+    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+  };
+  notificationsData.push(resultNotif);
 
   res.json({ invitation, accepted: accept });
 });
@@ -196,22 +237,57 @@ router.put('/:worldId/changes/:changeId/review', (req, res) => {
   changeRequest.reviewComment = reviewComment || null;
   changeRequest.reviewedAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
 
-  if (approved) {
+  const world = worldSettingsData.find(w => w.id === worldId);
+  if (approved && world && changeRequest.newValue) {
+    if (changeRequest.type === 'update' && changeRequest.entryId) {
+      const entryIndex = world.entries.findIndex(e => e.id === changeRequest.entryId);
+      if (entryIndex !== -1) {
+        world.entries[entryIndex] = { ...world.entries[entryIndex], ...changeRequest.newValue };
+      }
+    } else if (changeRequest.type === 'create') {
+      const newEntry = {
+        ...changeRequest.newValue,
+        id: changeRequest.entryId || `entry-${uuidv4()}`,
+        worldId
+      };
+      world.entries.push(newEntry);
+      changeRequest.entryId = newEntry.id;
+      changeRequest.entryTitle = newEntry.title;
+    } else if (changeRequest.type === 'delete' && changeRequest.entryId) {
+      const entryIndex = world.entries.findIndex(e => e.id === changeRequest.entryId);
+      if (entryIndex !== -1) {
+        world.entries.splice(entryIndex, 1);
+      }
+    }
+
+    const versionNum = (versionHistoryData.filter(v => v.worldId === worldId).length || 0) + 1;
     const newVersion = {
       id: `version-${uuidv4()}`,
       worldId,
-      version: (versionHistoryData.filter(v => v.worldId === worldId).length || 0) + 1,
+      version: versionNum,
       changeType: changeRequest.type,
       changeSummary: changeRequest.summary,
       changeRequestId: changeRequest.id,
       changedBy: reviewedBy,
       changerName: reviewerName,
       changerAvatar: users.find(u => u.id === reviewedBy)?.avatar || '👤',
-      entries: changeRequest.newValue ? [changeRequest.newValue] : [],
+      entries: JSON.parse(JSON.stringify(world.entries)),
       createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
     };
     versionHistoryData.push(newVersion);
   }
+
+  const resultNotif = {
+    id: `notif-${uuidv4()}`,
+    userId: changeRequest.requestedBy,
+    type: 'system',
+    content: `你关于「${changeRequest.entryTitle || '新条目'}」的变更请求被${reviewerName} ${approved ? '通过' : '驳回'}`,
+    relatedId: worldId,
+    relatedType: 'world',
+    isRead: false,
+    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+  };
+  notificationsData.push(resultNotif);
 
   res.json({ changeRequest, approved });
 });
@@ -268,6 +344,28 @@ router.post('/:worldId/versions/:versionId/rollback', (req, res) => {
 
   versionHistoryData.push(rollbackVersion);
   res.json({ rollbackVersion });
+});
+
+router.get('/user/:userId/invitations', (req, res) => {
+  const { userId } = req.params;
+  const { status } = req.query;
+  let result = invitationsData.filter(inv => inv.inviteeId === userId);
+  if (status) {
+    result = result.filter(inv => inv.status === status);
+  }
+  result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ invitations: result });
+});
+
+router.get('/:worldId/role/:userId', (req, res) => {
+  const { worldId, userId } = req.params;
+  const members = collaboratorsData[worldId] || [];
+  const member = members.find(m => m.userId === userId);
+  if (member) {
+    res.json({ role: member.role, permissions: member.permissions, categories: member.categories, member });
+  } else {
+    res.json({ role: 'none', permissions: [], categories: [], member: null });
+  }
 });
 
 module.exports = router;

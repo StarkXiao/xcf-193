@@ -27,6 +27,7 @@
         <n-radio-button value="like">点赞</n-radio-button>
         <n-radio-button value="comment">评论</n-radio-button>
         <n-radio-button value="favorite">收藏</n-radio-button>
+        <n-radio-button value="invitation">邀请</n-radio-button>
         <n-radio-button value="system">系统</n-radio-button>
       </n-radio-group>
       <n-radio-group v-model:value="filterRead" size="medium" @update:value="loadNotifications">
@@ -49,6 +50,7 @@
             <span v-if="notif.type === 'like'">❤️</span>
             <span v-else-if="notif.type === 'comment'">💬</span>
             <span v-else-if="notif.type === 'favorite'">⭐</span>
+            <span v-else-if="notif.type === 'invitation'">✉️</span>
             <span v-else-if="notif.type === 'system'">🔔</span>
             <span v-else>📬</span>
           </div>
@@ -58,6 +60,33 @@
               <span class="message-time">📅 {{ notif.createdAt }}</span>
               <n-tag v-if="!notif.isRead" size="small" type="error" round>未读</n-tag>
               <n-tag v-else size="small" type="default" round>已读</n-tag>
+              
+              <template v-if="notif.type === 'invitation' && notif.invitationRole">
+                <n-tag size="small" type="info">
+                  角色：{{ getRoleLabel(notif.invitationRole) }}
+                </n-tag>
+              </template>
+              <template v-if="notif.type === 'invitation' && notif.invitationCategories?.length > 0">
+                <n-tag size="small" type="warning">
+                  负责分类：{{ notif.invitationCategories.join('、') }}
+                </n-tag>
+              </template>
+            </div>
+            
+            <div v-if="notif.type === 'invitation' && !notif.invitationStatus" class="invitation-actions">
+              <n-button type="success" size="small" @click="acceptInvitation(notif)">
+                <template #icon>✅</template>
+                接受邀请
+              </n-button>
+              <n-button type="error" size="small" @click="rejectInvitation(notif)">
+                <template #icon>❌</template>
+                拒绝邀请
+              </n-button>
+            </div>
+            <div v-else-if="notif.type === 'invitation' && notif.invitationStatus" class="invitation-status">
+              <n-tag :type="notif.invitationStatus === 'accepted' ? 'success' : 'error'" size="small">
+                {{ notif.invitationStatus === 'accepted' ? '已接受' : '已拒绝' }}
+              </n-tag>
             </div>
           </div>
           <div class="message-actions">
@@ -70,12 +99,20 @@
               标记已读
             </n-button>
             <n-button 
-              v-if="notif.relatedId" 
+              v-if="notif.relatedId && notif.type !== 'invitation'" 
               size="small" 
               @click="openRelated(notif)"
             >
               <template #icon>👁️</template>
               查看
+            </n-button>
+            <n-button 
+              v-if="notif.type === 'invitation' && !notif.invitationStatus && notif.relatedWorldId" 
+              size="small" 
+              @click="openWorld(notif.relatedWorldId)"
+            >
+              <template #icon>🌍</template>
+              查看世界
             </n-button>
             <n-button 
               size="small" 
@@ -101,18 +138,25 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NTag, NRadioGroup, NRadioButton, NSpin, useMessage } from 'naive-ui'
-import { userApi } from '../api'
+import { NButton, NCard, NTag, NRadioGroup, NRadioButton, NSpin, useMessage, useDialog } from 'naive-ui'
+import { userApi, collaborationApi } from '../api'
 
 const router = useRouter()
 const message = useMessage()
+const dialog = useDialog()
 const userId = 'user-1'
+const currentUsername = '月下独酌'
 
 const notifications = ref([])
 const unreadCount = ref(0)
 const loading = ref(false)
 const filterType = ref('all')
 const filterRead = ref('all')
+
+const getRoleLabel = (role) => {
+  const map = { owner: '主理人', editor: '编辑者', reviewer: '审核者' }
+  return map[role] || role
+}
 
 const loadNotifications = async () => {
   loading.value = true
@@ -174,6 +218,48 @@ const openRelated = (notif) => {
   } else if (notif.relatedType === 'world') {
     router.push(`/world/${notif.relatedId}`)
   }
+}
+
+const openWorld = (worldId) => {
+  router.push(`/world/${worldId}`)
+}
+
+const acceptInvitation = async (notif) => {
+  if (!notif.relatedId || !notif.relatedWorldId) return
+  try {
+    await collaborationApi.respondToInvitation(notif.relatedWorldId, notif.relatedId, {
+      accept: true,
+      responderId: userId,
+      responderName: currentUsername
+    })
+    message.success('已接受邀请')
+    loadNotifications()
+  } catch (err) {
+    message.error(err.response?.data?.message || '操作失败')
+  }
+}
+
+const rejectInvitation = (notif) => {
+  if (!notif.relatedId || !notif.relatedWorldId) return
+  dialog.warning({
+    title: '确认拒绝',
+    content: '确定要拒绝这个协作邀请吗？',
+    positiveText: '确认拒绝',
+    negativeText: '再想想',
+    onPositiveClick: async () => {
+      try {
+        await collaborationApi.respondToInvitation(notif.relatedWorldId, notif.relatedId, {
+          accept: false,
+          responderId: userId,
+          responderName: currentUsername
+        })
+        message.success('已拒绝邀请')
+        loadNotifications()
+      } catch (err) {
+        message.error(err.response?.data?.message || '操作失败')
+      }
+    }
+  })
 }
 
 onMounted(() => {
@@ -272,11 +358,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .message-time {
   font-size: 12px;
   color: #999;
+}
+
+.invitation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.invitation-status {
+  margin-top: 12px;
 }
 
 .message-actions {

@@ -7,17 +7,34 @@
           返回
         </n-button>
         <h1 class="editor-title">{{ isEditing ? '编辑世界设定' : '创建新世界' }}</h1>
+        <n-tag v-if="collabRole && collabRole !== 'owner' && collabRole !== 'none'" size="small" type="info">
+          {{ getRoleLabel(collabRole) }}模式
+        </n-tag>
       </div>
       <div class="header-actions">
         <n-button @click="previewWorld" :disabled="!world.id">
           <template #icon>👁️</template>
           预览
         </n-button>
-        <n-button type="primary" @click="saveWorld">
+        <n-button v-if="collabRole === 'owner' || !isEditing" type="primary" @click="saveWorld">
           <template #icon>💾</template>
           保存
         </n-button>
+        <n-button v-if="collabRole && collabRole !== 'owner' && collabRole !== 'none'" @click="goToCollaboration">
+          <template #icon>📋</template>
+          变更审核
+        </n-button>
       </div>
+    </div>
+
+    <div v-if="collabRole && collabRole !== 'owner' && collabRole !== 'none'" class="collab-tip">
+      <n-alert type="info" :show-icon="true">
+        你是以 <strong>{{ getRoleLabel(collabRole) }}</strong> 身份参与此世界设定的协作。
+        <template v-if="assignedCategories.length > 0">
+          你负责的分类：<n-tag v-for="cat in assignedCategories" :key="cat" size="small" type="warning" style="margin: 0 4px;">{{ cat }}</n-tag>
+        </template>
+        你的修改将以变更请求形式提交，需主理人审核通过后生效。
+      </n-alert>
     </div>
 
     <div class="editor-container">
@@ -25,7 +42,11 @@
         <n-card title="基本信息" class="info-card">
           <n-form label-placement="top">
             <n-form-item label="世界名称">
-              <n-input v-model:value="world.name" placeholder="请输入世界名称" />
+              <n-input 
+                v-model:value="world.name" 
+                placeholder="请输入世界名称" 
+                :disabled="collabRole && collabRole !== 'owner' && collabRole !== 'none'"
+              />
             </n-form-item>
             <n-form-item label="封面图标">
               <div class="cover-selector">
@@ -33,8 +54,8 @@
                   v-for="icon in coverIcons" 
                   :key="icon"
                   class="cover-option"
-                  :class="{ active: world.cover === icon }"
-                  @click="world.cover = icon"
+                  :class="{ active: world.cover === icon, disabled: collabRole && collabRole !== 'owner' && collabRole !== 'none' }"
+                  @click="handleCoverSelect(icon)"
                 >
                   {{ icon }}
                 </div>
@@ -46,6 +67,7 @@
                 type="textarea"
                 :rows="3"
                 placeholder="简短描述这个世界观..."
+                :disabled="collabRole && collabRole !== 'owner' && collabRole !== 'none'"
               />
             </n-form-item>
           </n-form>
@@ -54,7 +76,7 @@
         <n-card title="条目分类" class="categories-card">
           <div class="category-list">
             <div 
-              v-for="cat in categories" 
+              v-for="cat in displayCategories" 
               :key="cat"
               class="category-item"
               :class="{ active: selectedCategory === cat }"
@@ -73,7 +95,11 @@
           <h2 class="section-title">
             {{ selectedCategory === '全部' ? '所有条目' : selectedCategory }}
           </h2>
-          <n-button type="primary" @click="addEntry">
+          <n-button 
+            type="primary" 
+            @click="addEntry"
+            :disabled="!canAddEntry"
+          >
             <template #icon>+</template>
             新增条目
           </n-button>
@@ -92,6 +118,7 @@
               :key="entry.id"
               hoverable
               class="entry-card"
+              :class="{ 'readonly-entry': !canEditEntry(entry) }"
             >
               <div class="entry-card-header">
                 <div>
@@ -101,11 +128,28 @@
                   <h3 class="entry-title">{{ entry.title }}</h3>
                 </div>
                 <div class="entry-actions">
-                  <n-button text size="small" @click="editEntry(entry)">
+                  <n-button 
+                    v-if="canEditEntry(entry)" 
+                    text size="small" 
+                    @click="editEntry(entry)"
+                  >
                     <template #icon>✏️</template>
                     编辑
                   </n-button>
-                  <n-button text size="small" @click="deleteEntry(entry)">
+                  <n-button 
+                    v-else 
+                    text size="small" 
+                    disabled
+                  >
+                    <template #icon>🔒</template>
+                    只读
+                  </n-button>
+                  <n-button 
+                    v-if="collabRole === 'owner'" 
+                    text size="small" 
+                    type="error" 
+                    @click="deleteEntry(entry)"
+                  >
                     <template #icon>🗑️</template>
                     删除
                   </n-button>
@@ -121,7 +165,7 @@
     <n-modal 
       v-model:show="showEntryModal" 
       preset="card"
-      :title="editingEntry?.id ? '编辑条目' : '新增条目'"
+      :title="editingEntry?.id ? (collabRole === 'owner' ? '编辑条目' : '提交变更请求') : '新增条目（提交变更）'"
       style="width: 500px"
       :mask-closable="false"
     >
@@ -133,9 +177,10 @@
           <n-form-item label="分类">
             <n-select 
               v-model:value="editingEntry.category" 
-              :options="categoryOptions"
+              :options="editableCategoryOptions"
               allow-create
               placeholder="选择或创建分类"
+              :disabled="!canChangeCategory"
             />
           </n-form-item>
           <n-form-item label="条目内容">
@@ -146,12 +191,22 @@
               placeholder="详细描述这个设定..."
             />
           </n-form-item>
+          <n-form-item v-if="collabRole && collabRole !== 'owner' && collabRole !== 'none'" label="变更说明">
+            <n-input
+              v-model:value="changeSummary"
+              type="textarea"
+              :rows="2"
+              placeholder="简要描述本次变更的内容和原因..."
+            />
+          </n-form-item>
         </n-form>
       </div>
       <template #footer>
         <div class="modal-footer">
           <n-button @click="showEntryModal = false">取消</n-button>
-          <n-button type="primary" @click="saveEntry">保存</n-button>
+          <n-button type="primary" @click="saveEntry">
+            {{ collabRole === 'owner' || !isEditing ? '保存' : '提交变更' }}
+          </n-button>
         </div>
       </template>
     </n-modal>
@@ -171,13 +226,18 @@ import {
   NSelect,
   NTag,
   NSpin,
-  NModal
+  NModal,
+  NAlert
 } from 'naive-ui'
-import { worldApi } from '../api'
+import { worldApi, collaborationApi } from '../api'
 
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
+
+const userId = 'user-1'
+const userName = '月下独酌'
+const userAvatar = '🌸'
 
 const coverIcons = ['🌍', '🏰', '🌙', '⭐', '🦊', '🚀', '🌸', '💫', '🏯', '🐉']
 
@@ -195,25 +255,67 @@ const selectedCategory = ref('全部')
 const loading = ref(false)
 const showEntryModal = ref(false)
 const editingEntry = ref(null)
+const changeSummary = ref('')
+const collabRole = ref(null)
+const assignedCategories = ref([])
+const originalEntry = ref(null)
 
 const isEditing = computed(() => !!route.params.id)
 
-const categories = computed(() => {
+const displayCategories = computed(() => {
   if (!world.value.entries?.length) return ['全部']
-  const cats = [...new Set(world.value.entries.map(e => e.category))]
+  let cats = [...new Set(world.value.entries.map(e => e.category))]
+  
+  if (collabRole.value && collabRole.value !== 'owner' && collabRole.value !== 'none' && assignedCategories.value.length > 0) {
+    cats = cats.filter(c => assignedCategories.value.includes(c))
+  }
+  
   return ['全部', ...cats]
 })
 
 const filteredEntries = computed(() => {
   if (!world.value.entries) return []
-  if (selectedCategory.value === '全部') return world.value.entries
-  return world.value.entries.filter(e => e.category === selectedCategory.value)
+  
+  let entries = world.value.entries
+  
+  if (collabRole.value && collabRole.value !== 'owner' && collabRole.value !== 'none' && assignedCategories.value.length > 0) {
+    entries = entries.filter(e => assignedCategories.value.includes(e.category))
+  }
+  
+  if (selectedCategory.value === '全部') return entries
+  return entries.filter(e => e.category === selectedCategory.value)
 })
 
-const categoryOptions = computed(() => {
-  const cats = categories.value.filter(c => c !== '全部')
-  return cats.map(c => ({ label: c, value: c }))
+const editableCategoryOptions = computed(() => {
+  if (collabRole.value === 'owner' || !collabRole.value || collabRole.value === 'none') {
+    if (!world.value.entries) return []
+    return [...new Set(world.value.entries.map(e => e.category))].map(c => ({ label: c, value: c }))
+  }
+  return assignedCategories.value.map(c => ({ label: c, value: c }))
 })
+
+const canAddEntry = computed(() => {
+  if (!world.value.id) return false
+  if (!collabRole.value || collabRole.value === 'owner' || collabRole.value === 'none') return true
+  return assignedCategories.value.length > 0
+})
+
+const canChangeCategory = computed(() => {
+  if (collabRole.value === 'owner' || !collabRole.value || collabRole.value === 'none') return true
+  return !editingEntry.value?.id
+})
+
+const canEditEntry = (entry) => {
+  if (!collabRole.value || collabRole.value === 'owner' || collabRole.value === 'none') return true
+  if (collabRole.value === 'reviewer') return false
+  if (assignedCategories.value.length === 0) return true
+  return assignedCategories.value.includes(entry.category)
+}
+
+const getRoleLabel = (role) => {
+  const map = { owner: '主理人', editor: '编辑者', reviewer: '审核者' }
+  return map[role] || role
+}
 
 const getCategoryIcon = (cat) => {
   const icons = {
@@ -230,8 +332,17 @@ const getCategoryIcon = (cat) => {
 }
 
 const getCategoryCount = (cat) => {
-  if (cat === '全部') return world.value.entries?.length || 0
-  return world.value.entries?.filter(e => e.category === cat).length || 0
+  let entries = world.value.entries || []
+  if (collabRole.value && collabRole.value !== 'owner' && collabRole.value !== 'none' && assignedCategories.value.length > 0) {
+    entries = entries.filter(e => assignedCategories.value.includes(e.category))
+  }
+  if (cat === '全部') return entries.length
+  return entries.filter(e => e.category === cat).length
+}
+
+const handleCoverSelect = (icon) => {
+  if (collabRole.value && collabRole.value !== 'owner' && collabRole.value !== 'none') return
+  world.value.cover = icon
 }
 
 const loadWorld = async () => {
@@ -249,6 +360,17 @@ const loadWorld = async () => {
   }
 }
 
+const loadCollabRole = async () => {
+  if (!route.params.id) return
+  try {
+    const res = await collaborationApi.getCollaborationRole(route.params.id, userId)
+    collabRole.value = res.data.role
+    assignedCategories.value = res.data.categories || []
+  } catch (err) {
+    console.error('加载协作身份失败:', err)
+  }
+}
+
 const saveWorld = async () => {
   if (!world.value.name) {
     message.warning('请输入世界名称')
@@ -261,6 +383,7 @@ const saveWorld = async () => {
     } else {
       const res = await worldApi.createWorld(world.value)
       world.value.id = res.data.id
+      collabRole.value = 'owner'
       message.success('创建成功')
     }
   } catch (err) {
@@ -280,16 +403,27 @@ const addEntry = () => {
 }
 
 const openNewEntry = () => {
+  let defaultCategory = '其他'
+  if (selectedCategory.value !== '全部') {
+    defaultCategory = selectedCategory.value
+  } else if (assignedCategories.value.length > 0) {
+    defaultCategory = assignedCategories.value[0]
+  }
+  
   editingEntry.value = {
     title: '',
-    category: selectedCategory.value === '全部' ? '其他' : selectedCategory.value,
+    category: defaultCategory,
     content: ''
   }
+  changeSummary.value = ''
+  originalEntry.value = null
   showEntryModal.value = true
 }
 
 const editEntry = (entry) => {
+  originalEntry.value = { ...entry }
   editingEntry.value = { ...entry }
+  changeSummary.value = ''
   showEntryModal.value = true
 }
 
@@ -304,30 +438,54 @@ const saveEntry = async () => {
   }
 
   try {
-    if (editingEntry.value.id) {
-      await worldApi.updateEntry(world.value.id, editingEntry.value.id, {
-        title: editingEntry.value.title,
-        category: editingEntry.value.category,
-        content: editingEntry.value.content
-      })
-      const index = world.value.entries.findIndex(e => e.id === editingEntry.value.id)
-      if (index !== -1) {
-        world.value.entries[index] = { ...editingEntry.value }
+    if (collabRole.value === 'owner' || !collabRole.value || collabRole.value === 'none') {
+      if (editingEntry.value.id) {
+        await worldApi.updateEntry(world.value.id, editingEntry.value.id, {
+          title: editingEntry.value.title,
+          category: editingEntry.value.category,
+          content: editingEntry.value.content
+        })
+        const index = world.value.entries.findIndex(e => e.id === editingEntry.value.id)
+        if (index !== -1) {
+          world.value.entries[index] = { ...editingEntry.value }
+        }
+        message.success('已更新')
+      } else {
+        const res = await worldApi.addEntry(world.value.id, {
+          title: editingEntry.value.title,
+          category: editingEntry.value.category,
+          content: editingEntry.value.content
+        })
+        if (!world.value.entries) {
+          world.value.entries = []
+        }
+        world.value.entries.push(res.data)
+        message.success('已添加')
       }
-      message.success('已更新')
+      showEntryModal.value = false
     } else {
-      const res = await worldApi.addEntry(world.value.id, {
-        title: editingEntry.value.title,
-        category: editingEntry.value.category,
-        content: editingEntry.value.content
-      })
-      if (!world.value.entries) {
-        world.value.entries = []
+      if (!changeSummary.value.trim()) {
+        message.warning('请填写变更说明')
+        return
       }
-      world.value.entries.push(res.data)
-      message.success('已添加')
+      
+      const changeType = editingEntry.value.id ? 'update' : 'create'
+      
+      await collaborationApi.submitChangeRequest(world.value.id, {
+        entryId: editingEntry.value.id || null,
+        entryTitle: editingEntry.value.title,
+        type: changeType,
+        summary: changeSummary.value,
+        oldValue: originalEntry.value,
+        newValue: { ...editingEntry.value },
+        requestedBy: userId,
+        requesterName: userName,
+        requesterAvatar: userAvatar
+      })
+      
+      message.success('变更请求已提交，等待主理人审核')
+      showEntryModal.value = false
     }
-    showEntryModal.value = false
   } catch (err) {
     console.error('保存条目失败:', err)
     message.error('保存失败')
@@ -349,7 +507,11 @@ const deleteEntry = async (entry) => {
 }
 
 const goBack = () => {
-  router.push('/worlds')
+  if (world.value.id) {
+    router.push(`/world/${world.value.id}`)
+  } else {
+    router.push('/worlds')
+  }
 }
 
 const previewWorld = () => {
@@ -358,8 +520,17 @@ const previewWorld = () => {
   }
 }
 
-onMounted(() => {
-  loadWorld()
+const goToCollaboration = () => {
+  if (world.value.id) {
+    router.push(`/world/${world.value.id}/collaboration`)
+  }
+}
+
+onMounted(async () => {
+  await loadWorld()
+  if (isEditing.value) {
+    await loadCollabRole()
+  }
 })
 </script>
 
@@ -394,6 +565,10 @@ onMounted(() => {
   gap: 12px;
 }
 
+.collab-tip {
+  margin-bottom: 20px;
+}
+
 .editor-container {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -425,7 +600,7 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-.cover-option:hover {
+.cover-option:hover:not(.disabled) {
   border-color: #c77dff;
   transform: scale(1.1);
 }
@@ -433,6 +608,11 @@ onMounted(() => {
 .cover-option.active {
   border-color: #9d4edd;
   background: #f9f0ff;
+}
+
+.cover-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .category-list {
@@ -515,8 +695,12 @@ onMounted(() => {
   transition: transform 0.2s;
 }
 
-.entry-card:hover {
+.entry-card:hover:not(.readonly-entry) {
   transform: translateX(4px);
+}
+
+.entry-card.readonly-entry {
+  opacity: 0.75;
 }
 
 .entry-card-header {

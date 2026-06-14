@@ -163,6 +163,10 @@ export const collaborationApi = {
     return api.post(`/collaboration/${worldId}/invitations/${inviteId}/respond`, data)
   },
 
+  getUserInvitations(userId, params = {}) {
+    return api.get(`/collaboration/user/${userId}/invitations`, { params })
+  },
+
   getChangeRequests(worldId, params = {}) {
     return api.get(`/collaboration/${worldId}/changes`, { params })
   },
@@ -185,6 +189,10 @@ export const collaborationApi = {
 
   rollbackToVersion(worldId, versionId, data) {
     return api.post(`/collaboration/${worldId}/versions/${versionId}/rollback`, data)
+  },
+
+  getCollaborationRole(worldId, userId) {
+    return api.get(`/collaboration/${worldId}/role/${userId}`)
   }
 }
 
