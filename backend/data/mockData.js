@@ -1681,6 +1681,339 @@ const versionHistory = [
   }
 ];
 
+const activities = [
+  {
+    id: 'activity-1',
+    title: '「浮城梦境」主题征文大赛',
+    subtitle: '用文字编织属于你的浮城故事',
+    description: '欢迎来到浮城！这是一座漂浮在万米高空之上的奇迹之城。在这里，天空守护者与凡人共存，古老的传说与浪漫的相遇交织。请以「浮城梦境」为主题，创作一篇互动叙事故事，让读者在你的文字中感受浮城的浪漫与奇幻。',
+    theme: '浮城梦境',
+    cover: '🏰✨',
+    banner: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=floating%20city%20in%20clouds%20fantasy%20dreamy%20romantic%20anime%20style&image_size=landscape_16_9',
+    rules: [
+      '作品需围绕「浮城梦境」主题展开，可融入浮城世界观元素',
+      '故事形式为互动叙事（分支选择），至少包含3个不同结局',
+      '字数不少于3000字，内容健康向上，不得涉及违规内容',
+      '参赛作品需为原创，严禁抄袭、洗稿',
+      '每位参赛者最多提交2部作品'
+    ],
+    prizes: [
+      { rank: '一等奖', name: '浮城金笔奖', count: 1, reward: '奖金5000元 + 专属头像框 + 作品首页推荐' },
+      { rank: '二等奖', name: '天空银笔奖', count: 3, reward: '奖金2000元 + 专属头像框 + 作品分类推荐' },
+      { rank: '三等奖', name: '云海铜笔奖', count: 5, reward: '奖金800元 + 作品分类推荐' },
+      { rank: '人气奖', name: '最具人气作品', count: 10, reward: '浮城周边礼盒 + 作品曝光提升' },
+      { rank: '参与奖', name: '梦想参与奖', count: '不限', reward: '活动限定徽章 + 50积分' }
+    ],
+    tags: ['征文', '浮城', '恋爱', '奇幻'],
+    organizerId: 'system',
+    organizerName: '浮城回声官方',
+    organizerAvatar: '🏛️',
+    startTime: '2024-06-01 00:00',
+    endTime: '2024-07-31 23:59',
+    registrationEndTime: '2024-07-20 23:59',
+    status: 'ongoing',
+    maxParticipants: 1000,
+    viewCount: 12580,
+    shareCount: 892,
+    participantCount: 256,
+    submissionCount: 189,
+    createdAt: '2024-05-20 10:00'
+  },
+  {
+    id: 'activity-2',
+    title: '「星海彼端」科幻恋爱征文',
+    subtitle: '跨越星际的浪漫约定',
+    description: '公元3024年，星际航行时代已经来临。在浩瀚的宇宙中，是否也存在着动人的爱情故事？请以「星海彼端」为主题，创作一篇科幻背景下的恋爱互动故事。',
+    theme: '星海彼端',
+    cover: '🚀💫',
+    banner: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=starry%20space%20sci-fi%20romantic%20spaceship%20galaxy%20anime%20style&image_size=landscape_16_9',
+    rules: [
+      '作品需为科幻背景下的恋爱故事',
+      '故事需包含互动分支，至少2个结局',
+      '字数不少于2000字',
+      '必须为原创作品'
+    ],
+    prizes: [
+      { rank: '一等奖', name: '星海桂冠', count: 1, reward: '奖金3000元 + 专属标识' },
+      { rank: '二等奖', name: '星辰奖章', count: 3, reward: '奖金1000元 + 专属标识' },
+      { rank: '参与奖', name: '星 dust', count: '不限', reward: '30积分' }
+    ],
+    tags: ['征文', '科幻', '恋爱', '星际'],
+    organizerId: 'system',
+    organizerName: '浮城回声官方',
+    organizerAvatar: '🏛️',
+    startTime: '2024-05-15 00:00',
+    endTime: '2024-06-30 23:59',
+    registrationEndTime: '2024-06-20 23:59',
+    status: 'ongoing',
+    maxParticipants: 500,
+    viewCount: 8920,
+    shareCount: 456,
+    participantCount: 178,
+    submissionCount: 134,
+    createdAt: '2024-05-10 10:00'
+  },
+  {
+    id: 'activity-3',
+    title: '「山海奇缘」古风恋爱主题月',
+    subtitle: '前世今生的山海之约',
+    description: '在远古的山海世界，精怪与人类共存。九尾白狐、乘黄异兽、鲛人泣珠...请以「山海奇缘」为主题，创作一篇古风奇幻恋爱故事。',
+    theme: '山海奇缘',
+    cover: '🦊🏔️',
+    banner: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ancient%20chinese%20mountain%20sea%20mythology%20fox%20spirit%20romantic%20anime%20style&image_size=landscape_16_9',
+    rules: [
+      '作品需为古风背景，可融入山海经元素',
+      '故事形式为互动叙事',
+      '字数不少于2500字',
+      '必须为原创作品'
+    ],
+    prizes: [
+      { rank: '一等奖', name: '山海奇缘奖', count: 1, reward: '奖金4000元 + 古风头像框' },
+      { rank: '二等奖', name: '青丘奖章', count: 2, reward: '奖金1500元 + 古风头像框' },
+      { rank: '人气奖', name: '最受欢迎作品', count: 5, reward: '古风周边礼盒' },
+      { rank: '参与奖', name: '结缘奖', count: '不限', reward: '40积分' }
+    ],
+    tags: ['征文', '古风', '奇幻', '恋爱'],
+    organizerId: 'system',
+    organizerName: '浮城回声官方',
+    organizerAvatar: '🏛️',
+    startTime: '2024-04-01 00:00',
+    endTime: '2024-05-31 23:59',
+    registrationEndTime: '2024-05-20 23:59',
+    status: 'ended',
+    maxParticipants: 800,
+    viewCount: 15680,
+    shareCount: 1234,
+    participantCount: 423,
+    submissionCount: 356,
+    createdAt: '2024-03-25 10:00'
+  }
+];
+
+const activityRegistrations = [
+  {
+    id: 'reg-1',
+    activityId: 'activity-1',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    penName: '月下独酌',
+    contactInfo: 'wechat: yuexia123',
+    motivation: '热爱浮城的世界观，想创作一个属于自己的浮城故事',
+    status: 'approved',
+    registeredAt: '2024-06-02 10:30',
+    reviewedAt: '2024-06-02 11:00'
+  },
+  {
+    id: 'reg-2',
+    activityId: 'activity-1',
+    userId: 'user-2',
+    username: '星河漫步者',
+    avatar: '⭐',
+    penName: '星河漫步者',
+    contactInfo: 'qq: 123456789',
+    motivation: '想试试写恋爱题材的故事',
+    status: 'approved',
+    registeredAt: '2024-06-03 14:20',
+    reviewedAt: '2024-06-03 15:00'
+  },
+  {
+    id: 'reg-3',
+    activityId: 'activity-1',
+    userId: 'user-3',
+    username: '梦境织者',
+    avatar: '🌙',
+    penName: '梦境织者',
+    contactInfo: 'email: mengjing@example.com',
+    motivation: '古风是我的强项，这次想挑战奇幻题材',
+    status: 'approved',
+    registeredAt: '2024-06-05 09:15',
+    reviewedAt: '2024-06-05 10:00'
+  },
+  {
+    id: 'reg-4',
+    activityId: 'activity-2',
+    userId: 'user-2',
+    username: '星河漫步者',
+    avatar: '⭐',
+    penName: '星河漫步者',
+    contactInfo: 'qq: 123456789',
+    motivation: '科幻是我的最爱！',
+    status: 'approved',
+    registeredAt: '2024-05-16 16:00',
+    reviewedAt: '2024-05-16 16:30'
+  }
+];
+
+const activitySubmissions = [
+  {
+    id: 'submission-1',
+    activityId: 'activity-1',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    storyId: 'story-1',
+    storyTitle: '浮城之恋',
+    summary: '在漂浮于云端的城市中，一位普通的图书管理员意外遇见了神秘的银发少年...',
+    cover: '🏰',
+    tags: ['奇幻', '恋爱', '冒险'],
+    wordCount: 8500,
+    endingCount: 5,
+    status: 'approved',
+    reviewComment: '画面感极强，人物形象丰满，完美契合主题',
+    submittedAt: '2024-06-15 10:00',
+    reviewedAt: '2024-06-16 14:00',
+    voteCount: 256,
+    viewCount: 1024,
+    score: 9.5
+  },
+  {
+    id: 'submission-2',
+    activityId: 'activity-1',
+    userId: 'user-3',
+    username: '梦境织者',
+    avatar: '🌙',
+    storyId: 'story-3',
+    storyTitle: '浮城月下',
+    summary: '月光下的浮城，藏着多少不为人知的秘密...',
+    cover: '🌙',
+    tags: ['古风', '奇幻', '恋爱'],
+    wordCount: 6800,
+    endingCount: 4,
+    status: 'approved',
+    reviewComment: '文笔优美，意境深远',
+    submittedAt: '2024-06-18 11:30',
+    reviewedAt: '2024-06-19 09:00',
+    voteCount: 189,
+    viewCount: 756,
+    score: 9.2
+  },
+  {
+    id: 'submission-3',
+    activityId: 'activity-2',
+    userId: 'user-2',
+    username: '星河漫步者',
+    avatar: '⭐',
+    storyId: 'story-2',
+    storyTitle: '星海彼端的约定',
+    summary: '星际时代，两位少女在废弃空间站相遇，命运的齿轮开始转动...',
+    cover: '🚀',
+    tags: ['科幻', '百合', '治愈'],
+    wordCount: 7200,
+    endingCount: 4,
+    status: 'approved',
+    reviewComment: '科幻设定新颖，情感真挚动人',
+    submittedAt: '2024-05-28 15:00',
+    reviewedAt: '2024-05-29 10:00',
+    voteCount: 312,
+    viewCount: 1280,
+    score: 9.6
+  },
+  {
+    id: 'submission-4',
+    activityId: 'activity-3',
+    userId: 'user-3',
+    username: '梦境织者',
+    avatar: '🌙',
+    storyId: 'story-3',
+    storyTitle: '妖狐与书生',
+    summary: '深山古寺中，赶考的书生邂逅了一只受伤的九尾狐...',
+    cover: '🦊',
+    tags: ['古风', '奇幻', '恋爱'],
+    wordCount: 9200,
+    endingCount: 6,
+    status: 'approved',
+    reviewComment: '古风韵味十足，人物塑造鲜活',
+    submittedAt: '2024-04-25 20:00',
+    reviewedAt: '2024-04-26 14:00',
+    voteCount: 445,
+    viewCount: 1890,
+    score: 9.8
+  }
+];
+
+const activityRankings = {
+  'activity-1': [
+    { rank: 1, submissionId: 'submission-1', userId: 'user-1', username: '月下独酌', avatar: '🌸', storyTitle: '浮城之恋', score: 9.5, voteCount: 256, viewCount: 1024 },
+    { rank: 2, submissionId: 'submission-2', userId: 'user-3', username: '梦境织者', avatar: '🌙', storyTitle: '浮城月下', score: 9.2, voteCount: 189, viewCount: 756 }
+  ],
+  'activity-2': [
+    { rank: 1, submissionId: 'submission-3', userId: 'user-2', username: '星河漫步者', avatar: '⭐', storyTitle: '星海彼端的约定', score: 9.6, voteCount: 312, viewCount: 1280 }
+  ],
+  'activity-3': [
+    { rank: 1, submissionId: 'submission-4', userId: 'user-3', username: '梦境织者', avatar: '🌙', storyTitle: '妖狐与书生', score: 9.8, voteCount: 445, viewCount: 1890 }
+  ]
+};
+
+const activityShares = [
+  {
+    id: 'share-1',
+    activityId: 'activity-1',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    channel: 'wechat',
+    shareType: 'activity',
+    targetId: 'activity-1',
+    targetType: 'activity',
+    clickCount: 45,
+    registerCount: 8,
+    submitCount: 3,
+    createdAt: '2024-06-10 14:30'
+  },
+  {
+    id: 'share-2',
+    activityId: 'activity-1',
+    userId: 'user-2',
+    username: '星河漫步者',
+    avatar: '⭐',
+    channel: 'qq',
+    shareType: 'submission',
+    targetId: 'submission-3',
+    targetType: 'submission',
+    clickCount: 78,
+    registerCount: 12,
+    submitCount: 5,
+    createdAt: '2024-06-12 09:15'
+  },
+  {
+    id: 'share-3',
+    activityId: 'activity-2',
+    userId: 'user-2',
+    username: '星河漫步者',
+    avatar: '⭐',
+    channel: 'weibo',
+    shareType: 'activity',
+    targetId: 'activity-2',
+    targetType: 'activity',
+    clickCount: 156,
+    registerCount: 23,
+    submitCount: 8,
+    createdAt: '2024-05-20 16:45'
+  },
+  {
+    id: 'share-4',
+    activityId: 'activity-1',
+    userId: 'user-3',
+    username: '梦境织者',
+    avatar: '🌙',
+    channel: 'wechat',
+    shareType: 'submission',
+    targetId: 'submission-2',
+    targetType: 'submission',
+    clickCount: 92,
+    registerCount: 15,
+    submitCount: 6,
+    createdAt: '2024-06-20 11:20'
+  }
+];
+
+const activityVotes = [
+  { id: 'vote-1', activityId: 'activity-1', submissionId: 'submission-1', userId: 'user-2', createdAt: '2024-06-20 10:00' },
+  { id: 'vote-2', activityId: 'activity-1', submissionId: 'submission-1', userId: 'user-3', createdAt: '2024-06-21 14:30' },
+  { id: 'vote-3', activityId: 'activity-1', submissionId: 'submission-2', userId: 'user-2', createdAt: '2024-06-22 09:15' }
+];
+
 module.exports = {
   users,
   stories,
@@ -1692,5 +2025,11 @@ module.exports = {
   collaborators,
   invitations,
   changeRequests,
-  versionHistory
+  versionHistory,
+  activities,
+  activityRegistrations,
+  activitySubmissions,
+  activityRankings,
+  activityShares,
+  activityVotes
 };

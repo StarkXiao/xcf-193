@@ -7,6 +7,7 @@ const commentsRouter = require('./routes/comments');
 const worldsRouter = require('./routes/worlds');
 const usersRouter = require('./routes/users');
 const collaborationRouter = require('./routes/collaboration');
+const activitiesRouter = require('./routes/activities');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +29,7 @@ app.use('/api/comments', commentsRouter);
 app.use('/api/worlds', worldsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/collaboration', collaborationRouter);
+app.use('/api/activities', activitiesRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: '接口不存在' });

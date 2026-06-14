@@ -196,4 +196,86 @@ export const collaborationApi = {
   }
 }
 
+export const activityApi = {
+  getActivities(params = {}) {
+    return api.get('/activities', { params })
+  },
+
+  getFeaturedActivities() {
+    return api.get('/activities/featured')
+  },
+
+  getActivity(id) {
+    return api.get(`/activities/${id}`)
+  },
+
+  getActivityStats(id) {
+    return api.get(`/activities/${id}/stats`)
+  },
+
+  createActivity(data) {
+    return api.post('/activities', data)
+  },
+
+  updateActivity(id, data) {
+    return api.put(`/activities/${id}`, data)
+  },
+
+  deleteActivity(id) {
+    return api.delete(`/activities/${id}`)
+  },
+
+  registerActivity(id, data) {
+    return api.post(`/activities/${id}/register`, data)
+  },
+
+  getActivityRegistrations(id, params = {}) {
+    return api.get(`/activities/${id}/registrations`, { params })
+  },
+
+  checkRegistration(id, params = {}) {
+    return api.get(`/activities/${id}/registration/check`, { params })
+  },
+
+  submitWork(id, data) {
+    return api.post(`/activities/${id}/submit`, data)
+  },
+
+  getActivitySubmissions(id, params = {}) {
+    return api.get(`/activities/${id}/submissions`, { params })
+  },
+
+  getSubmission(submissionId) {
+    return api.get(`/activities/submissions/${submissionId}`)
+  },
+
+  reviewSubmission(submissionId, data) {
+    return api.put(`/activities/submissions/${submissionId}/review`, data)
+  },
+
+  voteSubmission(submissionId, data) {
+    return api.post(`/activities/submissions/${submissionId}/vote`, data)
+  },
+
+  getActivityRanking(id, params = {}) {
+    return api.get(`/activities/${id}/ranking`, { params })
+  },
+
+  shareActivity(id, data) {
+    return api.post(`/activities/${id}/share`, data)
+  },
+
+  recordShareClick(shareId) {
+    return api.post(`/activities/share/${shareId}/click`)
+  },
+
+  getActivityPropagation(id, params = {}) {
+    return api.get(`/activities/${id}/propagation`, { params })
+  },
+
+  getUserActivities(userId, params = {}) {
+    return api.get(`/activities/user/${userId}/my-activities`, { params })
+  }
+}
+
 export default api

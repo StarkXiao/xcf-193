@@ -97,6 +97,7 @@ const loadUnreadCount = async () => {
 
 const menuItems = [
   { key: 'home', label: '首页', icon: '🏠' },
+  { key: 'activities', label: '活动中心', icon: '🎯' },
   { key: 'worlds', label: '世界设定', icon: '🌍' },
   { key: 'editor', label: '创作', icon: '✏️' }
 ]
@@ -141,8 +142,10 @@ const userMenuOptions = [
 const activeMenu = computed(() => {
   const path = route.path
   if (path.startsWith('/story')) return 'home'
+  if (path.startsWith('/activity')) return 'activities'
   if (path.startsWith('/world')) return 'worlds'
   if (path.startsWith('/editor') || path.startsWith('/world-editor')) return 'editor'
+  if (path.startsWith('/activities')) return 'activities'
   return 'home'
 })
 
@@ -150,6 +153,9 @@ const handleMenuClick = (key) => {
   switch (key) {
     case 'home':
       router.push('/')
+      break
+    case 'activities':
+      router.push('/activities')
       break
     case 'worlds':
       router.push('/worlds')

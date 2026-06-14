@@ -9,7 +9,13 @@ const {
   collaborators,
   invitations,
   changeRequests,
-  versionHistory
+  versionHistory,
+  activities,
+  activityRegistrations,
+  activitySubmissions,
+  activityRankings,
+  activityShares,
+  activityVotes
 } = require('./mockData');
 
 const store = {
@@ -23,7 +29,13 @@ const store = {
   collaborators: JSON.parse(JSON.stringify(collaborators)),
   invitations: [...invitations],
   changeRequests: [...changeRequests],
-  versionHistory: [...versionHistory]
+  versionHistory: [...versionHistory],
+  activities: [...activities],
+  activityRegistrations: [...activityRegistrations],
+  activitySubmissions: [...activitySubmissions],
+  activityRankings: JSON.parse(JSON.stringify(activityRankings)),
+  activityShares: [...activityShares],
+  activityVotes: [...activityVotes]
 };
 
 module.exports = store;
