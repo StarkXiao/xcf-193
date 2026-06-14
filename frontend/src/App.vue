@@ -7,26 +7,18 @@
             <span class="logo-icon">🏰</span>
             <span class="logo-text">浮城回声</span>
           </div>
-          <n-menu mode="horizontal" :value="activeMenu" @update:value="handleMenuClick" class="nav-menu">
-            <n-menu-item key="home">
-              <template #icon>
-                <n-icon>🏠</n-icon>
-              </template>
-              首页
-            </n-menu-item>
-            <n-menu-item key="worlds">
-              <template #icon>
-                <n-icon>🌍</n-icon>
-              </template>
-              世界设定
-            </n-menu-item>
-            <n-menu-item key="editor">
-              <template #icon>
-                <n-icon>✏️</n-icon>
-              </template>
-              创作
-            </n-menu-item>
-          </n-menu>
+          <div class="nav-menu">
+            <div 
+              v-for="item in menuItems" 
+              :key="item.key"
+              class="nav-item"
+              :class="{ active: activeMenu === item.key }"
+              @click="handleMenuClick(item.key)"
+            >
+              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-text">{{ item.label }}</span>
+            </div>
+          </div>
           <div class="user-area">
             <n-avatar round size="medium">
               {{ currentUser.avatar }}
@@ -55,10 +47,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NMenu, NMenuItem, NAvatar, NIcon } from 'naive-ui'
-import { darkTheme } from 'naive-ui'
+import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar } from 'naive-ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -80,6 +71,12 @@ const currentUser = ref({
   username: '月下独酌',
   avatar: '🌸'
 })
+
+const menuItems = [
+  { key: 'home', label: '首页', icon: '🏠' },
+  { key: 'worlds', label: '世界设定', icon: '🌍' },
+  { key: 'editor', label: '创作', icon: '✏️' }
+]
 
 const activeMenu = computed(() => {
   const path = route.path
@@ -149,8 +146,39 @@ const goHome = () => {
 .nav-menu {
   flex: 1;
   max-width: 400px;
-  background: transparent !important;
-  border: none !important;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #c77dff;
+  font-size: 14px;
+}
+
+.nav-item:hover {
+  background: rgba(199, 125, 255, 0.1);
+  color: #e0aaff;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(157, 78, 221, 0.3) 0%, rgba(199, 125, 255, 0.3) 100%);
+  color: #ffffff;
+}
+
+.nav-icon {
+  font-size: 16px;
+}
+
+.nav-text {
+  font-weight: 500;
 }
 
 .user-area {
