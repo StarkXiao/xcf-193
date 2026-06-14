@@ -122,6 +122,24 @@ const paragraphs = computed(() => {
   return currentNode.value.content.split('\n').filter(p => p.trim())
 })
 
+const scrollToComment = (commentId) => {
+  setTimeout(() => {
+    const commentEl = document.getElementById(`comment-${commentId}`)
+    if (commentEl) {
+      commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      commentEl.style.backgroundColor = 'rgba(157, 78, 221, 0.1)'
+      setTimeout(() => {
+        commentEl.style.backgroundColor = 'transparent'
+      }, 2000)
+    } else {
+      const commentsSection = document.querySelector('.comments-section')
+      if (commentsSection) {
+        commentsSection.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }, 500)
+}
+
 const loadStory = async () => {
   loading.value = true
   try {
@@ -132,7 +150,17 @@ const loadStory = async () => {
     story.value = storyRes.data
     allNodes.value = nodesRes.data
     
-    if (story.value.startNodeId) {
+    const queryNodeId = route.query.nodeId
+    const queryCommentId = route.query.commentId
+    
+    if (queryNodeId) {
+      const targetNode = nodesRes.data.find(n => n.id === queryNodeId)
+      if (targetNode) {
+        currentNode.value = targetNode
+        currentNodeId.value = targetNode.id
+        history.value = [targetNode]
+      }
+    } else if (story.value.startNodeId) {
       const startNode = nodesRes.data.find(n => n.id === story.value.startNodeId)
       if (startNode) {
         currentNode.value = startNode
@@ -143,6 +171,10 @@ const loadStory = async () => {
     
     storyApi.viewStory(storyId.value)
     checkFavorite()
+    
+    if (queryCommentId) {
+      scrollToComment(queryCommentId)
+    }
   } catch (err) {
     console.error('加载故事失败:', err)
   } finally {
@@ -174,7 +206,9 @@ const toggleFavorite = async () => {
     } else {
       await userApi.addFavorite(userId, {
         targetId: storyId.value,
-        targetType: 'story'
+        targetType: 'story',
+        username: '月下独酌',
+        avatar: '🌸'
       })
       isFavorited.value = true
       message.success('已加入收藏')
@@ -218,7 +252,11 @@ const restartStory = () => {
 
 const toggleLike = async () => {
   try {
-    const res = await storyApi.likeStory(storyId.value)
+    const res = await storyApi.likeStory(storyId.value, {
+      userId: userId,
+      username: '月下独酌',
+      avatar: '🌸'
+    })
     if (story.value) {
       story.value.likes = res.data.likes
     }

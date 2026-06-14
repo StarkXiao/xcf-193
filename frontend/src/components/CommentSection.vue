@@ -5,6 +5,14 @@
         {{ currentUser.avatar }}
       </n-avatar>
       <div class="input-wrapper">
+        <div v-if="replyingTo" class="replying-to-bar">
+          <n-tag size="small" type="info">
+            正在回复 @{{ replyingTo.username }}
+          </n-tag>
+          <n-button text size="tiny" @click="cancelReply">
+            取消
+          </n-button>
+        </div>
         <n-input
           v-model:value="newComment"
           type="textarea"
@@ -20,7 +28,7 @@
             :disabled="!newComment.trim()"
             @click="submitComment"
           >
-            发表评论
+            {{ replyingTo ? '发送回复' : '发表评论' }}
           </n-button>
         </div>
       </div>
@@ -43,6 +51,7 @@
         <div 
           v-for="comment in comments" 
           :key="comment.id"
+          :id="`comment-${comment.id}`"
           class="comment-item"
         >
           <n-avatar round size="medium" class="comment-avatar">
@@ -96,6 +105,7 @@ const currentUser = ref({
 const comments = ref([])
 const newComment = ref('')
 const loading = ref(false)
+const replyingTo = ref(null)
 
 const loadComments = async () => {
   loading.value = true
@@ -113,15 +123,22 @@ const submitComment = async () => {
   if (!newComment.value.trim()) return
   
   try {
-    const res = await commentApi.addComment(props.storyId, {
+    const commentData = {
       nodeId: props.nodeId,
       userId: currentUser.value.id,
       username: currentUser.value.username,
       avatar: currentUser.value.avatar,
       content: newComment.value.trim()
-    })
+    }
+    
+    if (replyingTo.value) {
+      commentData.replyToCommentId = replyingTo.value.id
+    }
+    
+    const res = await commentApi.addComment(props.storyId, commentData)
     comments.value.unshift({ ...res.data, isLiked: false })
     newComment.value = ''
+    replyingTo.value = null
   } catch (err) {
     console.error('发表评论失败:', err)
   }
@@ -131,7 +148,11 @@ const likeComment = async (comment) => {
   if (comment.isLiked) return
   
   try {
-    const res = await commentApi.likeComment(comment.id)
+    const res = await commentApi.likeComment(comment.id, {
+      userId: currentUser.value.id,
+      username: currentUser.value.username,
+      avatar: currentUser.value.avatar
+    })
     comment.likes = res.data.likes
     comment.isLiked = true
   } catch (err) {
@@ -140,7 +161,13 @@ const likeComment = async (comment) => {
 }
 
 const replyTo = (comment) => {
+  replyingTo.value = comment
   newComment.value = `@${comment.username} `
+}
+
+const cancelReply = () => {
+  replyingTo.value = null
+  newComment.value = ''
 }
 
 watch(() => props.nodeId, () => {
@@ -168,6 +195,16 @@ onMounted(() => {
 
 .input-wrapper {
   flex: 1;
+}
+
+.replying-to-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  background: rgba(157, 78, 221, 0.06);
+  border-radius: 8px;
 }
 
 .comment-input {

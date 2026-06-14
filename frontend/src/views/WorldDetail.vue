@@ -155,6 +155,16 @@ const loadWorld = async () => {
     const res = await worldApi.getWorld(route.params.id)
     world.value = res.data
     checkFavorite()
+    
+    const entryId = route.query.entryId
+    if (entryId && world.value?.entries) {
+      const entry = world.value.entries.find(e => e.id === entryId)
+      if (entry) {
+        setTimeout(() => {
+          selectedEntry.value = entry
+        }, 300)
+      }
+    }
   } catch (err) {
     console.error('加载世界设定失败:', err)
   } finally {
@@ -186,7 +196,9 @@ const toggleFavorite = async () => {
     } else {
       await userApi.addFavorite(userId, {
         targetId: route.params.id,
-        targetType: 'world'
+        targetType: 'world',
+        username: '月下独酌',
+        avatar: '🌸'
       })
       isFavorited.value = true
       message.success('已加入收藏')
@@ -199,7 +211,11 @@ const toggleFavorite = async () => {
 
 const toggleLike = async () => {
   try {
-    const res = await worldApi.likeWorld(route.params.id)
+    const res = await worldApi.likeWorld(route.params.id, {
+      userId: userId,
+      username: '月下独酌',
+      avatar: '🌸'
+    })
     if (world.value) {
       world.value.likes = res.data.likes
     }

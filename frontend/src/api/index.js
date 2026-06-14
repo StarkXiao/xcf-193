@@ -38,8 +38,8 @@ export const storyApi = {
     return api.delete(`/stories/${storyId}/nodes/${nodeId}`)
   },
   
-  likeStory(id) {
-    return api.post(`/stories/${id}/like`)
+  likeStory(id, data) {
+    return api.post(`/stories/${id}/like`, data)
   },
   
   viewStory(id) {
@@ -57,8 +57,8 @@ export const commentApi = {
     return api.post(`/comments/story/${storyId}`, data)
   },
   
-  likeComment(commentId) {
-    return api.post(`/comments/${commentId}/like`)
+  likeComment(commentId, data) {
+    return api.post(`/comments/${commentId}/like`, data)
   },
   
   deleteComment(commentId) {
@@ -91,8 +91,8 @@ export const worldApi = {
     return api.delete(`/worlds/${worldId}/entries/${entryId}`)
   },
   
-  likeWorld(id) {
-    return api.post(`/worlds/${id}/like`)
+  likeWorld(id, data) {
+    return api.post(`/worlds/${id}/like`, data)
   }
 }
 

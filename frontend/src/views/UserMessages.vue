@@ -483,15 +483,36 @@ const handleNotificationClick = async (notif) => {
       console.error('标记已读失败:', err)
     }
   }
+  if (notif.relatedId && notif.type !== 'invitation') {
+    openRelated(notif)
+  }
 }
 
 const openRelated = (notif) => {
   if (notif.relatedType === 'story') {
-    router.push(`/story/${notif.relatedId}`)
+    const routeData = { path: `/story/${notif.relatedId}` }
+    if (notif.commentId) {
+      routeData.query = { commentId: notif.commentId }
+    }
+    if (notif.nodeId) {
+      routeData.query = routeData.query || {}
+      routeData.query.nodeId = notif.nodeId
+    }
+    router.push(routeData)
   } else if (notif.relatedType === 'world') {
-    router.push(`/world/${notif.relatedId}`)
+    const routeData = { path: `/world/${notif.relatedId}` }
+    if (notif.referenceId) {
+      routeData.query = { entryId: notif.referenceId }
+    }
+    router.push(routeData)
   } else if (notif.relatedType === 'activity') {
     router.push(`/activity/${notif.relatedId}`)
+  } else if (notif.relatedType === 'comment' && notif.storyId) {
+    const routeData = { path: `/story/${notif.storyId}` }
+    if (notif.relatedId) {
+      routeData.query = { commentId: notif.relatedId }
+    }
+    router.push(routeData)
   }
 }
 
