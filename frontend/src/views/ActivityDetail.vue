@@ -467,6 +467,7 @@ const submissionSort = ref('votes')
 const ranking = ref([])
 const rankingType = ref('votes')
 const propagationData = ref(null)
+const sourceShareId = ref(null)
 
 const showRegisterModal = ref(false)
 const showSubmitModal = ref(false)
@@ -557,6 +558,9 @@ const checkRegistration = async () => {
       userId: currentUser.value.id
     })
     isRegistered.value = res.data.isRegistered
+    if (res.data.isRegistered && res.data.registration?.sourceShareId && !sourceShareId.value) {
+      sourceShareId.value = res.data.registration.sourceShareId
+    }
   } catch (err) {
     console.error('检查报名状态失败:', err)
   }
@@ -604,12 +608,14 @@ const handleRegister = async () => {
       userId: currentUser.value.id,
       username: currentUser.value.username,
       avatar: currentUser.value.avatar,
-      ...registerForm
+      ...registerForm,
+      shareId: sourceShareId.value || undefined
     })
     message.success('报名成功！')
     showRegisterModal.value = false
     isRegistered.value = true
     loadActivity()
+    loadPropagation()
   } catch (err) {
     message.error(err.response?.data?.message || '报名失败')
   }
@@ -626,12 +632,14 @@ const handleSubmit = async () => {
       username: currentUser.value.username,
       avatar: currentUser.value.avatar,
       ...submitForm,
-      tags: []
+      tags: [],
+      shareId: sourceShareId.value || undefined
     })
     message.success('作品提交成功，等待审核！')
     showSubmitModal.value = false
     loadSubmissions()
     loadActivity()
+    loadPropagation()
   } catch (err) {
     message.error(err.response?.data?.message || '提交失败')
   }
@@ -639,7 +647,7 @@ const handleSubmit = async () => {
 
 const handleShare = async (channel) => {
   try {
-    await activityApi.shareActivity(route.params.id, {
+    const shareRes = await activityApi.shareActivity(route.params.id, {
       userId: currentUser.value.id,
       username: currentUser.value.username,
       avatar: currentUser.value.avatar,
@@ -648,8 +656,16 @@ const handleShare = async (channel) => {
       targetId: route.params.id,
       targetType: 'activity'
     })
+    const shareId = shareRes.data.id
+    const shareUrl = `${window.location.origin}/activity/${route.params.id}?shareId=${shareId}`
+
     if (channel === 'link') {
-      message.success('分享链接已复制！')
+      try {
+        await navigator.clipboard.writeText(shareUrl)
+        message.success('分享链接已复制！')
+      } catch {
+        message.success(`分享链接：${shareUrl}`)
+      }
     } else {
       message.success(`已生成${getChannelName(channel)}分享链接`)
     }
@@ -666,7 +682,16 @@ const viewSubmission = (submission) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  const shareId = route.query.shareId
+  if (shareId) {
+    sourceShareId.value = shareId
+    try {
+      await activityApi.recordShareClick(shareId)
+    } catch (err) {
+      console.error('记录分享点击失败:', err)
+    }
+  }
   loadActivity()
   loadSubmissions()
   loadRanking()

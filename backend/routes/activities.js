@@ -312,6 +312,8 @@ router.post('/:id/submit', (req, res) => {
     return res.status(400).json({ message: '请先报名该活动' });
   }
 
+  const effectiveShareId = shareId || (registration.sourceShareId) || null;
+
   const newSubmission = {
     id: `submission-${uuidv4()}`,
     activityId,
@@ -332,7 +334,7 @@ router.post('/:id/submit', (req, res) => {
     voteCount: 0,
     viewCount: 0,
     score: 0,
-    sourceShareId: shareId || null
+    sourceShareId: effectiveShareId
   };
 
   submissionsData.unshift(newSubmission);
@@ -346,8 +348,8 @@ router.post('/:id/submit', (req, res) => {
     'submission'
   );
 
-  if (shareId) {
-    const share = sharesData.find(s => s.id === shareId);
+  if (effectiveShareId) {
+    const share = sharesData.find(s => s.id === effectiveShareId);
     if (share) {
       share.submitCount += 1;
     }
