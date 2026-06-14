@@ -1416,6 +1416,241 @@ const notifications = [
   }
 ];
 
+const collaborators = {
+  'world-1': [
+    {
+      id: 'collab-1',
+      worldId: 'world-1',
+      userId: 'user-1',
+      username: '月下独酌',
+      avatar: '🌸',
+      role: 'owner',
+      permissions: ['read', 'write', 'review', 'manage'],
+      categories: [],
+      joinedAt: '2024-01-20'
+    },
+    {
+      id: 'collab-2',
+      worldId: 'world-1',
+      userId: 'user-2',
+      username: '星河漫步者',
+      avatar: '⭐',
+      role: 'editor',
+      permissions: ['read', 'write'],
+      categories: ['地理', '传说'],
+      joinedAt: '2024-02-15'
+    },
+    {
+      id: 'collab-3',
+      worldId: 'world-1',
+      userId: 'user-3',
+      username: '梦境织者',
+      avatar: '🌙',
+      role: 'editor',
+      permissions: ['read', 'write'],
+      categories: ['种族'],
+      joinedAt: '2024-03-01'
+    }
+  ],
+  'world-2': [
+    {
+      id: 'collab-4',
+      worldId: 'world-2',
+      userId: 'user-2',
+      username: '星河漫步者',
+      avatar: '⭐',
+      role: 'owner',
+      permissions: ['read', 'write', 'review', 'manage'],
+      categories: [],
+      joinedAt: '2024-02-10'
+    },
+    {
+      id: 'collab-5',
+      worldId: 'world-2',
+      userId: 'user-1',
+      username: '月下独酌',
+      avatar: '🌸',
+      role: 'reviewer',
+      permissions: ['read', 'review'],
+      categories: [],
+      joinedAt: '2024-03-05'
+    }
+  ],
+  'world-3': [
+    {
+      id: 'collab-6',
+      worldId: 'world-3',
+      userId: 'user-3',
+      username: '梦境织者',
+      avatar: '🌙',
+      role: 'owner',
+      permissions: ['read', 'write', 'review', 'manage'],
+      categories: [],
+      joinedAt: '2024-01-05'
+    }
+  ]
+};
+
+const invitations = [
+  {
+    id: 'invite-1',
+    worldId: 'world-1',
+    worldName: '浮城世界观',
+    inviterId: 'user-1',
+    inviterName: '月下独酌',
+    inviteeId: 'user-2',
+    inviteeName: '星河漫步者',
+    role: 'editor',
+    categories: ['地理', '传说'],
+    status: 'accepted',
+    createdAt: '2024-02-14 10:00',
+    respondedAt: '2024-02-14 15:30'
+  },
+  {
+    id: 'invite-2',
+    worldId: 'world-1',
+    worldName: '浮城世界观',
+    inviterId: 'user-1',
+    inviterName: '月下独酌',
+    inviteeId: 'user-3',
+    inviteeName: '梦境织者',
+    role: 'editor',
+    categories: ['种族'],
+    status: 'accepted',
+    createdAt: '2024-02-28 09:00',
+    respondedAt: '2024-02-28 12:00'
+  },
+  {
+    id: 'invite-3',
+    worldId: 'world-1',
+    worldName: '浮城世界观',
+    inviterId: 'user-1',
+    inviterName: '月下独酌',
+    inviteeId: 'user-2',
+    inviteeName: '星河漫步者',
+    role: 'editor',
+    categories: ['地理'],
+    status: 'pending',
+    createdAt: '2024-05-20 08:00',
+    respondedAt: null
+  }
+];
+
+const changeRequests = [
+  {
+    id: 'change-1',
+    worldId: 'world-1',
+    entryId: 'entry-1',
+    entryTitle: '浮城',
+    requestedBy: 'user-2',
+    requesterName: '星河漫步者',
+    requesterAvatar: '⭐',
+    type: 'update',
+    status: 'approved',
+    summary: '更新浮城的地理描述，增加下层区域的详细设定',
+    oldValue: { title: '浮城', category: '地理', content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。' },
+    newValue: { title: '浮城', category: '地理', content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。浮城的能源来自天空晶石，这是一种稀有的矿石，蕴含着强大的能量。' },
+    reviewedBy: 'user-1',
+    reviewerName: '月下独酌',
+    reviewComment: '很好的补充，天空晶石的设定很重要',
+    createdAt: '2024-04-10 14:30',
+    reviewedAt: '2024-04-11 09:00'
+  },
+  {
+    id: 'change-2',
+    worldId: 'world-1',
+    entryId: 'entry-2',
+    entryTitle: '天空之境',
+    requestedBy: 'user-2',
+    requesterName: '星河漫步者',
+    requesterAvatar: '⭐',
+    type: 'update',
+    status: 'pending',
+    summary: '扩展天空之境的传说内容，增加守护者仪式的描述',
+    oldValue: { title: '天空之境', category: '传说', content: '天空之境是传说中的圣地，据说在云层之上的更高处。那里是天空守护者的居所，有着无穷无尽的天空之力。没有人真正到达过天空之境，只有传说流传下来。' },
+    newValue: { title: '天空之境', category: '传说', content: '天空之境是传说中的圣地，据说在云层之上的更高处。那里是天空守护者的居所，有着无穷无尽的天空之力。每年春分之日，守护者会在天空之境举行升云仪式，将天空之力注入浮城的核心晶石，维系浮城的悬浮。没有人真正到达过天空之境，只有传说流传下来。' },
+    reviewedBy: null,
+    reviewerName: null,
+    reviewComment: null,
+    createdAt: '2024-05-15 16:00',
+    reviewedAt: null
+  },
+  {
+    id: 'change-3',
+    worldId: 'world-1',
+    entryId: null,
+    entryTitle: null,
+    requestedBy: 'user-3',
+    requesterName: '梦境织者',
+    requesterAvatar: '🌙',
+    type: 'create',
+    status: 'pending',
+    summary: '新增浮城货币体系条目',
+    oldValue: null,
+    newValue: { title: '浮城货币', category: '经济', content: '浮城使用天空币作为通用货币。天空币由天空晶石的碎屑制成，本身也蕴含微弱的天空之力。1枚天空币可以购买一顿丰盛的午餐。贵族区流通的则是镶嵌了天空宝石的贵族币，价值是普通天空币的一百倍。' },
+    reviewedBy: null,
+    reviewerName: null,
+    reviewComment: null,
+    createdAt: '2024-05-18 11:30',
+    reviewedAt: null
+  },
+  {
+    id: 'change-4',
+    worldId: 'world-1',
+    entryId: 'entry-3',
+    entryTitle: '天空守护者',
+    requestedBy: 'user-3',
+    requesterName: '梦境织者',
+    requesterAvatar: '🌙',
+    type: 'update',
+    status: 'rejected',
+    summary: '修改天空守护者的描述，增加关于守护者叛逃的设定',
+    oldValue: { title: '天空守护者', category: '种族', content: '天空守护者是一群神秘的存在，他们守护着天空之境和天空之力。他们有着银色的头发和紫色的眼眸，能够操控风和云。天空守护者通常不与凡人接触，但偶尔也会有守护者来到浮城。' },
+    newValue: { title: '天空守护者', category: '种族', content: '天空守护者是一群神秘的存在，他们守护着天空之境和天空之力。他们有着银色的头发和紫色的眼眸，能够操控风和云。每隔数十年，会有守护者因厌倦永恒的守候而叛逃至浮城，这些叛逃者将失去操控天空之力的能力，但会保留银发紫眸的外貌特征。' },
+    reviewedBy: 'user-1',
+    reviewerName: '月下独酌',
+    reviewComment: '叛逃设定与主线故事冲突，暂不添加',
+    createdAt: '2024-04-20 10:00',
+    reviewedAt: '2024-04-21 14:00'
+  }
+];
+
+const versionHistory = [
+  {
+    id: 'version-1',
+    worldId: 'world-1',
+    version: 1,
+    changeType: 'create',
+    changeSummary: '创建世界设定「浮城世界观」',
+    changedBy: 'user-1',
+    changerName: '月下独酌',
+    changerAvatar: '🌸',
+    entries: [
+      { id: 'entry-1', title: '浮城', category: '地理', content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。' },
+      { id: 'entry-2', title: '天空之境', category: '传说', content: '天空之境是传说中的圣地，据说在云层之上的更高处。那里是天空守护者的居所，有着无穷无尽的天空之力。没有人真正到达过天空之境，只有传说流传下来。' },
+      { id: 'entry-3', title: '天空守护者', category: '种族', content: '天空守护者是一群神秘的存在，他们守护着天空之境和天空之力。他们有着银色的头发和紫色的眼眸，能够操控风和云。天空守护者通常不与凡人接触，但偶尔也会有守护者来到浮城。' }
+    ],
+    createdAt: '2024-01-20 10:00'
+  },
+  {
+    id: 'version-2',
+    worldId: 'world-1',
+    version: 2,
+    changeType: 'update',
+    changeSummary: '更新浮城地理描述，补充天空晶石能源设定',
+    changeRequestId: 'change-1',
+    changedBy: 'user-1',
+    changerName: '月下独酌',
+    changerAvatar: '🌸',
+    entries: [
+      { id: 'entry-1', title: '浮城', category: '地理', content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。浮城的能源来自天空晶石，这是一种稀有的矿石，蕴含着强大的能量。' },
+      { id: 'entry-2', title: '天空之境', category: '传说', content: '天空之境是传说中的圣地，据说在云层之上的更高处。那里是天空守护者的居所，有着无穷无尽的天空之力。没有人真正到达过天空之境，只有传说流传下来。' },
+      { id: 'entry-3', title: '天空守护者', category: '种族', content: '天空守护者是一群神秘的存在，他们守护着天空之境和天空之力。他们有着银色的头发和紫色的眼眸，能够操控风和云。天空守护者通常不与凡人接触，但偶尔也会有守护者来到浮城。' }
+    ],
+    createdAt: '2024-04-11 09:00'
+  }
+];
+
 module.exports = {
   users,
   stories,
@@ -1423,5 +1658,9 @@ module.exports = {
   comments,
   worldSettings,
   favorites,
-  notifications
+  notifications,
+  collaborators,
+  invitations,
+  changeRequests,
+  versionHistory
 };

@@ -138,4 +138,54 @@ export const userApi = {
   }
 }
 
+export const collaborationApi = {
+  getMembers(worldId) {
+    return api.get(`/collaboration/${worldId}/members`)
+  },
+
+  inviteMember(worldId, data) {
+    return api.post(`/collaboration/${worldId}/invite`, data)
+  },
+
+  updateMember(worldId, memberId, data) {
+    return api.put(`/collaboration/${worldId}/members/${memberId}`, data)
+  },
+
+  removeMember(worldId, memberId) {
+    return api.delete(`/collaboration/${worldId}/members/${memberId}`)
+  },
+
+  getInvitations(worldId, params = {}) {
+    return api.get(`/collaboration/${worldId}/invitations`, { params })
+  },
+
+  respondToInvitation(worldId, inviteId, data) {
+    return api.post(`/collaboration/${worldId}/invitations/${inviteId}/respond`, data)
+  },
+
+  getChangeRequests(worldId, params = {}) {
+    return api.get(`/collaboration/${worldId}/changes`, { params })
+  },
+
+  submitChangeRequest(worldId, data) {
+    return api.post(`/collaboration/${worldId}/changes`, data)
+  },
+
+  reviewChangeRequest(worldId, changeId, data) {
+    return api.put(`/collaboration/${worldId}/changes/${changeId}/review`, data)
+  },
+
+  getVersionHistory(worldId, params = {}) {
+    return api.get(`/collaboration/${worldId}/versions`, { params })
+  },
+
+  getVersionDetail(worldId, versionId) {
+    return api.get(`/collaboration/${worldId}/versions/${versionId}`)
+  },
+
+  rollbackToVersion(worldId, versionId, data) {
+    return api.post(`/collaboration/${worldId}/versions/${versionId}/rollback`, data)
+  }
+}
+
 export default api

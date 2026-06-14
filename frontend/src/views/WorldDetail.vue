@@ -41,6 +41,10 @@
                 <template #icon>✏️</template>
                 编辑
               </n-button>
+              <n-button type="info" @click="goToCollaboration">
+                <template #icon>🤝</template>
+                共创管理
+              </n-button>
             </div>
           </div>
         </div>
@@ -215,6 +219,10 @@ const goBack = () => {
 
 const goToEditor = () => {
   router.push(`/world-editor/${route.params.id}`)
+}
+
+const goToCollaboration = () => {
+  router.push(`/world/${route.params.id}/collaboration`)
 }
 
 onMounted(() => {

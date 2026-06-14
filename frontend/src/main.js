@@ -15,6 +15,7 @@ import UserProfile from './views/UserProfile.vue'
 import UserCreations from './views/UserCreations.vue'
 import UserMessages from './views/UserMessages.vue'
 import UserFavorites from './views/UserFavorites.vue'
+import WorldCollaboration from './views/WorldCollaboration.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -28,7 +29,8 @@ const routes = [
   { path: '/user/profile', name: 'UserProfile', component: UserProfile },
   { path: '/user/creations', name: 'UserCreations', component: UserCreations },
   { path: '/user/messages', name: 'UserMessages', component: UserMessages },
-  { path: '/user/favorites', name: 'UserFavorites', component: UserFavorites }
+  { path: '/user/favorites', name: 'UserFavorites', component: UserFavorites },
+  { path: '/world/:id/collaboration', name: 'WorldCollaboration', component: WorldCollaboration }
 ]
 
 const router = createRouter({
