@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { stories, storyNodes } = require('../data/mockData');
+const store = require('../data/store');
 
-let storiesData = [...stories];
-let storyNodesData = JSON.parse(JSON.stringify(storyNodes));
+let storiesData = store.stories;
+let storyNodesData = store.storyNodes;
 
 router.get('/', (req, res) => {
   const { tag, sort, page = 1, limit = 10 } = req.query;

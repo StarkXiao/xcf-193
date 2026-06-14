@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { users, collaborators, invitations, changeRequests, versionHistory, notifications, worldSettings } = require('../data/mockData');
+const store = require('../data/store');
 
-let collaboratorsData = JSON.parse(JSON.stringify(collaborators));
-let invitationsData = [...invitations];
-let changeRequestsData = [...changeRequests];
-let versionHistoryData = [...versionHistory];
-let notificationsData = [...notifications];
-let worldSettingsData = JSON.parse(JSON.stringify(worldSettings));
+const { users } = require('../data/mockData');
+let collaboratorsData = store.collaborators;
+let invitationsData = store.invitations;
+let changeRequestsData = store.changeRequests;
+let versionHistoryData = store.versionHistory;
+let notificationsData = store.notifications;
+let worldSettingsData = store.worldSettings;
 
 router.get('/:worldId/members', (req, res) => {
   const { worldId } = req.params;

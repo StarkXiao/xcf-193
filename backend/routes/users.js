@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { users, stories, worldSettings, favorites, notifications } = require('../data/mockData');
+const store = require('../data/store');
 
-let usersData = [...users];
-let storiesData = [...stories];
-let worldsData = [...worldSettings];
-let favoritesData = JSON.parse(JSON.stringify(favorites));
-let notificationsData = [...notifications];
+let usersData = store.users;
+let storiesData = store.stories;
+let worldsData = store.worldSettings;
+let favoritesData = store.favorites;
+let notificationsData = store.notifications;
 
 router.get('/:id', (req, res) => {
   const user = usersData.find(u => u.id === req.params.id);

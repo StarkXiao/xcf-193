@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { comments } = require('../data/mockData');
+const store = require('../data/store');
 
-let commentsData = JSON.parse(JSON.stringify(comments));
+let commentsData = store.comments;
 
 router.get('/story/:storyId', (req, res) => {
   const { storyId } = req.params;

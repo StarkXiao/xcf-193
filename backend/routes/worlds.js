@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { worldSettings } = require('../data/mockData');
+const store = require('../data/store');
 
-let worldSettingsData = [...worldSettings];
+const worldSettingsData = store.worldSettings;
 
 router.get('/', (req, res) => {
   const { sort, page = 1, limit = 10 } = req.query;
