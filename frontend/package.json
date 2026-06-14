@@ -1,0 +1,22 @@
+{
+  "name": "fucheng-echo-frontend",
+  "version": "1.0.0",
+  "description": "浮城回声 - 幻想恋爱叙事社区前端",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5",
+    "naive-ui": "^2.38.0",
+    "axios": "^1.6.0",
+    "vfonts": "^0.0.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "fucheng-echo-backend",
+  "version": "1.0.0",
+  "description": "浮城回声 - 幻想恋爱叙事社区后端",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
