@@ -61,7 +61,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar, NDropdown, NBadge } from 'naive-ui'
-import { userApi } from './api'
+import { notificationApi } from './api'
 
 const route = useRoute()
 const router = useRouter()
@@ -88,8 +88,8 @@ const unreadCount = ref(0)
 
 const loadUnreadCount = async () => {
   try {
-    const res = await userApi.getUser(currentUser.value.id)
-    unreadCount.value = res.data.stats.unreadCount
+    const res = await notificationApi.getUnreadCount(currentUser.value.id)
+    unreadCount.value = res.data.unreadCount
   } catch (err) {
     console.error('加载未读消息数失败:', err)
   }

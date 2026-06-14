@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const store = require('../data/store');
+const { createNotification } = require('./notifications');
 
 let usersData = store.users;
 let storiesData = store.stories;
 let worldsData = store.worldSettings;
 let favoritesData = store.favorites;
-let notificationsData = store.notifications;
 
 router.get('/:id', (req, res) => {
   const user = usersData.find(u => u.id === req.params.id);
@@ -103,24 +103,49 @@ router.get('/:id/favorites', (req, res) => {
 });
 
 router.post('/:id/favorites', (req, res) => {
-  const { targetId, targetType } = req.body;
+  const { targetId, targetType, username, avatar } = req.body;
   const userId = req.params.id;
   
   if (!favoritesData[userId]) {
     favoritesData[userId] = { stories: [], worlds: [] };
   }
   
+  let isNewFavorite = false;
+  let targetItem = null;
+  
   if (targetType === 'story') {
     if (!favoritesData[userId].stories.includes(targetId)) {
       favoritesData[userId].stories.push(targetId);
+      isNewFavorite = true;
+      targetItem = storiesData.find(s => s.id === targetId);
     }
   } else if (targetType === 'world') {
     if (!favoritesData[userId].worlds.includes(targetId)) {
       favoritesData[userId].worlds.push(targetId);
+      isNewFavorite = true;
+      targetItem = worldsData.find(w => w.id === targetId);
     }
   }
   
-  res.json({ message: '收藏成功', favorites: favoritesData[userId] });
+  if (isNewFavorite && targetItem && targetItem.authorId && targetItem.authorId !== userId) {
+    const typeLabel = targetType === 'story' ? '故事' : '世界设定';
+    const itemTitle = targetType === 'story' ? targetItem.title : targetItem.name;
+    createNotification({
+      userId: targetItem.authorId,
+      type: 'favorite',
+      content: `${username || '有人'} 收藏了你的${typeLabel}《${itemTitle}》`,
+      relatedId: targetId,
+      relatedType: targetType,
+      relatedTitle: itemTitle,
+      extra: {
+        inviterId: userId,
+        inviterName: username,
+        inviterAvatar: avatar || '👤'
+      }
+    });
+  }
+  
+  res.json({ message: '收藏成功', favorites: favoritesData[userId], isNewFavorite });
 });
 
 router.delete('/:id/favorites', (req, res) => {

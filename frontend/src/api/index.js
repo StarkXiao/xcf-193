@@ -138,6 +138,44 @@ export const userApi = {
   }
 }
 
+export const notificationApi = {
+  getNotifications(userId, params = {}) {
+    return api.get(`/notifications/user/${userId}`, { params })
+  },
+
+  getUnreadCount(userId) {
+    return api.get(`/notifications/user/${userId}/unread-count`)
+  },
+
+  createNotification(data) {
+    return api.post('/notifications', data)
+  },
+
+  createBatchNotifications(data) {
+    return api.post('/notifications/batch', data)
+  },
+
+  markAsRead(notificationId, userId) {
+    return api.post(`/notifications/${notificationId}/read`, { userId })
+  },
+
+  markAllAsRead(userId, type = null) {
+    return api.post(`/notifications/user/${userId}/read-all`, { type })
+  },
+
+  deleteNotification(notificationId, userId) {
+    return api.delete(`/notifications/${notificationId}`, { data: { userId } })
+  },
+
+  clearNotifications(userId, options = {}) {
+    return api.delete(`/notifications/user/${userId}/clear`, { data: options })
+  },
+
+  getNotificationTypes() {
+    return api.get('/notifications/types')
+  }
+}
+
 export const collaborationApi = {
   getMembers(worldId) {
     return api.get(`/collaboration/${worldId}/members`)

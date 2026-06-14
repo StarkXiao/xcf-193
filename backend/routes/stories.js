@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const store = require('../data/store');
+const { createNotification } = require('./notifications');
 
 let storiesData = store.stories;
 let storyNodesData = store.storyNodes;
+let favoritesData = store.favorites;
 
 router.get('/', (req, res) => {
   const { tag, sort, page = 1, limit = 10 } = req.query;
@@ -84,7 +86,7 @@ router.post('/', (req, res) => {
 
 router.post('/:id/nodes', (req, res) => {
   const storyId = req.params.id;
-  const { title, content, choices = [], isEnding = false, endingType } = req.body;
+  const { title, content, choices = [], isEnding = false, endingType, updateNotify = true } = req.body;
   
   if (!storyNodesData[storyId]) {
     storyNodesData[storyId] = [];
@@ -107,8 +109,40 @@ router.post('/:id/nodes', (req, res) => {
   storyNodesData[storyId].push(newNode);
 
   const story = storiesData.find(s => s.id === storyId);
-  if (story && !story.startNodeId) {
-    story.startNodeId = newNode.id;
+  if (story) {
+    if (!story.startNodeId) {
+      story.startNodeId = newNode.id;
+    }
+    story.updatedAt = new Date().toISOString().split('T')[0];
+    
+    if (updateNotify && story.authorId) {
+      const userFavorites = Object.keys(favoritesData).filter(userId => 
+        favoritesData[userId]?.stories?.includes(storyId)
+      );
+      
+      const updateType = isEnding ? 'new_ending' : 'new_chapter';
+      const updateTypeLabel = isEnding ? '新结局' : '新章节';
+      
+      userFavorites.forEach(userId => {
+        if (userId !== story.authorId) {
+          createNotification({
+            userId,
+            type: 'story_update',
+            content: `你收藏的作品《${story.title}》发布了${updateTypeLabel}`,
+            relatedId: storyId,
+            relatedType: 'story',
+            relatedTitle: story.title,
+            extra: {
+              updateType,
+              chapterTitle: title,
+              authorId: story.authorId,
+              authorName: story.authorName,
+              authorAvatar: '👤'
+            }
+          });
+        }
+      });
+    }
   }
 
   res.status(201).json(newNode);
@@ -169,11 +203,31 @@ router.delete('/:id/nodes/:nodeId', (req, res) => {
 });
 
 router.post('/:id/like', (req, res) => {
-  const story = storiesData.find(s => s.id === req.params.id);
+  const { id } = req.params;
+  const { userId, username, avatar } = req.body;
+  
+  const story = storiesData.find(s => s.id === id);
   if (!story) {
     return res.status(404).json({ message: '故事不存在' });
   }
   story.likes += 1;
+  
+  if (story.authorId && userId && story.authorId !== userId) {
+    createNotification({
+      userId: story.authorId,
+      type: 'like',
+      content: `${username || '有人'} 点赞了你的故事《${story.title}》`,
+      relatedId: id,
+      relatedType: 'story',
+      relatedTitle: story.title,
+      extra: {
+        inviterId: userId,
+        inviterName: username,
+        inviterAvatar: avatar || '👤'
+      }
+    });
+  }
+  
   res.json({ likes: story.likes });
 });
 

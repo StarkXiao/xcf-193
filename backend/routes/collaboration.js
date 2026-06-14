@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const store = require('../data/store');
+const { createNotification } = require('./notifications');
 
 const { users } = require('../data/mockData');
 let collaboratorsData = store.collaborators;
 let invitationsData = store.invitations;
 let changeRequestsData = store.changeRequests;
 let versionHistoryData = store.versionHistory;
-let notificationsData = store.notifications;
 let worldSettingsData = store.worldSettings;
 
 router.get('/:worldId/members', (req, res) => {
@@ -50,23 +50,24 @@ router.post('/:worldId/invite', (req, res) => {
 
   invitationsData.push(invitation);
 
-  const inviteNotif = {
-    id: `notif-${uuidv4()}`,
+  const inviter = users.find(u => u.id === inviterId);
+  createNotification({
     userId: inviteeId,
     type: 'invitation',
     content: `${inviterName} 邀请你共同维护世界设定「${worldName}」`,
     relatedId: invitation.id,
     relatedType: 'invitation',
-    relatedWorldId: worldId,
-    relatedWorldName: worldName,
-    invitationRole: role || 'editor',
-    invitationCategories: categories || [],
-    inviterId,
-    inviterName,
-    isRead: false,
-    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-  };
-  notificationsData.push(inviteNotif);
+    relatedTitle: worldName,
+    extra: {
+      relatedWorldId: worldId,
+      relatedWorldName: worldName,
+      invitationRole: role || 'editor',
+      invitationCategories: categories || [],
+      inviterId,
+      inviterName,
+      inviterAvatar: inviter?.avatar || '👤'
+    }
+  });
 
   res.status(201).json(invitation);
 });
@@ -156,7 +157,7 @@ router.post('/:worldId/invitations/:inviteId/respond', (req, res) => {
     collaboratorsData[worldId].push(newMember);
   }
 
-  const notif = notificationsData.find(
+  const notif = store.notifications.find(
     n => n.relatedId === inviteId && n.type === 'invitation'
   );
   if (notif) {
@@ -164,17 +165,14 @@ router.post('/:worldId/invitations/:inviteId/respond', (req, res) => {
     notif.invitationStatus = accept ? 'accepted' : 'rejected';
   }
 
-  const resultNotif = {
-    id: `notif-${uuidv4()}`,
+  createNotification({
     userId: invitation.inviterId,
     type: 'system',
     content: `${responderName || invitation.inviteeName} ${accept ? '接受了' : '拒绝了'}你关于「${invitation.worldName}」的协作邀请`,
     relatedId: worldId,
     relatedType: 'world',
-    isRead: false,
-    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-  };
-  notificationsData.push(resultNotif);
+    relatedTitle: invitation.worldName
+  });
 
   res.json({ invitation, accepted: accept });
 });
@@ -278,17 +276,23 @@ router.put('/:worldId/changes/:changeId/review', (req, res) => {
     versionHistoryData.push(newVersion);
   }
 
-  const resultNotif = {
-    id: `notif-${uuidv4()}`,
+  const reviewer = users.find(u => u.id === reviewedBy);
+  createNotification({
     userId: changeRequest.requestedBy,
-    type: 'system',
+    type: 'collaboration',
     content: `你关于「${changeRequest.entryTitle || '新条目'}」的变更请求被${reviewerName} ${approved ? '通过' : '驳回'}`,
     relatedId: worldId,
     relatedType: 'world',
-    isRead: false,
-    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-  };
-  notificationsData.push(resultNotif);
+    relatedTitle: world?.name || null,
+    extra: {
+      changeRequestId: changeRequest.id,
+      changeType: changeRequest.type,
+      entryTitle: changeRequest.entryTitle,
+      inviterId: reviewedBy,
+      inviterName: reviewerName,
+      inviterAvatar: reviewer?.avatar || '👤'
+    }
+  });
 
   res.json({ changeRequest, approved });
 });

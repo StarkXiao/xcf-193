@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const store = require('../data/store');
+const { createNotification } = require('./notifications');
 
 let commentsData = store.comments;
+let storiesData = store.stories;
+let usersData = store.users;
 
 router.get('/story/:storyId', (req, res) => {
   const { storyId } = req.params;
@@ -22,7 +25,7 @@ router.get('/story/:storyId', (req, res) => {
 
 router.post('/story/:storyId', (req, res) => {
   const { storyId } = req.params;
-  const { nodeId, userId, username, avatar, content } = req.body;
+  const { nodeId, userId, username, avatar, content, replyToCommentId } = req.body;
   
   if (!commentsData[storyId]) {
     commentsData[storyId] = [];
@@ -37,6 +40,7 @@ router.post('/story/:storyId', (req, res) => {
     avatar: avatar || '👤',
     content,
     likes: 0,
+    replyToCommentId: replyToCommentId || null,
     createdAt: new Date().toLocaleString('zh-CN', { 
       year: 'numeric', 
       month: '2-digit', 
@@ -47,16 +51,82 @@ router.post('/story/:storyId', (req, res) => {
   };
   
   commentsData[storyId].unshift(newComment);
+  
+  const story = storiesData.find(s => s.id === storyId);
+  if (story) {
+    if (replyToCommentId) {
+      const replyToComment = commentsData[storyId].find(c => c.id === replyToCommentId);
+      if (replyToComment && replyToComment.userId !== userId) {
+        const replyToUser = usersData.find(u => u.id === replyToComment.userId);
+        createNotification({
+          userId: replyToComment.userId,
+          type: 'comment_reply',
+          content: `${username} 回复了你的评论：${content.length > 30 ? content.substring(0, 30) + '...' : content}`,
+          relatedId: storyId,
+          relatedType: 'story',
+          relatedTitle: story.title,
+          extra: {
+            replyToCommentId,
+            replyContent: replyToComment.content,
+            commentId: newComment.id,
+            inviterId: userId,
+            inviterName: username,
+            inviterAvatar: avatar || '👤'
+          }
+        });
+      }
+    }
+    
+    if (story.authorId && story.authorId !== userId) {
+      createNotification({
+        userId: story.authorId,
+        type: 'comment',
+        content: `${username} 评论了你的故事《${story.title}》：${content.length > 30 ? content.substring(0, 30) + '...' : content}`,
+        relatedId: storyId,
+        relatedType: 'story',
+        relatedTitle: story.title,
+        extra: {
+          commentId: newComment.id,
+          inviterId: userId,
+          inviterName: username,
+          inviterAvatar: avatar || '👤'
+        }
+      });
+    }
+  }
+  
   res.status(201).json(newComment);
 });
 
 router.post('/:commentId/like', (req, res) => {
   const { commentId } = req.params;
+  const { userId, username, avatar } = req.body;
   
   for (const storyId in commentsData) {
     const comment = commentsData[storyId].find(c => c.id === commentId);
     if (comment) {
       comment.likes += 1;
+      
+      if (comment.userId && userId && comment.userId !== userId) {
+        const story = storiesData.find(s => s.id === storyId);
+        createNotification({
+          userId: comment.userId,
+          type: 'like',
+          content: `${username || '有人'} 点赞了你的评论`,
+          relatedId: commentId,
+          relatedType: 'comment',
+          relatedTitle: story ? story.title : null,
+          extra: {
+            commentId,
+            commentContent: comment.content,
+            storyId,
+            inviterId: userId,
+            inviterName: username,
+            inviterAvatar: avatar || '👤'
+          }
+        });
+      }
+      
       return res.json({ likes: comment.likes });
     }
   }
