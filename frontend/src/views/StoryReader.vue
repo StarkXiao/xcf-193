@@ -10,6 +10,10 @@
         <div class="story-author">作者：{{ story.authorName }}</div>
       </div>
       <div class="header-actions">
+        <n-button text @click="toggleFavorite" :class="{ 'is-favorited': isFavorited }">
+          <template #icon>{{ isFavorited ? '⭐' : ' ☆' }}</template>
+          {{ isFavorited ? '已收藏' : '收藏' }}
+        </n-button>
         <n-button text @click="toggleLike">
           <template #icon>{{ isLiked ? '❤️' : '🤍' }}</template>
           {{ story?.likes || 0 }}
@@ -94,12 +98,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NSpin, NDivider } from 'naive-ui'
-import { storyApi } from '../api'
+import { NButton, NSpin, NDivider, useMessage } from 'naive-ui'
+import { storyApi, userApi } from '../api'
 import CommentSection from '../components/CommentSection.vue'
 
 const route = useRoute()
 const router = useRouter()
+const message = useMessage()
+const userId = 'user-1'
 
 const storyId = computed(() => route.params.id)
 const story = ref(null)
@@ -108,6 +114,7 @@ const currentNodeId = ref('')
 const loading = ref(false)
 const history = ref([])
 const isLiked = ref(false)
+const isFavorited = ref(false)
 const allNodes = ref([])
 
 const paragraphs = computed(() => {
@@ -135,10 +142,46 @@ const loadStory = async () => {
     }
     
     storyApi.viewStory(storyId.value)
+    checkFavorite()
   } catch (err) {
     console.error('加载故事失败:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const checkFavorite = async () => {
+  try {
+    const res = await userApi.checkFavorite(userId, {
+      targetId: storyId.value,
+      targetType: 'story'
+    })
+    isFavorited.value = res.data.isFavorited
+  } catch (err) {
+    console.error('检查收藏状态失败:', err)
+  }
+}
+
+const toggleFavorite = async () => {
+  try {
+    if (isFavorited.value) {
+      await userApi.removeFavorite(userId, {
+        targetId: storyId.value,
+        targetType: 'story'
+      })
+      isFavorited.value = false
+      message.success('已取消收藏')
+    } else {
+      await userApi.addFavorite(userId, {
+        targetId: storyId.value,
+        targetType: 'story'
+      })
+      isFavorited.value = true
+      message.success('已加入收藏')
+    }
+  } catch (err) {
+    console.error('收藏操作失败:', err)
+    message.error('操作失败，请重试')
   }
 }
 
@@ -232,6 +275,13 @@ onMounted(() => {
 .header-actions {
   min-width: 80px;
   text-align: right;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-actions .is-favorited {
+  color: #f0a020;
 }
 
 .reader-container {

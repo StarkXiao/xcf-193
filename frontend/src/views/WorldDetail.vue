@@ -29,6 +29,10 @@
               </span>
             </div>
             <div class="world-actions">
+              <n-button :type="isFavorited ? 'warning' : 'default'" @click="toggleFavorite">
+                <template #icon>{{ isFavorited ? '⭐' : '☆' }}</template>
+                {{ isFavorited ? '已收藏' : '收藏' }}
+              </n-button>
               <n-button type="primary" @click="toggleLike">
                 <template #icon>{{ isLiked ? '❤️' : '🤍' }}</template>
                 {{ isLiked ? '已喜欢' : '喜欢' }}
@@ -107,16 +111,20 @@ import {
   NCard,
   NTag,
   NSpin,
-  NModal
+  NModal,
+  useMessage
 } from 'naive-ui'
-import { worldApi } from '../api'
+import { worldApi, userApi } from '../api'
 
 const route = useRoute()
 const router = useRouter()
+const message = useMessage()
+const userId = 'user-1'
 
 const world = ref(null)
 const loading = ref(false)
 const isLiked = ref(false)
+const isFavorited = ref(false)
 const selectedCategory = ref('全部')
 const selectedEntry = ref(null)
 
@@ -142,10 +150,46 @@ const loadWorld = async () => {
   try {
     const res = await worldApi.getWorld(route.params.id)
     world.value = res.data
+    checkFavorite()
   } catch (err) {
     console.error('加载世界设定失败:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const checkFavorite = async () => {
+  try {
+    const res = await userApi.checkFavorite(userId, {
+      targetId: route.params.id,
+      targetType: 'world'
+    })
+    isFavorited.value = res.data.isFavorited
+  } catch (err) {
+    console.error('检查收藏状态失败:', err)
+  }
+}
+
+const toggleFavorite = async () => {
+  try {
+    if (isFavorited.value) {
+      await userApi.removeFavorite(userId, {
+        targetId: route.params.id,
+        targetType: 'world'
+      })
+      isFavorited.value = false
+      message.success('已取消收藏')
+    } else {
+      await userApi.addFavorite(userId, {
+        targetId: route.params.id,
+        targetType: 'world'
+      })
+      isFavorited.value = true
+      message.success('已加入收藏')
+    }
+  } catch (err) {
+    console.error('收藏操作失败:', err)
+    message.error('操作失败，请重试')
   }
 }
 

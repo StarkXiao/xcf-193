@@ -232,7 +232,7 @@ const loadFavorites = async () => {
   }
 }
 
-const removeFavorite = (targetId, targetType, title) => {
+const removeFavorite = async (targetId, targetType, title) => {
   dialog.warning({
     title: '确认取消收藏',
     content: `确定要取消收藏《${title}》吗？`,
@@ -242,11 +242,7 @@ const removeFavorite = (targetId, targetType, title) => {
       try {
         await userApi.removeFavorite(userId, { targetId, targetType })
         message.success('已取消收藏')
-        if (targetType === 'story') {
-          favoriteStories.value = favoriteStories.value.filter(s => s.id !== targetId)
-        } else {
-          favoriteWorlds.value = favoriteWorlds.value.filter(w => w.id !== targetId)
-        }
+        await loadFavorites()
       } catch (err) {
         console.error('取消收藏失败:', err)
         message.error('操作失败')
@@ -272,9 +268,7 @@ const goToWorlds = () => {
 }
 
 watch(activeTab, () => {
-  if (favoriteStories.value.length === 0 && favoriteWorlds.value.length === 0) {
-    loadFavorites()
-  }
+  loadFavorites()
 })
 
 onMounted(() => {
