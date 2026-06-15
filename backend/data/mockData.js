@@ -3272,6 +3272,465 @@ const themeHallStories = {
   ]
 };
 
+const creationTasks = [
+  {
+    id: 'task-1',
+    title: '「盛夏恋歌」主题创作',
+    description: '夏日炎炎，正是恋爱的季节！以"盛夏"为背景，创作一段甜蜜或遗憾的恋爱故事。让读者在文字中感受到夏日的热烈与悸动。',
+    cover: '☀️',
+    gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+    theme: '盛夏恋歌',
+    type: 'themed',
+    difficulty: 'medium',
+    status: 'active',
+    tags: ['恋爱', '夏日', '现代'],
+    requirements: {
+      minWordCount: 3000,
+      minEndings: 2,
+      mustIncludeTags: ['夏日', '恋爱'],
+      forbiddenTags: ['恐怖', '血腥']
+    },
+    rewards: {
+      points: 500,
+      badge: '夏日恋曲',
+      badgeIcon: '🌻',
+      featured: true,
+      cashReward: null
+    },
+    stages: [
+      {
+        id: 'stage-1-1',
+        name: '第一阶段：人设构建',
+        description: '创建故事的主要角色，设计他们的性格、背景和关系。',
+        requirements: '提交至少2个主要角色的人设，包含姓名、性格、外貌、背景故事',
+        deadline: '2024-07-01',
+        reward: { points: 100, description: '100积分' },
+        order: 1
+      },
+      {
+        id: 'stage-1-2',
+        name: '第二阶段：开篇创作',
+        description: '完成故事的开篇章节，引入主要角色和夏日背景。',
+        requirements: '完成至少3000字的开篇内容，包含2个以上的选择分支',
+        deadline: '2024-07-15',
+        reward: { points: 200, description: '200积分 + 解锁专属徽章' },
+        order: 2
+      },
+      {
+        id: 'stage-1-3',
+        name: '第三阶段：结局完成',
+        description: '完成所有故事线和结局，让故事完整呈现。',
+        requirements: '完成至少2个不同结局，总字数不少于8000字',
+        deadline: '2024-07-31',
+        reward: { points: 200, description: '200积分 + 作品首页推荐' },
+        order: 3
+      }
+    ],
+    totalParticipants: 156,
+    completedCount: 45,
+    startDate: '2024-06-01',
+    endDate: '2024-07-31',
+    createdBy: 'platform',
+    createdAt: '2024-05-25'
+  },
+  {
+    id: 'task-2',
+    title: '「浮城回声」官方同人创作',
+    description: '基于官方世界观「浮城」进行同人创作，可以扩展原有故事，也可以创作全新的人物和剧情。让浮城的世界更加丰富多彩！',
+    cover: '🏰',
+    gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+    theme: '浮城同人',
+    type: 'fanfic',
+    difficulty: 'easy',
+    status: 'active',
+    tags: ['奇幻', '浮城', '同人'],
+    requirements: {
+      minWordCount: 2000,
+      minEndings: 1,
+      mustIncludeTags: ['浮城'],
+      forbiddenTags: []
+    },
+    rewards: {
+      points: 300,
+      badge: '浮城建造师',
+      badgeIcon: '🏰',
+      featured: true,
+      cashReward: null
+    },
+    stages: [
+      {
+        id: 'stage-2-1',
+        name: '第一阶段：选题确认',
+        description: '确定你的同人故事主题，是续写原作还是创作全新角色？',
+        requirements: '提交故事大纲，说明与官方世界观的关联',
+        deadline: '2024-06-20',
+        reward: { points: 50, description: '50积分' },
+        order: 1
+      },
+      {
+        id: 'stage-2-2',
+        name: '第二阶段：作品完成',
+        description: '完成你的同人作品并发布。',
+        requirements: '完成至少2000字的完整故事，包含至少1个结局',
+        deadline: '2024-07-20',
+        reward: { points: 250, description: '250积分 + 「浮城建造师」徽章' },
+        order: 2
+      }
+    ],
+    totalParticipants: 234,
+    completedCount: 89,
+    startDate: '2024-06-01',
+    endDate: '2024-07-20',
+    createdBy: 'platform',
+    createdAt: '2024-05-20'
+  },
+  {
+    id: 'task-3',
+    title: '「星际迷航」长期创作计划',
+    description: '参与官方大型科幻世界观「星际时代」的共建！这是一个长期创作任务，你将与其他作者一起构建一个宏大的星际世界。',
+    cover: '🚀',
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    theme: '星际共建',
+    type: 'worldbuilding',
+    difficulty: 'hard',
+    status: 'active',
+    tags: ['科幻', '星际', '世界共建'],
+    requirements: {
+      minWordCount: 5000,
+      minEndings: 3,
+      mustIncludeTags: ['科幻', '星际'],
+      forbiddenTags: ['仙侠', '古风']
+    },
+    rewards: {
+      points: 1000,
+      badge: '星际开拓者',
+      badgeIcon: '🌟',
+      featured: true,
+      cashReward: 500
+    },
+    stages: [
+      {
+        id: 'stage-3-1',
+        name: '第一阶段：设定提交',
+        description: '为星际世界贡献一个原创设定，可以是星球、种族、科技或历史事件。',
+        requirements: '提交一份详细的设定文档，不少于1000字，附相关视觉描述',
+        deadline: '2024-07-05',
+        reward: { points: 200, description: '200积分' },
+        order: 1
+      },
+      {
+        id: 'stage-3-2',
+        name: '第二阶段：故事创作',
+        description: '基于你提交的设定，创作一个完整的互动故事。',
+        requirements: '完成至少5000字的故事，包含3个以上不同结局',
+        deadline: '2024-08-15',
+        reward: { points: 400, description: '400积分 + 「星际开拓者」徽章' },
+        order: 2
+      },
+      {
+        id: 'stage-3-3',
+        name: '第三阶段：跨作品联动',
+        description: '与其他参与作者的故事进行联动，让世界观更加统一。',
+        requirements: '在故事中至少引用2个其他作者的设定，并获得对方确认',
+        deadline: '2024-09-30',
+        reward: { points: 400, description: '400积分 + 500元现金奖励 + 永久署名' },
+        order: 3
+      }
+    ],
+    totalParticipants: 78,
+    completedCount: 12,
+    startDate: '2024-06-01',
+    endDate: '2024-09-30',
+    createdBy: 'platform',
+    createdAt: '2024-05-15'
+  },
+  {
+    id: 'task-4',
+    title: '「古风新韵」短篇挑战',
+    description: '用现代视角重新诠释古典故事，可以是改编传统神话，也可以是原创古风作品。让古老的韵味在新时代焕发光彩！',
+    cover: '🏮',
+    gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    theme: '古风新韵',
+    type: 'themed',
+    difficulty: 'easy',
+    status: 'upcoming',
+    tags: ['古风', '创新', '短篇'],
+    requirements: {
+      minWordCount: 1500,
+      minEndings: 1,
+      mustIncludeTags: ['古风'],
+      forbiddenTags: []
+    },
+    rewards: {
+      points: 200,
+      badge: '古韵新声',
+      badgeIcon: '🎐',
+      featured: true,
+      cashReward: null
+    },
+    stages: [
+      {
+        id: 'stage-4-1',
+        name: '第一阶段：创意构思',
+        description: '构思你的故事创意，说明如何将古典元素与现代视角结合。',
+        requirements: '提交300字以内的创意说明',
+        deadline: '2024-08-01',
+        reward: { points: 50, description: '50积分' },
+        order: 1
+      },
+      {
+        id: 'stage-4-2',
+        name: '第二阶段：作品提交',
+        description: '完成并提交你的短篇作品。',
+        requirements: '完成1500-3000字的短篇故事',
+        deadline: '2024-08-20',
+        reward: { points: 150, description: '150积分 + 「古韵新声」徽章' },
+        order: 2
+      }
+    ],
+    totalParticipants: 0,
+    completedCount: 0,
+    startDate: '2024-08-01',
+    endDate: '2024-08-20',
+    createdBy: 'platform',
+    createdAt: '2024-05-10'
+  }
+];
+
+const userTaskProgress = [
+  {
+    id: 'progress-1',
+    taskId: 'task-1',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    storyId: 'story-1',
+    storyTitle: '浮城之恋',
+    currentStage: 2,
+    overallProgress: 66,
+    status: 'in_progress',
+    joinedAt: '2024-06-02',
+    stages: [
+      {
+        stageId: 'stage-1-1',
+        status: 'completed',
+        submittedAt: '2024-06-10',
+        reviewedAt: '2024-06-11',
+        reviewStatus: 'approved',
+        reviewComment: '人设立体，角色关系设计巧妙',
+        rewardClaimed: true
+      },
+      {
+        stageId: 'stage-1-2',
+        status: 'in_review',
+        submittedAt: '2024-06-25',
+        reviewedAt: null,
+        reviewStatus: 'pending',
+        reviewComment: null,
+        rewardClaimed: false
+      },
+      {
+        stageId: 'stage-1-3',
+        status: 'pending',
+        submittedAt: null,
+        reviewedAt: null,
+        reviewStatus: null,
+        reviewComment: null,
+        rewardClaimed: false
+      }
+    ],
+    totalPointsEarned: 100,
+    badgesEarned: []
+  },
+  {
+    id: 'progress-2',
+    taskId: 'task-2',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    storyId: null,
+    storyTitle: null,
+    currentStage: 1,
+    overallProgress: 50,
+    status: 'in_progress',
+    joinedAt: '2024-06-05',
+    stages: [
+      {
+        stageId: 'stage-2-1',
+        status: 'completed',
+        submittedAt: '2024-06-08',
+        reviewedAt: '2024-06-09',
+        reviewStatus: 'approved',
+        reviewComment: '创意新颖，期待完整作品',
+        rewardClaimed: true
+      },
+      {
+        stageId: 'stage-2-2',
+        status: 'in_progress',
+        submittedAt: null,
+        reviewedAt: null,
+        reviewStatus: null,
+        reviewComment: null,
+        rewardClaimed: false
+      }
+    ],
+    totalPointsEarned: 50,
+    badgesEarned: []
+  },
+  {
+    id: 'progress-3',
+    taskId: 'task-3',
+    userId: 'user-2',
+    username: '星河漫步者',
+    avatar: '⭐',
+    storyId: 'story-2',
+    storyTitle: '星海彼端的约定',
+    currentStage: 2,
+    overallProgress: 66,
+    status: 'in_progress',
+    joinedAt: '2024-06-01',
+    stages: [
+      {
+        stageId: 'stage-3-1',
+        status: 'completed',
+        submittedAt: '2024-06-03',
+        reviewedAt: '2024-06-04',
+        reviewStatus: 'approved',
+        reviewComment: '设定精彩，为星际世界增色不少',
+        rewardClaimed: true
+      },
+      {
+        stageId: 'stage-3-2',
+        status: 'completed',
+        submittedAt: '2024-06-20',
+        reviewedAt: '2024-06-21',
+        reviewStatus: 'approved',
+        reviewComment: '故事感人，科幻设定严谨',
+        rewardClaimed: true
+      },
+      {
+        stageId: 'stage-3-3',
+        status: 'in_progress',
+        submittedAt: null,
+        reviewedAt: null,
+        reviewStatus: null,
+        reviewComment: null,
+        rewardClaimed: false
+      }
+    ],
+    totalPointsEarned: 600,
+    badgesEarned: ['星际开拓者']
+  },
+  {
+    id: 'progress-4',
+    taskId: 'task-1',
+    userId: 'user-3',
+    username: '梦境织者',
+    avatar: '🌙',
+    storyId: 'story-3',
+    storyTitle: '妖狐与书生',
+    currentStage: 3,
+    overallProgress: 100,
+    status: 'completed',
+    joinedAt: '2024-06-03',
+    stages: [
+      {
+        stageId: 'stage-1-1',
+        status: 'completed',
+        submittedAt: '2024-06-08',
+        reviewedAt: '2024-06-09',
+        reviewStatus: 'approved',
+        reviewComment: '角色鲜活，狐妖设定尤其出彩',
+        rewardClaimed: true
+      },
+      {
+        stageId: 'stage-1-2',
+        status: 'completed',
+        submittedAt: '2024-06-18',
+        reviewedAt: '2024-06-19',
+        reviewStatus: 'approved',
+        reviewComment: '开篇引人入胜，古风韵味十足',
+        rewardClaimed: true
+      },
+      {
+        stageId: 'stage-1-3',
+        status: 'completed',
+        submittedAt: '2024-06-28',
+        reviewedAt: '2024-06-29',
+        reviewStatus: 'approved',
+        reviewComment: '结局多样，情感真挚，完美诠释主题',
+        rewardClaimed: true
+      }
+    ],
+    totalPointsEarned: 500,
+    badgesEarned: ['夏日恋曲']
+  }
+];
+
+const taskSubmissions = [
+  {
+    id: 'submission-task-1',
+    taskId: 'task-1',
+    stageId: 'stage-1-1',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    content: '主要角色：\n1. 林小雨 - 22岁，浮城中央图书馆管理员，性格温柔善良，热爱读书。外表普通但眼神灵动。\n2. 辰 - 神秘的银发少年，外表看起来18岁左右，实际是天空守护者。性格清冷疏离，但内心温柔。\n背景设定：在漂浮于云端的浮城，一个普通的夏日午后，两人在图书馆相遇...',
+    attachments: [],
+    submittedAt: '2024-06-10 14:30',
+    status: 'approved',
+    reviewedBy: 'admin-1',
+    reviewedAt: '2024-06-11 09:00',
+    reviewComment: '人设立体，角色关系设计巧妙'
+  },
+  {
+    id: 'submission-task-2',
+    taskId: 'task-1',
+    stageId: 'stage-1-2',
+    userId: 'user-1',
+    username: '月下独酌',
+    avatar: '🌸',
+    content: '已完成故事开篇，共3500字，包含2个选择分支。故事讲述了夏日午后，林小雨在图书馆偶遇神秘银发少年辰的故事...',
+    attachments: [{ type: 'story', id: 'story-1' }],
+    submittedAt: '2024-06-25 16:20',
+    status: 'pending',
+    reviewedBy: null,
+    reviewedAt: null,
+    reviewComment: null
+  }
+];
+
+const taskRewards = [
+  {
+    id: 'reward-1',
+    userId: 'user-1',
+    taskId: 'task-1',
+    stageId: 'stage-1-1',
+    type: 'points',
+    value: 100,
+    description: '完成「盛夏恋歌」第一阶段奖励',
+    claimedAt: '2024-06-11 10:00'
+  },
+  {
+    id: 'reward-2',
+    userId: 'user-3',
+    taskId: 'task-1',
+    type: 'badge',
+    value: '夏日恋曲',
+    description: '获得「夏日恋曲」专属徽章',
+    claimedAt: '2024-06-29 15:00'
+  },
+  {
+    id: 'reward-3',
+    userId: 'user-2',
+    taskId: 'task-3',
+    type: 'badge',
+    value: '星际开拓者',
+    description: '获得「星际开拓者」专属徽章',
+    claimedAt: '2024-06-21 11:30'
+  }
+];
+
 module.exports = {
   users,
   stories,
@@ -3300,5 +3759,9 @@ module.exports = {
   themeHallCharacters,
   themeHallFactions,
   themeHallTimeline,
-  themeHallStories
+  themeHallStories,
+  creationTasks,
+  userTaskProgress,
+  taskSubmissions,
+  taskRewards
 };

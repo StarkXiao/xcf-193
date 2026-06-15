@@ -43,11 +43,13 @@
       </n-layout-header>
       
       <n-layout-content class="main-content">
-        <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </transition>
-        </router-view>
+        <n-message-provider>
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </n-message-provider>
       </n-layout-content>
       
       <n-layout-footer class="footer">
@@ -63,7 +65,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar, NDropdown, NBadge } from 'naive-ui'
+import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar, NDropdown, NBadge, NMessageProvider } from 'naive-ui'
 import { notificationApi } from './api'
 import SearchBox from './components/SearchBox.vue'
 
@@ -101,6 +103,7 @@ const loadUnreadCount = async () => {
 
 const menuItems = [
   { key: 'home', label: '首页', icon: '🏠' },
+  { key: 'creation-tasks', label: '创作任务', icon: '📋' },
   { key: 'activities', label: '活动中心', icon: '🎯' },
   { key: 'worlds', label: '世界设定', icon: '🌍' },
   { key: 'theme-halls', label: '专题世界馆', icon: '🏛️' },
@@ -157,6 +160,8 @@ const userMenuOptions = [
 const activeMenu = computed(() => {
   const path = route.path
   if (path.startsWith('/story')) return 'home'
+  if (path.startsWith('/creation-task')) return 'creation-tasks'
+  if (path.startsWith('/creation-tasks')) return 'creation-tasks'
   if (path.startsWith('/activity')) return 'activities'
   if (path.startsWith('/world')) return 'worlds'
   if (path.startsWith('/theme-hall')) return 'theme-halls'
@@ -170,6 +175,9 @@ const handleMenuClick = (key) => {
   switch (key) {
     case 'home':
       router.push('/')
+      break
+    case 'creation-tasks':
+      router.push('/creation-tasks')
       break
     case 'activities':
       router.push('/activities')

@@ -23,6 +23,8 @@ import AuthorDashboard from './views/AuthorDashboard.vue'
 import ContentAudit from './views/ContentAudit.vue'
 import ThemeHall from './views/ThemeHall.vue'
 import ThemeHallDetail from './views/ThemeHallDetail.vue'
+import CreationTaskCenter from './views/CreationTaskCenter.vue'
+import CreationTaskDetail from './views/CreationTaskDetail.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -44,7 +46,9 @@ const routes = [
   { path: '/activity/:id', name: 'ActivityDetail', component: ActivityDetail },
   { path: '/admin/audit', name: 'ContentAudit', component: ContentAudit },
   { path: '/theme-halls', name: 'ThemeHall', component: ThemeHall },
-  { path: '/theme-hall/:id', name: 'ThemeHallDetail', component: ThemeHallDetail }
+  { path: '/theme-hall/:id', name: 'ThemeHallDetail', component: ThemeHallDetail },
+  { path: '/creation-tasks', name: 'CreationTaskCenter', component: CreationTaskCenter },
+  { path: '/creation-task/:id', name: 'CreationTaskDetail', component: CreationTaskDetail }
 ]
 
 const router = createRouter({

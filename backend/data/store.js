@@ -26,7 +26,11 @@ const {
   themeHallCharacters,
   themeHallFactions,
   themeHallTimeline,
-  themeHallStories
+  themeHallStories,
+  creationTasks,
+  userTaskProgress,
+  taskSubmissions,
+  taskRewards
 } = require('./mockData');
 
 const store = {
@@ -57,7 +61,11 @@ const store = {
   themeHallCharacters: JSON.parse(JSON.stringify(themeHallCharacters)),
   themeHallFactions: JSON.parse(JSON.stringify(themeHallFactions)),
   themeHallTimeline: JSON.parse(JSON.stringify(themeHallTimeline)),
-  themeHallStories: JSON.parse(JSON.stringify(themeHallStories))
+  themeHallStories: JSON.parse(JSON.stringify(themeHallStories)),
+  creationTasks: [...creationTasks],
+  userTaskProgress: [...userTaskProgress],
+  taskSubmissions: [...taskSubmissions],
+  taskRewards: [...taskRewards]
 };
 
 module.exports = store;
