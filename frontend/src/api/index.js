@@ -316,4 +316,22 @@ export const activityApi = {
   }
 }
 
+export const searchApi = {
+  search(params = {}) {
+    return api.get('/search', { params })
+  },
+
+  suggestTags(keyword, limit = 10) {
+    return api.get('/search/tags/suggest', { params: { keyword, limit } })
+  },
+
+  getPopularTags(limit = 20) {
+    return api.get('/search/tags/popular', { params: { limit } })
+  },
+
+  getHotKeywords() {
+    return api.get('/search/hot-keywords')
+  }
+}
+
 export default api

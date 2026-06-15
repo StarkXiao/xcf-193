@@ -19,6 +19,9 @@
               <span class="nav-text">{{ item.label }}</span>
             </div>
           </div>
+          <div class="header-search">
+            <SearchBox size="small" placeholder="搜索..." />
+          </div>
           <div class="user-area">
             <n-dropdown 
               :options="userMenuOptions" 
@@ -62,6 +65,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar, NDropdown, NBadge } from 'naive-ui'
 import { notificationApi } from './api'
+import SearchBox from './components/SearchBox.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -238,10 +242,16 @@ onMounted(() => {
 
 .nav-menu {
   flex: 1;
-  max-width: 400px;
+  max-width: 300px;
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+
+.header-search {
+  flex: 1;
+  max-width: 280px;
+  margin: 0 16px;
 }
 
 .nav-item {

@@ -18,9 +18,11 @@ import UserFavorites from './views/UserFavorites.vue'
 import WorldCollaboration from './views/WorldCollaboration.vue'
 import ActivityCenter from './views/ActivityCenter.vue'
 import ActivityDetail from './views/ActivityDetail.vue'
+import SearchResults from './views/SearchResults.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
+  { path: '/search', name: 'Search', component: SearchResults },
   { path: '/story/:id', name: 'StoryReader', component: StoryReader },
   { path: '/editor', name: 'StoryEditor', component: StoryEditor },
   { path: '/editor/:id', name: 'StoryEditorEdit', component: StoryEditor },
