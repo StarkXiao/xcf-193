@@ -68,21 +68,30 @@ export const storyApi = {
 }
 
 export const commentApi = {
-  getComments(storyId, nodeId = null) {
-    const params = nodeId ? { nodeId } : {}
+  getComments(storyId, nodeId = null, options = {}) {
+    const params = { ...options }
+    if (nodeId) params.nodeId = nodeId
     return api.get('/comments/story/' + storyId, { params })
+  },
+  
+  getHotAggregate(storyId, options = {}) {
+    return api.get('/comments/story/' + storyId + '/hot-aggregate', { params: options })
   },
   
   addComment(storyId, data) {
     return api.post('/comments/story/' + storyId, data)
   },
   
+  pinComment(commentId, data) {
+    return api.post('/comments/' + commentId + '/pin', data)
+  },
+  
   likeComment(commentId, data) {
     return api.post('/comments/' + commentId + '/like', data)
   },
   
-  deleteComment(commentId) {
-    return api.delete('/comments/' + commentId)
+  deleteComment(commentId, data = {}) {
+    return api.delete('/comments/' + commentId, { data })
   }
 }
 

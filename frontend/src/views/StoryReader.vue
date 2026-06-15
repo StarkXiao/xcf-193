@@ -35,6 +35,16 @@
         <n-button v-if="isMobile" text @click="toggleSettingPanel = !toggleSettingPanel">
           <template #icon>⚙️</template>
         </n-button>
+        <n-button 
+          v-if="hotAggregate?.topHotComments?.length > 0" 
+          text 
+          @click="showHotPanel = !showHotPanel"
+          :class="{ 'active-btn': showHotPanel }"
+        >
+          <template #icon>🔥</template>
+          <span v-if="!isMobile">热评聚合</span>
+          <span v-else class="mobile-count">{{ hotAggregate?.overallStats?.totalComments || 0 }}</span>
+        </n-button>
       </div>
     </div>
 
@@ -243,11 +253,76 @@
     </div>
 
     <div class="comments-section" :class="{ 'mobile-comments': isMobile }">
-      <n-divider v-if="!isMobile">评论互动</n-divider>
+      <div v-if="hotAggregate && (showHotPanel || !isMobile)" class="hot-comments-panel" :class="{ 'mobile-hot-panel': isMobile }">
+        <div class="hot-panel-header">
+          <div class="hot-panel-title">
+            <span class="hot-icon">🔥</span>
+            <span>全站热评</span>
+            <n-tag v-if="hotAggregate.overallStats" size="small" type="success" round style="margin-left:8px;">
+              {{ hotAggregate.overallStats.totalComments }} 条 · {{ hotAggregate.overallStats.totalLikes }} 赞
+            </n-tag>
+          </div>
+          <n-button v-if="!isMobile" text size="small" @click="showHotPanel = !showHotPanel">
+            {{ showHotPanel ? '收起' : '展开' }}
+          </n-button>
+        </div>
+        
+        <div v-if="showHotPanel || !isMobile" class="hot-panel-content">
+          <div v-if="hotAggregate.topHotComments?.length > 0" class="hot-comments-list">
+            <div 
+              v-for="(hc, index) in hotAggregate.topHotComments" 
+              :key="hc.id"
+              class="hot-comment-item"
+              :class="{ 'mobile-hot-item': isMobile }"
+              @click="jumpToHotComment(hc)"
+            >
+              <div class="hot-rank" :class="`rank-${index + 1}`">
+                {{ index + 1 }}
+              </div>
+              <div class="hot-comment-body">
+                <div class="hot-comment-meta">
+                  <n-avatar round size="small" style="margin-right:6px;">{{ hc.avatar }}</n-avatar>
+                  <span class="hot-username">{{ hc.username }}</span>
+                  <n-tag v-if="hc.nodeTitle" size="tiny" type="info" style="margin-left:6px;">
+                    📖 {{ hc.nodeTitle }}
+                  </n-tag>
+                  <span class="hot-time">{{ hc.createdAt }}</span>
+                </div>
+                <p class="hot-comment-text">{{ hc.content }}</p>
+                <div class="hot-comment-stats">
+                  <span class="hot-likes">❤️ {{ hc.likes }}</span>
+                  <span v-if="hc.replyCount" class="hot-replies">💬 {{ hc.replyCount }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="hotAggregate.byNode?.length > 0" class="by-node-section">
+            <n-divider style="margin: 16px 0 12px 0;">📊 各节点评论概况</n-divider>
+            <div class="node-stats-grid" :class="{ 'mobile-node-grid': isMobile }">
+              <div 
+                v-for="ns in hotAggregate.byNode.slice(0, isMobile ? 4 : 6)" 
+                :key="ns.nodeId"
+                class="node-stat-card"
+                @click="jumpToNodeComment(ns)"
+              >
+                <div class="node-stat-title">{{ ns.nodeTitle }}</div>
+                <div class="node-stat-info">
+                  <span>💬 {{ ns.commentCount }} 评论</span>
+                  <span>❤️ {{ ns.topComment?.likes || 0 }} 赞</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <n-divider v-if="!isMobile">💬 评论互动</n-divider>
       <div v-if="isMobile" class="mobile-comments-header">💬 评论互动</div>
       <CommentSection 
         :story-id="storyId" 
         :node-id="currentNodeId" 
+        :author-id="story?.authorId"
         @comments-loaded="handleCommentsLoaded"
       />
     </div>
@@ -258,7 +333,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NSpin, NDivider, NTag, useMessage, NSwitch } from 'naive-ui'
-import { storyApi, userApi } from '../api'
+import { storyApi, userApi, commentApi } from '../api'
 import CommentSection from '../components/CommentSection.vue'
 import { useResponsive, useTouchGestures } from '../composables/useResponsive'
 
@@ -285,6 +360,8 @@ const themeKey = ref('default')
 const immersiveMode = ref(false)
 const toggleSettingPanel = ref(false)
 const storyWideReferences = ref([])
+const hotAggregate = ref(null)
+const showHotPanel = ref(false)
 
 const readerRef = ref(null)
 
@@ -462,7 +539,7 @@ const loadStory = async () => {
           currentNodeId.value = targetNode.id
         }
       }
-    } else if (histRecord) {
+    } else if (histRecord && histRecord.historyNodeIds && histRecord.historyNodeIds.length > 0) {
       const restoreNodes = histRecord.historyNodeIds
         .map(nid => nodesRes.data.find(n => n.id === nid))
         .filter(Boolean)
@@ -503,6 +580,13 @@ const loadStory = async () => {
     
     if (queryCommentId) {
       pendingCommentId.value = queryCommentId
+    }
+    
+    try {
+      const hotRes = await commentApi.getHotAggregate(storyId.value, { limit: 5, minLikes: 5 })
+      hotAggregate.value = hotRes.data
+    } catch (e) {
+      console.error('加载热评聚合失败:', e)
     }
   } catch (err) {
     console.error('加载故事失败:', err)
@@ -625,6 +709,57 @@ const goToWorldEntry = (ref) => {
     path: `/world/${ref.worldId}`,
     query: { entryId: ref.entryId }
   })
+}
+
+const jumpToHotComment = (hotComment) => {
+  if (!hotComment.nodeId) return
+  
+  const targetNode = allNodes.value.find(n => n.id === hotComment.nodeId)
+  if (targetNode && !history.value.find(n => n.id === hotComment.nodeId)) {
+    if (!confirm(`这条评论来自「${hotComment.nodeTitle}」，是否跳转到该章节？`)) {
+      return
+    }
+  }
+  
+  if (targetNode) {
+    const nodeIndex = allNodes.value.findIndex(n => n.id === targetNode.id)
+    if (nodeIndex >= 0) {
+      const existingIndex = history.value.findIndex(n => n.id === targetNode.id)
+      if (existingIndex >= 0) {
+        jumpToNode(existingIndex)
+      } else {
+        history.value.push(targetNode)
+        currentNode.value = targetNode
+        currentNodeId.value = targetNode.id
+      }
+      saveReadingProgress()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      
+      setTimeout(() => {
+        pendingCommentId.value = hotComment.id
+        scrollToComment(hotComment.id)
+      }, 500)
+    }
+  }
+}
+
+const jumpToNodeComment = (nodeStat) => {
+  if (!nodeStat.nodeId) return
+  
+  const targetNode = allNodes.value.find(n => n.id === nodeStat.nodeId)
+  if (targetNode) {
+    const existingIndex = history.value.findIndex(n => n.id === targetNode.id)
+    if (existingIndex >= 0) {
+      jumpToNode(existingIndex)
+    } else {
+      history.value.push(targetNode)
+      currentNode.value = targetNode
+      currentNodeId.value = targetNode.id
+    }
+    saveReadingProgress()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    message.success(`已跳转到「${nodeStat.nodeTitle}」`)
+  }
 }
 
 watch(() => route.params.id, () => {
@@ -1374,5 +1509,210 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.hot-comments-panel {
+  background: linear-gradient(135deg, #fff5f5 0%, #fff0f6 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #ffd6e7;
+}
+
+.hot-comments-panel.mobile-hot-panel {
+  padding: 14px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.hot-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.hot-panel-title {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #c41d7f;
+}
+
+.hot-icon {
+  font-size: 20px;
+  margin-right: 6px;
+}
+
+.hot-panel-content {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hot-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hot-comment-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.hot-comment-item:hover {
+  transform: translateY(-2px);
+  border-color: #ffadd2;
+  box-shadow: 0 4px 12px rgba(196, 29, 127, 0.1);
+}
+
+.hot-comment-item.mobile-hot-item {
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.hot-rank {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
+  background: linear-gradient(135deg, #ffadd2 0%, #eb2f96 100%);
+}
+
+.hot-rank.rank-1 {
+  background: linear-gradient(135deg, #ffd666 0%, #fa8c16 100%);
+  box-shadow: 0 2px 8px rgba(250, 140, 22, 0.3);
+}
+
+.hot-rank.rank-2 {
+  background: linear-gradient(135deg, #d9d9d9 0%, #8c8c8c 100%);
+}
+
+.hot-rank.rank-3 {
+  background: linear-gradient(135deg, #ffd8bf 0%, #d46b08 100%);
+}
+
+.hot-comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.hot-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.hot-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.hot-time {
+  font-size: 11px;
+  color: #999;
+  margin-left: auto;
+}
+
+.hot-comment-text {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.hot-comment-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.hot-likes {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.hot-replies {
+  color: #9d4edd;
+  font-weight: 500;
+}
+
+.by-node-section {
+  margin-top: 4px;
+}
+
+.node-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.node-stats-grid.mobile-node-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.node-stat-card {
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #fff0f6;
+}
+
+.node-stat-card:hover {
+  transform: translateY(-1px);
+  border-color: #ffadd2;
+  background: #fff5f5;
+}
+
+.node-stat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-stat-info {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: #888;
 }
 </style>
