@@ -103,6 +103,7 @@ const menuItems = [
   { key: 'home', label: '首页', icon: '🏠' },
   { key: 'activities', label: '活动中心', icon: '🎯' },
   { key: 'worlds', label: '世界设定', icon: '🌍' },
+  { key: 'theme-halls', label: '专题世界馆', icon: '🏛️' },
   { key: 'editor', label: '创作', icon: '✏️' }
 ]
 
@@ -158,6 +159,7 @@ const activeMenu = computed(() => {
   if (path.startsWith('/story')) return 'home'
   if (path.startsWith('/activity')) return 'activities'
   if (path.startsWith('/world')) return 'worlds'
+  if (path.startsWith('/theme-hall')) return 'theme-halls'
   if (path.startsWith('/editor') || path.startsWith('/world-editor')) return 'editor'
   if (path.startsWith('/activities')) return 'activities'
   if (path.startsWith('/user/dashboard')) return 'editor'
@@ -174,6 +176,9 @@ const handleMenuClick = (key) => {
       break
     case 'worlds':
       router.push('/worlds')
+      break
+    case 'theme-halls':
+      router.push('/theme-halls')
       break
     case 'editor':
       router.push('/editor')

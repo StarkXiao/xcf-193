@@ -382,4 +382,38 @@ export const auditApi = {
   }
 }
 
+export const themeHallApi = {
+  getThemeHalls(params = {}) {
+    return api.get('/theme-halls', { params })
+  },
+
+  getThemeHall(id) {
+    return api.get(`/theme-halls/${id}`)
+  },
+
+  getThemeHallCharacters(id, params = {}) {
+    return api.get(`/theme-halls/${id}/characters`, { params })
+  },
+
+  getThemeHallFactions(id, params = {}) {
+    return api.get(`/theme-halls/${id}/factions`, { params })
+  },
+
+  getThemeHallTimeline(id, params = {}) {
+    return api.get(`/theme-halls/${id}/timeline`, { params })
+  },
+
+  getThemeHallStories(id, params = {}) {
+    return api.get(`/theme-halls/${id}/stories`, { params })
+  },
+
+  getFeaturedThemeHalls() {
+    return api.get('/theme-halls/featured')
+  },
+
+  likeThemeHall(id, data) {
+    return api.post(`/theme-halls/${id}/like`, data)
+  }
+}
+
 export default api
