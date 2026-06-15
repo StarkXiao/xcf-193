@@ -2167,6 +2167,537 @@ const activityVotes = [
   { id: 'vote-3', activityId: 'activity-1', submissionId: 'submission-2', userId: 'user-2', createdAt: '2024-06-22 09:15' }
 ];
 
+const storyPerformance = {
+  'user-1': {
+    summary: {
+      totalStories: 1,
+      totalViews: 1024,
+      totalLikes: 256,
+      totalComments: 3,
+      avgCompletionRate: 78,
+      weeklyGrowth: 12.5
+    },
+    stories: [
+      {
+        id: 'story-1',
+        title: '浮城之恋',
+        cover: '🏰',
+        views: 1024,
+        likes: 256,
+        comments: 3,
+        favorites: 89,
+        shares: 34,
+        completionRate: 78,
+        avgReadingTime: 8.5,
+        status: 'ongoing',
+        updatedAt: '2024-05-10',
+        trend: [
+          { date: '2024-05-06', views: 120, likes: 28 },
+          { date: '2024-05-07', views: 145, likes: 32 },
+          { date: '2024-05-08', views: 168, likes: 35 },
+          { date: '2024-05-09', views: 190, likes: 42 },
+          { date: '2024-05-10', views: 175, likes: 38 },
+          { date: '2024-05-11', views: 210, likes: 45 },
+          { date: '2024-05-12', views: 186, likes: 36 }
+        ]
+      }
+    ],
+    topEndings: [
+      { id: 'node-1-4b', title: '结局：云之彼端', count: 156, rate: 42 },
+      { id: 'node-1-3a', title: '结局：天空的守护者', count: 98, rate: 26 },
+      { id: 'node-1-4a', title: '结局：烟火人间', count: 76, rate: 20 },
+      { id: 'node-1-3b', title: '结局：未完的故事', count: 54, rate: 14 }
+    ]
+  },
+  'user-2': {
+    summary: {
+      totalStories: 1,
+      totalViews: 756,
+      totalLikes: 189,
+      totalComments: 2,
+      avgCompletionRate: 82,
+      weeklyGrowth: 8.3
+    },
+    stories: [
+      {
+        id: 'story-2',
+        title: '星海彼端的约定',
+        cover: '🚀',
+        views: 756,
+        likes: 189,
+        comments: 2,
+        favorites: 67,
+        shares: 28,
+        completionRate: 82,
+        avgReadingTime: 10.2,
+        status: 'completed',
+        updatedAt: '2024-04-28',
+        trend: [
+          { date: '2024-04-22', views: 98, likes: 22 },
+          { date: '2024-04-23', views: 112, likes: 28 },
+          { date: '2024-04-24', views: 130, likes: 35 },
+          { date: '2024-04-25', views: 125, likes: 30 },
+          { date: '2024-04-26', views: 140, likes: 38 },
+          { date: '2024-04-27', views: 148, likes: 40 },
+          { date: '2024-04-28', views: 103, likes: 26 }
+        ]
+      }
+    ],
+    topEndings: [
+      { id: 'node-2-4d', title: '结局：两个人的空间站', count: 168, rate: 45 },
+      { id: 'node-2-4a', title: '结局：星河旅人', count: 112, rate: 30 },
+      { id: 'node-2-4b', title: '结局：记忆的重量', count: 60, rate: 16 },
+      { id: 'node-2-4c', title: '结局：各自的轨道', count: 33, rate: 9 }
+    ]
+  },
+  'user-3': {
+    summary: {
+      totalStories: 1,
+      totalViews: 1280,
+      totalLikes: 342,
+      totalComments: 2,
+      avgCompletionRate: 85,
+      weeklyGrowth: 15.2
+    },
+    stories: [
+      {
+        id: 'story-3',
+        title: '妖狐与书生',
+        cover: '🦊',
+        views: 1280,
+        likes: 342,
+        comments: 2,
+        favorites: 125,
+        shares: 56,
+        completionRate: 85,
+        avgReadingTime: 12.3,
+        status: 'ongoing',
+        updatedAt: '2024-05-05',
+        trend: [
+          { date: '2024-04-29', views: 156, likes: 42 },
+          { date: '2024-04-30', views: 178, likes: 48 },
+          { date: '2024-05-01', views: 210, likes: 56 },
+          { date: '2024-05-02', views: 195, likes: 50 },
+          { date: '2024-05-03', views: 225, likes: 62 },
+          { date: '2024-05-04', views: 180, likes: 45 },
+          { date: '2024-05-05', views: 136, likes: 39 }
+        ]
+      }
+    ],
+    topEndings: [
+      { id: 'node-3-4a', title: '结局：京城烟火', count: 245, rate: 48 },
+      { id: 'node-3-4d', title: '结局：一人一狐', count: 128, rate: 25 },
+      { id: 'node-3-4f', title: '结局：古寺余生', count: 78, rate: 15 },
+      { id: 'node-3-4c', title: '结局：山中岁月长', count: 61, rate: 12 }
+    ]
+  }
+};
+
+const readerProfiles = {
+  'user-1': {
+    demographics: {
+      gender: { male: 35, female: 58, other: 7 },
+      ageGroups: { '18-24': 42, '25-34': 38, '35-44': 15, '45+': 5 },
+      regions: [
+        { name: '华东', value: 28 },
+        { name: '华南', value: 22 },
+        { name: '华北', value: 18 },
+        { name: '西南', value: 15 },
+        { name: '华中', value: 10 },
+        { name: '其他', value: 7 }
+      ]
+    },
+    preferences: {
+      favoriteTags: [
+        { name: '奇幻', value: 78 },
+        { name: '恋爱', value: 85 },
+        { name: '冒险', value: 62 },
+        { name: '治愈', value: 45 },
+        { name: '古风', value: 38 }
+      ],
+      readingHabits: {
+        avgSessions: 3.2,
+        avgDuration: 25,
+        preferredTime: '20:00-23:00'
+      },
+      engagement: {
+        activeDays: [
+          { day: '周一', readers: 156 },
+          { day: '周二', readers: 178 },
+          { day: '周三', readers: 165 },
+          { day: '周四', readers: 189 },
+          { day: '周五', readers: 234 },
+          { day: '周六', readers: 312 },
+          { day: '周日', readers: 289 }
+        ]
+      }
+    }
+  },
+  'user-2': {
+    demographics: {
+      gender: { male: 42, female: 52, other: 6 },
+      ageGroups: { '18-24': 35, '25-34': 42, '35-44': 18, '45+': 5 },
+      regions: [
+        { name: '华东', value: 30 },
+        { name: '华南', value: 25 },
+        { name: '华北', value: 20 },
+        { name: '西南', value: 12 },
+        { name: '华中', value: 8 },
+        { name: '其他', value: 5 }
+      ]
+    },
+    preferences: {
+      favoriteTags: [
+        { name: '科幻', value: 82 },
+        { name: '百合', value: 75 },
+        { name: '治愈', value: 68 },
+        { name: '冒险', value: 42 },
+        { name: '奇幻', value: 35 }
+      ],
+      readingHabits: {
+        avgSessions: 2.8,
+        avgDuration: 30,
+        preferredTime: '21:00-24:00'
+      },
+      engagement: {
+        activeDays: [
+          { day: '周一', readers: 132 },
+          { day: '周二', readers: 145 },
+          { day: '周三', readers: 158 },
+          { day: '周四', readers: 170 },
+          { day: '周五', readers: 195 },
+          { day: '周六', readers: 268 },
+          { day: '周日', readers: 245 }
+        ]
+      }
+    }
+  },
+  'user-3': {
+    demographics: {
+      gender: { male: 28, female: 65, other: 7 },
+      ageGroups: { '18-24': 48, '25-34': 35, '35-44': 12, '45+': 5 },
+      regions: [
+        { name: '华东', value: 25 },
+        { name: '华南', value: 20 },
+        { name: '华北', value: 22 },
+        { name: '西南', value: 18 },
+        { name: '华中', value: 10 },
+        { name: '其他', value: 5 }
+      ]
+    },
+    preferences: {
+      favoriteTags: [
+        { name: '古风', value: 88 },
+        { name: '奇幻', value: 72 },
+        { name: '恋爱', value: 80 },
+        { name: '治愈', value: 55 },
+        { name: '冒险', value: 40 }
+      ],
+      readingHabits: {
+        avgSessions: 3.5,
+        avgDuration: 28,
+        preferredTime: '19:00-22:00'
+      },
+      engagement: {
+        activeDays: [
+          { day: '周一', readers: 189 },
+          { day: '周二', readers: 201 },
+          { day: '周三', readers: 195 },
+          { day: '周四', readers: 220 },
+          { day: '周五', readers: 278 },
+          { day: '周六', readers: 356 },
+          { day: '周日', readers: 334 }
+        ]
+      }
+    }
+  }
+};
+
+const branchConversions = {
+  'story-1': {
+    nodes: [
+      {
+      nodeId: 'node-1-1',
+      title: '第一章：云中之城',
+      visitors: 1024,
+      choices: [
+        { id: 'choice-1-1-1', text: '热情地帮他找书', count: 620, rate: 60.5, nextNodeId: 'node-1-2a' },
+        { id: 'choice-1-1-2', text: '保持距离，指给他方向', count: 404, rate: 39.5, nextNodeId: 'node-1-2b' }
+      ]
+    },
+    {
+      nodeId: 'node-1-2a',
+      title: '第二章：神秘的访客',
+      visitors: 620,
+      choices: [
+        { id: 'choice-1-2a-1', text: '询问他的名字', count: 342, rate: 55.2, nextNodeId: 'node-1-3a' },
+        { id: 'choice-1-2a-2', text: '邀请他明天再来', count: 278, rate: 44.8, nextNodeId: 'node-1-3b' }
+      ]
+    },
+    {
+      nodeId: 'node-1-2b',
+      title: '第二章：擦肩而过',
+      visitors: 404,
+      choices: [
+        { id: 'choice-1-2b-1', text: '上前打招呼', count: 256, rate: 63.4, nextNodeId: 'node-1-3c' },
+        { id: 'choice-1-2b-2', text: '悄悄离开', count: 148, rate: 36.6, nextNodeId: 'node-1-3d' }
+      ]
+    },
+    {
+      nodeId: 'node-1-3c',
+      title: '第三章：月下谈心',
+      visitors: 256,
+      choices: [
+        { id: 'choice-1-3c-1', text: '邀请他一起吃晚饭', count: 130, rate: 50.8, nextNodeId: 'node-1-4a' },
+        { id: 'choice-1-3c-2', text: '陪他看一会儿云', count: 126, rate: 49.2, nextNodeId: 'node-1-4b' }
+      ]
+    }
+  ],
+  overallFunnel: [
+    { stage: '开始阅读', count: 1024, rate: 100 },
+    { stage: '完成第一章', count: 890, rate: 86.9 },
+    { stage: '完成第二章', count: 720, rate: 70.3 },
+    { stage: '完成第三章', count: 560, rate: 54.7 },
+    { stage: '达成结局', count: 456, rate: 44.5 }
+  ]
+  },
+  'story-2': {
+    nodes: [
+      {
+      nodeId: 'node-2-1',
+      title: '序章：废弃空间站',
+      visitors: 756,
+      choices: [
+        { id: 'choice-2-1-1', text: '谨慎行事，先做外部扫描', count: 412, rate: 54.5, nextNodeId: 'node-2-2a' },
+        { id: 'choice-2-1-2', text: '直接进入空间站探索', count: 344, rate: 45.5, nextNodeId: 'node-2-2b' }
+      ]
+    },
+    {
+      nodeId: 'node-2-2a',
+      title: '第二章：意外的发现',
+      visitors: 412,
+      choices: [
+        { id: 'choice-2-2a-1', text: '前往生命反应所在地', count: 220, rate: 53.4, nextNodeId: 'node-2-3a' },
+        { id: 'choice-2-2a-2', text: '先去控制室查看日志', count: 192, rate: 46.6, nextNodeId: 'node-2-3b' }
+      ]
+    },
+    {
+      nodeId: 'node-2-2b',
+      title: '第二章：神秘的少女',
+      visitors: 344,
+      choices: [
+        { id: 'choice-2-2b-1', text: '唤醒她', count: 180, rate: 52.3, nextNodeId: 'node-2-3c' },
+        { id: 'choice-2-2b-2', text: '先搞清楚状况', count: 164, rate: 47.7, nextNodeId: 'node-2-3b' }
+      ]
+    },
+    {
+      nodeId: 'node-2-3b',
+      title: '第三章：真相的碎片',
+      visitors: 356,
+      choices: [
+        { id: 'choice-2-3b-1', text: '去找到那个少女', count: 215, rate: 60.4, nextNodeId: 'node-2-3c' },
+        { id: 'choice-2-3b-2', text: '决定离开，不打扰她', count: 141, rate: 39.6, nextNodeId: 'node-2-4c' }
+      ]
+    }
+  ],
+  overallFunnel: [
+    { stage: '开始阅读', count: 756, rate: 100 },
+    { stage: '完成序章', count: 680, rate: 89.9 },
+    { stage: '完成第二章', count: 540, rate: 71.4 },
+    { stage: '完成第三章', count: 460, rate: 60.8 },
+    { stage: '达成结局', count: 395, rate: 52.2 }
+  ]
+  },
+  'story-3': {
+    nodes: [
+      {
+      nodeId: 'node-3-1',
+      title: '第一章：深山古寺',
+      visitors: 1280,
+      choices: [
+        { id: 'choice-3-1-1', text: '上前帮助它', count: 768, rate: 60.0, nextNodeId: 'node-3-2a' },
+        { id: 'choice-3-1-2', text: '保持警惕，远远观察', count: 512, rate: 40.0, nextNodeId: 'node-3-2b' }
+      ]
+    },
+    {
+      nodeId: 'node-3-2a',
+      title: '第二章：受伤的九尾狐',
+      visitors: 768,
+      choices: [
+        { id: 'choice-3-2a-1', text: '惊讶地询问她的身份', count: 400, rate: 52.1, nextNodeId: 'node-3-3a' },
+        { id: 'choice-3-2a-2', text: '镇定地接受这个事实', count: 368, rate: 47.9, nextNodeId: 'node-3-3b' }
+      ]
+    },
+    {
+      nodeId: 'node-3-2b',
+      title: '第二章：远远的守望',
+      visitors: 512,
+      choices: [
+        { id: 'choice-3-2b-1', text: '救下它并带它离开', count: 280, rate: 54.7, nextNodeId: 'node-3-3c' },
+        { id: 'choice-3-2b-2', text: '就在这里照顾它', count: 232, rate: 45.3, nextNodeId: 'node-3-3d' }
+      ]
+    },
+    {
+      nodeId: 'node-3-3a',
+      title: '第三章：狐妖小九',
+      visitors: 400,
+      choices: [
+        { id: 'choice-3-3a-1', text: '答应她的提议', count: 245, rate: 61.3, nextNodeId: 'node-3-4a' },
+        { id: 'choice-3-3a-2', text: '婉言谢绝', count: 155, rate: 38.7, nextNodeId: 'node-3-4b' }
+      ]
+    }
+  ],
+  overallFunnel: [
+    { stage: '开始阅读', count: 1280, rate: 100 },
+    { stage: '完成第一章', count: 1150, rate: 89.8 },
+    { stage: '完成第二章', count: 980, rate: 76.6 },
+    { stage: '完成第三章', count: 790, rate: 61.7 },
+    { stage: '达成结局', count: 685, rate: 53.5 }
+  ]
+  }
+};
+
+const settingReferenceTrends = {
+  'user-1': {
+    summary: {
+      totalReferences: 45,
+      weeklyReferences: 8,
+      topReferenced: [
+        {
+          entryId: 'entry-1',
+          title: '浮城',
+          category: '地理',
+          referenceCount: 23,
+          trend: 'up',
+          weeklyChange: 5
+        },
+        {
+          entryId: 'entry-3',
+          title: '天空守护者',
+          category: '种族',
+          referenceCount: 15,
+          trend: 'up',
+          weeklyChange: 2
+        },
+        {
+          entryId: 'entry-2',
+          title: '天空之境',
+          category: '传说',
+          referenceCount: 7,
+          trend: 'stable',
+          weeklyChange: 1
+        }
+      ]
+    },
+    trendData: [
+      { week: '第1周', references: 3 },
+      { week: '第2周', references: 5 },
+      { week: '第3周', references: 6 },
+      { week: '第4周', references: 8 },
+      { week: '第5周', references: 7 },
+      { week: '第6周', references: 9 },
+      { week: '第7周', references: 8 }
+    ],
+    referenceSources: [
+      { source: '故事引用', count: 28 },
+      { source: '世界设定引用', count: 12 },
+      { source: '评论提及', count: 5 }
+    ]
+  },
+  'user-2': {
+    summary: {
+      totalReferences: 32,
+      weeklyReferences: 5,
+      topReferenced: [
+        {
+          entryId: 'entry-5',
+          title: '超光速航行',
+          category: '科技',
+          referenceCount: 18,
+          trend: 'up',
+          weeklyChange: 3
+        },
+        {
+          entryId: 'entry-4',
+          title: '星际联邦',
+          category: '政治',
+          referenceCount: 10,
+          trend: 'stable',
+          weeklyChange: 1
+        },
+        {
+          entryId: 'entry-6',
+          title: '北辰号空间站',
+          category: '地点',
+          referenceCount: 4,
+          trend: 'down',
+          weeklyChange: -1
+        }
+      ]
+    },
+    trendData: [
+      { week: '第1周', references: 2 },
+      { week: '第2周', references: 4 },
+      { week: '第3周', references: 5 },
+      { week: '第4周', references: 6 },
+      { week: '第5周', references: 5 },
+      { week: '第6周', references: 4 },
+      { week: '第7周', references: 6 }
+    ],
+    referenceSources: [
+      { source: '故事引用', count: 20 },
+      { source: '世界设定引用', count: 9 },
+      { source: '评论提及', count: 3 }
+    ]
+  },
+  'user-3': {
+    summary: {
+      totalReferences: 58,
+      weeklyReferences: 12,
+      topReferenced: [
+        {
+          entryId: 'entry-9',
+          title: '九尾狐',
+          category: '种族',
+          referenceCount: 32,
+          trend: 'up',
+          weeklyChange: 7
+        },
+        {
+          entryId: 'entry-8',
+          title: '妖族',
+          category: '种族',
+          referenceCount: 18,
+          trend: 'up',
+          weeklyChange: 3
+        },
+        {
+          entryId: 'entry-7',
+          title: '大靖王朝',
+          category: '政治',
+          referenceCount: 8,
+          trend: 'stable',
+          weeklyChange: 2
+        }
+      ]
+    },
+    trendData: [
+      { week: '第1周', references: 5 },
+      { week: '第2周', references: 7 },
+      { week: '第3周', references: 9 },
+      { week: '第4周', references: 10 },
+      { week: '第5周', references: 8 },
+      { week: '第6周', references: 11 },
+      { week: '第7周', references: 8 }
+    ],
+    referenceSources: [
+      { source: '故事引用', count: 38 },
+      { source: '世界设定引用', count: 15 },
+      { source: '评论提及', count: 5 }
+    ]
+  }
+};
+
 module.exports = {
   users,
   stories,
@@ -2184,5 +2715,9 @@ module.exports = {
   activitySubmissions,
   activityRankings,
   activityShares,
-  activityVotes
+  activityVotes,
+  storyPerformance,
+  readerProfiles,
+  branchConversions,
+  settingReferenceTrends
 };

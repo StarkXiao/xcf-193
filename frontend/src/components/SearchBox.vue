@@ -16,13 +16,15 @@
           <n-icon size="16">🔍</n-icon>
         </template>
         <template #default="{ option }">
-          <div class="suggestion-item">
-            <span class="suggestion-icon">{{ option.type === 'tag' ? '🏷️' : '🕐' }}</span>
-            <span class="suggestion-text">{{ option.label }}</span>
-            <span v-if="option.type === 'tag'" class="suggestion-count">
-              {{ option.storyCount }} 作品
+          <span>
+            <span v-if="option" class="suggestion-item">
+              <span class="suggestion-icon">{{ option?.type === 'tag' ? '🏷️' : '🕐' }}</span>
+              <span class="suggestion-text">{{ option?.label }}</span>
+              <span v-if="option?.type === 'tag'" class="suggestion-count">
+                {{ option?.storyCount }} 作品
+              </span>
             </span>
-          </div>
+          </span>
         </template>
       </n-auto-complete>
       <n-button 

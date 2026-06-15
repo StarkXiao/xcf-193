@@ -334,4 +334,26 @@ export const searchApi = {
   }
 }
 
+export const analyticsApi = {
+  getAuthorPerformance(userId) {
+    return api.get(`/analytics/author/${userId}/performance`)
+  },
+
+  getReaderProfile(userId) {
+    return api.get(`/analytics/author/${userId}/reader-profile`)
+  },
+
+  getBranchConversions(storyId) {
+    return api.get(`/analytics/story/${storyId}/branch-conversions`)
+  },
+
+  getSettingReferences(userId) {
+    return api.get(`/analytics/author/${userId}/setting-references`)
+  },
+
+  getAuthorSummary(userId) {
+    return api.get(`/analytics/author/${userId}/summary`)
+  }
+}
+
 export default api

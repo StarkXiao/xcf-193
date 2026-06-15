@@ -19,6 +19,7 @@ import WorldCollaboration from './views/WorldCollaboration.vue'
 import ActivityCenter from './views/ActivityCenter.vue'
 import ActivityDetail from './views/ActivityDetail.vue'
 import SearchResults from './views/SearchResults.vue'
+import AuthorDashboard from './views/AuthorDashboard.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -34,6 +35,7 @@ const routes = [
   { path: '/user/creations', name: 'UserCreations', component: UserCreations },
   { path: '/user/messages', name: 'UserMessages', component: UserMessages },
   { path: '/user/favorites', name: 'UserFavorites', component: UserFavorites },
+  { path: '/user/dashboard', name: 'AuthorDashboard', component: AuthorDashboard },
   { path: '/world/:id/collaboration', name: 'WorldCollaboration', component: WorldCollaboration },
   { path: '/activities', name: 'ActivityCenter', component: ActivityCenter },
   { path: '/activity/:id', name: 'ActivityDetail', component: ActivityDetail }

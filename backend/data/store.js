@@ -15,14 +15,18 @@ const {
   activitySubmissions,
   activityRankings,
   activityShares,
-  activityVotes
+  activityVotes,
+  storyPerformance,
+  readerProfiles,
+  branchConversions,
+  settingReferenceTrends
 } = require('./mockData');
 
 const store = {
   users: [...users],
   stories: [...stories],
-  storyNodes: [...storyNodes],
-  comments: [...comments],
+  storyNodes: JSON.parse(JSON.stringify(storyNodes)),
+  comments: JSON.parse(JSON.stringify(comments)),
   worldSettings: JSON.parse(JSON.stringify(worldSettings)),
   favorites: JSON.parse(JSON.stringify(favorites)),
   notifications: [...notifications],
@@ -35,7 +39,11 @@ const store = {
   activitySubmissions: [...activitySubmissions],
   activityRankings: JSON.parse(JSON.stringify(activityRankings)),
   activityShares: [...activityShares],
-  activityVotes: [...activityVotes]
+  activityVotes: [...activityVotes],
+  storyPerformance: JSON.parse(JSON.stringify(storyPerformance)),
+  readerProfiles: JSON.parse(JSON.stringify(readerProfiles)),
+  branchConversions: JSON.parse(JSON.stringify(branchConversions)),
+  settingReferenceTrends: JSON.parse(JSON.stringify(settingReferenceTrends))
 };
 
 module.exports = store;

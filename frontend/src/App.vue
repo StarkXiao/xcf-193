@@ -128,6 +128,11 @@ const userMenuOptions = [
     icon: () => '⭐'
   },
   {
+    label: '数据看板',
+    key: 'dashboard',
+    icon: () => '📊'
+  },
+  {
     type: 'divider',
     key: 'd1'
   },
@@ -150,6 +155,7 @@ const activeMenu = computed(() => {
   if (path.startsWith('/world')) return 'worlds'
   if (path.startsWith('/editor') || path.startsWith('/world-editor')) return 'editor'
   if (path.startsWith('/activities')) return 'activities'
+  if (path.startsWith('/user/dashboard')) return 'editor'
   return 'home'
 })
 
@@ -183,6 +189,9 @@ const handleUserMenuSelect = (key) => {
       break
     case 'favorites':
       router.push('/user/favorites')
+      break
+    case 'dashboard':
+      router.push('/user/dashboard')
       break
     case 'editor':
       router.push('/editor')
