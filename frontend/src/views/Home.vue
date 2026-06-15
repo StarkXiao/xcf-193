@@ -1,22 +1,22 @@
 <template>
-  <div class="home">
-    <div class="hero-section">
+  <div class="home" :class="{ 'is-mobile': isMobile }">
+    <div class="hero-section" :class="{ 'mobile-hero': isMobile }">
       <div class="hero-content">
-        <h1 class="hero-title">浮城回声</h1>
-        <p class="hero-subtitle">幻想恋爱叙事社区</p>
-        <p class="hero-desc">在云端之城，编织属于你的浪漫故事</p>
-        <div class="hero-actions">
-          <n-button type="primary" size="large" @click="goToEditor">
+        <h1 class="hero-title" :class="{ 'mobile-title': isMobile }">浮城回声</h1>
+        <p class="hero-subtitle" :class="{ 'mobile-subtitle': isMobile }">幻想恋爱叙事社区</p>
+        <p v-if="!isMobile" class="hero-desc">在云端之城，编织属于你的浪漫故事</p>
+        <div class="hero-actions" :class="{ 'mobile-actions': isMobile }">
+          <n-button type="primary" :size="isMobile ? 'medium' : 'large'" @click="goToEditor">
             <template #icon>✏️</template>
             开始创作
           </n-button>
-          <n-button size="large" @click="scrollToStories">
+          <n-button :size="isMobile ? 'medium' : 'large'" @click="scrollToStories">
             <template #icon>📖</template>
             浏览故事
           </n-button>
         </div>
       </div>
-      <div class="hero-decoration">
+      <div v-if="!isMobile" class="hero-decoration">
         <span class="deco-icon">🏰</span>
         <span class="deco-icon">⭐</span>
         <span class="deco-icon">🌙</span>
@@ -26,67 +26,66 @@
     </div>
 
     <div class="filter-section" ref="storiesSection">
-      <div class="section-header">
-        <h2 class="section-title">📚 故事广场</h2>
+      <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+        <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">📚 故事广场</h2>
         <div class="filter-tabs">
-          <n-radio-group v-model:value="sortBy" size="medium" @update:value="loadStories">
+          <n-radio-group v-model:value="sortBy" :size="isMobile ? 'small' : 'medium'" @update:value="loadStories">
             <n-radio-button value="newest">最新</n-radio-button>
             <n-radio-button value="popular">热门</n-radio-button>
           </n-radio-group>
         </div>
       </div>
       
-      <div class="tags-filter">
-        <n-tag 
+      <div class="tags-filter" :class="{ 'mobile-tags': isMobile }">
+        <div 
           v-for="tag in allTags" 
           :key="tag"
-          :type="selectedTag === tag ? 'primary' : 'default'"
-          :checkable="true"
-          :checked="selectedTag === tag"
+          class="tag-item"
+          :class="{ active: selectedTag === tag, 'mobile-tag': isMobile }"
           @click="toggleTag(tag)"
-          style="margin-right: 8px; margin-bottom: 8px; cursor: pointer;"
         >
           {{ tag }}
-        </n-tag>
+        </div>
       </div>
     </div>
 
     <n-spin :show="loading" size="large">
-      <div class="stories-grid">
+      <div class="stories-grid" :class="{ 'mobile-stories-grid': isMobile }">
         <n-card 
           v-for="story in stories" 
           :key="story.id"
           hoverable
           class="story-card"
+          :class="{ 'mobile-story-card': isMobile }"
           @click="openStory(story.id)"
         >
-          <div class="story-cover">{{ story.cover }}</div>
+          <div class="story-cover" :class="{ 'mobile-story-cover': isMobile }">{{ story.cover }}</div>
           <div class="story-info">
-            <h3 class="story-title">{{ story.title }}</h3>
-            <p class="story-summary">{{ story.summary }}</p>
-            <div class="story-tags">
+            <h3 class="story-title" :class="{ 'mobile-story-title': isMobile }">{{ story.title }}</h3>
+            <p class="story-summary" :class="{ 'mobile-story-summary': isMobile }">{{ story.summary }}</p>
+            <div class="story-tags" :class="{ 'mobile-story-tags': isMobile }">
               <n-tag 
-                v-for="tag in story.tags" 
+                v-for="tag in (story.tags || []).slice(0, isMobile ? 2 : 3)" 
                 :key="tag" 
                 size="small" 
                 type="primary"
-                style="margin-right: 4px;"
+                style="margin-right: 4px; margin-top: 4px;"
               >
                 {{ tag }}
               </n-tag>
             </div>
-            <div class="story-meta">
+            <div class="story-meta" :class="{ 'mobile-story-meta': isMobile }">
               <span class="meta-item">
                 <span class="meta-icon">👤</span>
-                {{ story.authorName }}
+                <span v-if="!isMobile">{{ story.authorName }}</span>
               </span>
               <span class="meta-item">
                 <span class="meta-icon">❤️</span>
-                {{ story.likes }}
+                {{ formatNumber(story.likes) }}
               </span>
               <span class="meta-item">
                 <span class="meta-icon">👁️</span>
-                {{ story.views }}
+                {{ formatNumber(story.views) }}
               </span>
             </div>
           </div>
@@ -94,35 +93,39 @@
       </div>
     </n-spin>
 
-    <div v-if="stories.length === 0 && !loading" class="empty-state">
-      <div class="empty-icon">📝</div>
+    <div v-if="stories.length === 0 && !loading" class="empty-state" :class="{ 'mobile-empty': isMobile }">
+      <div class="empty-icon" :class="{ 'mobile-empty-icon': isMobile }">📝</div>
       <p>还没有故事，快来创作第一个吧！</p>
-      <n-button type="primary" @click="goToEditor">
+      <n-button type="primary" :size="isMobile ? 'medium' : 'default'" @click="goToEditor">
         <template #icon>✏️</template>
         开始创作
       </n-button>
     </div>
 
-    <div class="worlds-preview">
-      <div class="section-header">
-        <h2 class="section-title">🌍 世界设定库</h2>
-        <n-button text type="primary" @click="goToWorlds">查看全部 →</n-button>
+    <div class="worlds-preview" :class="{ 'mobile-worlds': isMobile }">
+      <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+        <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">🌍 世界设定库</h2>
+        <n-button text type="primary" @click="goToWorlds">
+          查看全部
+          <span style="margin-left: 2px;">→</span>
+        </n-button>
       </div>
-      <div class="worlds-row">
+      <div class="worlds-row" :class="{ 'mobile-worlds-row': isMobile }">
         <n-card 
           v-for="world in worlds" 
           :key="world.id"
           hoverable
           class="world-card"
+          :class="{ 'mobile-world-card': isMobile }"
           @click="openWorld(world.id)"
         >
-          <div class="world-cover">{{ world.cover }}</div>
+          <div class="world-cover" :class="{ 'mobile-world-cover': isMobile }">{{ world.cover }}</div>
           <div class="world-info">
-            <h3 class="world-name">{{ world.name }}</h3>
-            <p class="world-desc">{{ world.description }}</p>
+            <h3 class="world-name" :class="{ 'mobile-world-name': isMobile }">{{ world.name }}</h3>
+            <p class="world-desc" :class="{ 'mobile-world-desc': isMobile }">{{ world.description }}</p>
             <div class="world-meta">
               <span>📝 {{ world.entries?.length || 0 }} 条目</span>
-              <span>❤️ {{ world.likes }}</span>
+              <span>❤️ {{ formatNumber(world.likes) }}</span>
             </div>
           </div>
         </n-card>
@@ -136,8 +139,10 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NTag, NRadioGroup, NRadioButton, NSpin } from 'naive-ui'
 import { storyApi, worldApi } from '../api'
+import { useResponsive } from '../composables/useResponsive'
 
 const router = useRouter()
+const { isMobile } = useResponsive()
 
 const stories = ref([])
 const worlds = ref([])
@@ -147,6 +152,17 @@ const selectedTag = ref('')
 const allTags = ['奇幻', '恋爱', '冒险', '科幻', '百合', '治愈', '古风']
 
 const storiesSection = ref(null)
+
+const formatNumber = (num) => {
+  if (!num) return 0
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1) + 'w'
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k'
+  }
+  return num
+}
 
 const loadStories = async () => {
   loading.value = true
@@ -222,6 +238,12 @@ onMounted(() => {
   overflow: hidden;
 }
 
+.hero-section.mobile-hero {
+  border-radius: 16px;
+  padding: 32px 20px;
+  margin-bottom: 24px;
+}
+
 .hero-content {
   position: relative;
   z-index: 2;
@@ -238,10 +260,19 @@ onMounted(() => {
   margin: 0 0 10px 0;
 }
 
+.hero-title.mobile-title {
+  font-size: 32px;
+}
+
 .hero-subtitle {
   font-size: 24px;
   color: #c77dff;
   margin: 0 0 16px 0;
+}
+
+.hero-subtitle.mobile-subtitle {
+  font-size: 16px;
+  margin-bottom: 12px;
 }
 
 .hero-desc {
@@ -254,6 +285,16 @@ onMounted(() => {
 .hero-actions {
   display: flex;
   gap: 16px;
+}
+
+.hero-actions.mobile-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero-actions.mobile-actions :deep(.n-button) {
+  flex: 1;
+  min-width: 120px;
 }
 
 .hero-decoration {
@@ -293,22 +334,67 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+.section-header.mobile-section-header {
+  margin-bottom: 14px;
+}
+
 .section-title {
   font-size: 24px;
   margin: 0;
   color: #333;
 }
 
+.section-title.mobile-section-title {
+  font-size: 18px;
+}
+
 .tags-filter {
   display: flex;
   flex-wrap: wrap;
   margin-bottom: 20px;
+  gap: 8px;
+}
+
+.tags-filter.mobile-tags {
+  margin-bottom: 14px;
+  gap: 6px;
+}
+
+.tag-item {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.tag-item:hover {
+  background: #e8e8e8;
+}
+
+.tag-item.active {
+  background: linear-gradient(135deg, #9d4edd 0%, #c77dff 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.tag-item.mobile-tag {
+  padding: 5px 12px;
+  font-size: 12px;
 }
 
 .stories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+}
+
+.stories-grid.mobile-stories-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .story-card {
@@ -320,6 +406,10 @@ onMounted(() => {
   transform: translateY(-4px);
 }
 
+.story-card.mobile-story-card :deep(.n-card__content) {
+  padding: 14px;
+}
+
 .story-cover {
   font-size: 60px;
   text-align: center;
@@ -329,10 +419,21 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
+.story-cover.mobile-story-cover {
+  font-size: 48px;
+  padding: 20px 0;
+  margin-bottom: 12px;
+  border-radius: 10px;
+}
+
 .story-title {
   font-size: 18px;
   margin: 0 0 8px 0;
   color: #333;
+}
+
+.story-title.mobile-story-title {
+  font-size: 16px;
 }
 
 .story-summary {
@@ -346,8 +447,17 @@ onMounted(() => {
   overflow: hidden;
 }
 
+.story-summary.mobile-story-summary {
+  font-size: 13px;
+  -webkit-line-clamp: 2;
+}
+
 .story-tags {
   margin-bottom: 12px;
+}
+
+.story-tags.mobile-story-tags {
+  margin-bottom: 10px;
 }
 
 .story-meta {
@@ -355,6 +465,11 @@ onMounted(() => {
   gap: 16px;
   font-size: 13px;
   color: #999;
+}
+
+.story-meta.mobile-story-meta {
+  gap: 12px;
+  font-size: 12px;
 }
 
 .meta-item {
@@ -372,9 +487,18 @@ onMounted(() => {
   padding: 60px 20px;
 }
 
+.empty-state.mobile-empty {
+  padding: 40px 20px;
+}
+
 .empty-icon {
   font-size: 64px;
   margin-bottom: 16px;
+}
+
+.empty-icon.mobile-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
 }
 
 .empty-state p {
@@ -386,14 +510,27 @@ onMounted(() => {
   margin-top: 60px;
 }
 
+.worlds-preview.mobile-worlds {
+  margin-top: 36px;
+}
+
 .worlds-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
 
+.worlds-row.mobile-worlds-row {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
 .world-card {
   cursor: pointer;
+}
+
+.world-card.mobile-world-card :deep(.n-card__content) {
+  padding: 14px;
 }
 
 .world-cover {
@@ -405,9 +542,19 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 
+.world-cover.mobile-world-cover {
+  font-size: 40px;
+  padding: 16px 0;
+  margin-bottom: 10px;
+}
+
 .world-name {
   font-size: 16px;
   margin: 0 0 8px 0;
+}
+
+.world-name.mobile-world-name {
+  font-size: 15px;
 }
 
 .world-desc {
@@ -418,6 +565,10 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.world-desc.mobile-world-desc {
+  font-size: 12px;
 }
 
 .world-meta {

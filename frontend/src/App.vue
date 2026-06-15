@@ -1,78 +1,176 @@
 <template>
   <n-config-provider :theme="theme" :theme-overrides="themeOverrides">
-    <n-layout style="min-height: 100vh">
-      <n-layout-header bordered class="header">
-        <div class="header-content">
-          <div class="logo" @click="goHome">
-            <span class="logo-icon">🏰</span>
-            <span class="logo-text">浮城回声</span>
+    <div class="app-root" :class="{ 'is-mobile': isMobile, 'menu-open': mobileMenuOpen }">
+      <transition name="slide-left">
+        <div v-if="isMobile && mobileMenuOpen" class="mobile-menu-backdrop" @click="mobileMenuOpen = false"></div>
+      </transition>
+
+      <transition name="slide-left">
+        <div v-if="isMobile && mobileMenuOpen" class="mobile-menu-drawer" @click.stop>
+          <div class="drawer-header">
+            <div class="drawer-user">
+              <n-avatar round size="large">{{ currentUser.avatar }}</n-avatar>
+              <div class="drawer-user-info">
+                <div class="drawer-username">{{ currentUser.username }}</div>
+                <div class="drawer-user-sub">幻想之城的旅人</div>
+              </div>
+            </div>
+            <n-button text @click="mobileMenuOpen = false" class="drawer-close">
+              <template #icon>✕</template>
+            </n-button>
           </div>
-          <div class="nav-menu">
+          <div class="drawer-menu">
             <div 
               v-for="item in menuItems" 
               :key="item.key"
-              class="nav-item"
+              class="drawer-item"
               :class="{ active: activeMenu === item.key }"
-              @click="handleMenuClick(item.key)"
+              @click="handleDrawerMenuClick(item.key)"
             >
-              <span class="nav-icon">{{ item.icon }}</span>
-              <span class="nav-text">{{ item.label }}</span>
+              <span class="drawer-item-icon">{{ item.icon }}</span>
+              <span class="drawer-item-label">{{ item.label }}</span>
+              <span class="drawer-item-arrow">›</span>
             </div>
           </div>
-          <div class="header-search">
-            <SearchBox size="small" placeholder="搜索..." />
-          </div>
-          <div class="user-area">
-            <n-dropdown 
-              :options="userMenuOptions" 
-              @select="handleUserMenuSelect"
-              trigger="click"
+          <div class="drawer-divider"></div>
+          <div class="drawer-menu">
+            <div 
+              v-for="item in userMenuItems" 
+              :key="item.key"
+              class="drawer-item"
+              @click="handleDrawerMenuClick(item.key)"
             >
-              <div class="user-dropdown-trigger">
-                <n-badge :value="unreadCount" :max="99" :show="unreadCount > 0" type="error">
-                  <n-avatar round size="medium">
-                    {{ currentUser.avatar }}
-                  </n-avatar>
-                </n-badge>
-                <span class="username">{{ currentUser.username }}</span>
-                <span class="dropdown-arrow">▼</span>
-              </div>
-            </n-dropdown>
+              <span class="drawer-item-icon">{{ item.icon }}</span>
+              <span class="drawer-item-label">{{ item.label }}</span>
+            </div>
           </div>
         </div>
-      </n-layout-header>
-      
-      <n-layout-content class="main-content">
-        <n-message-provider>
-          <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
-              <component :is="Component" />
-            </transition>
-          </router-view>
-        </n-message-provider>
-      </n-layout-content>
-      
-      <n-layout-footer class="footer">
-        <div class="footer-content">
-          <p>浮城回声 © 2024 | 幻想恋爱叙事社区</p>
-          <p class="footer-sub">用文字编织梦境，让故事超越结局</p>
+      </transition>
+
+      <n-layout class="layout-wrapper" style="min-height: 100vh">
+        <n-layout-header bordered class="header" :class="{ 'mobile-header': isMobile }">
+          <div class="header-content">
+            <div class="header-left">
+              <n-button 
+                v-if="isMobile" 
+                text 
+                class="hamburger-btn"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+              >
+                <template #icon>☰</template>
+              </n-button>
+              <div class="logo" @click="goHome">
+                <span class="logo-icon">🏰</span>
+                <span v-if="!isMobile" class="logo-text">浮城回声</span>
+              </div>
+            </div>
+            
+            <div v-if="!isMobile" class="nav-menu">
+              <div 
+                v-for="item in menuItems" 
+                :key="item.key"
+                class="nav-item"
+                :class="{ active: activeMenu === item.key }"
+                @click="handleMenuClick(item.key)"
+              >
+                <span class="nav-icon">{{ item.icon }}</span>
+                <span class="nav-text">{{ item.label }}</span>
+              </div>
+            </div>
+            
+            <div v-if="!isMobile" class="header-search">
+              <SearchBox size="small" placeholder="搜索..." />
+            </div>
+            
+            <div class="header-right">
+              <div v-if="isMobile" class="mobile-search-icon" @click="router.push('/search')">
+                🔍
+              </div>
+              <div class="user-area">
+                <n-dropdown 
+                  :options="userMenuOptions" 
+                  @select="handleUserMenuSelect"
+                  trigger="click"
+                >
+                  <div class="user-dropdown-trigger">
+                    <n-badge :value="unreadCount" :max="99" :show="unreadCount > 0 && !isMobile" type="error">
+                      <n-avatar round :size="isMobile ? 'small' : 'medium'">
+                        {{ currentUser.avatar }}
+                      </n-avatar>
+                    </n-badge>
+                    <span v-if="!isMobile" class="username">{{ currentUser.username }}</span>
+                    <span v-if="!isMobile" class="dropdown-arrow">▼</span>
+                  </div>
+                </n-dropdown>
+              </div>
+            </div>
+          </div>
+        </n-layout-header>
+        
+        <n-layout-content 
+          class="main-content" 
+          :class="{ 
+            'mobile-content': isMobile,
+            'has-tabbar': isMobile 
+          }"
+        >
+          <n-message-provider>
+            <router-view v-slot="{ Component }">
+              <transition name="fade" mode="out-in">
+                <component :is="Component" />
+              </transition>
+            </router-view>
+          </n-message-provider>
+        </n-layout-content>
+        
+        <n-layout-footer v-if="!isMobile" class="footer">
+          <div class="footer-content">
+            <p>浮城回声 © 2024 | 幻想恋爱叙事社区</p>
+            <p class="footer-sub">用文字编织梦境，让故事超越结局</p>
+          </div>
+        </n-layout-footer>
+
+        <div v-if="isMobile" class="mobile-tabbar">
+          <div 
+            v-for="item in tabBarItems" 
+            :key="item.key"
+            class="tabbar-item"
+            :class="{ active: activeMenu === item.key }"
+            @click="handleMenuClick(item.key)"
+          >
+            <span class="tabbar-icon">{{ item.icon }}</span>
+            <span class="tabbar-label">{{ item.label }}</span>
+            <n-badge 
+              v-if="item.key === 'messages' && unreadCount > 0" 
+              :value="unreadCount" 
+              :max="99" 
+              type="error"
+              class="tabbar-badge"
+            />
+          </div>
         </div>
-      </n-layout-footer>
-    </n-layout>
+      </n-layout>
+    </div>
   </n-config-provider>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, NAvatar, NDropdown, NBadge, NMessageProvider } from 'naive-ui'
+import { 
+  NConfigProvider, NLayout, NLayoutHeader, NLayoutContent, NLayoutFooter, 
+  NAvatar, NDropdown, NBadge, NMessageProvider, NButton 
+} from 'naive-ui'
 import { notificationApi } from './api'
 import SearchBox from './components/SearchBox.vue'
+import { useResponsive } from './composables/useResponsive'
 
 const route = useRoute()
 const router = useRouter()
+const { isMobile } = useResponsive()
 
 const theme = ref(null)
+const mobileMenuOpen = ref(false)
 
 const themeOverrides = {
   common: {
@@ -108,6 +206,22 @@ const menuItems = [
   { key: 'worlds', label: '世界设定', icon: '🌍' },
   { key: 'theme-halls', label: '专题世界馆', icon: '🏛️' },
   { key: 'editor', label: '创作', icon: '✏️' }
+]
+
+const tabBarItems = [
+  { key: 'home', label: '首页', icon: '🏠' },
+  { key: 'worlds', label: '世界', icon: '🌍' },
+  { key: 'editor', label: '创作', icon: '✏️' },
+  { key: 'messages', label: '消息', icon: '💬' },
+  { key: 'profile', label: '我的', icon: '👤' }
+]
+
+const userMenuItems = [
+  { key: 'profile', label: '个人主页', icon: '👤' },
+  { key: 'creations', label: '创作记录', icon: '✏️' },
+  { key: 'messages', label: unreadCount.value > 0 ? `互动消息 (${unreadCount.value})` : '互动消息', icon: '💬' },
+  { key: 'favorites', label: '收藏管理', icon: '⭐' },
+  { key: 'dashboard', label: '数据看板', icon: '📊' }
 ]
 
 const userMenuOptions = [
@@ -168,10 +282,15 @@ const activeMenu = computed(() => {
   if (path.startsWith('/editor') || path.startsWith('/world-editor')) return 'editor'
   if (path.startsWith('/activities')) return 'activities'
   if (path.startsWith('/user/dashboard')) return 'editor'
+  if (path.startsWith('/user/profile')) return 'profile'
+  if (path.startsWith('/user/creations')) return 'profile'
+  if (path.startsWith('/user/messages')) return 'messages'
+  if (path.startsWith('/user/favorites')) return 'profile'
   return 'home'
 })
 
 const handleMenuClick = (key) => {
+  mobileMenuOpen.value = false
   switch (key) {
     case 'home':
       router.push('/')
@@ -191,7 +310,18 @@ const handleMenuClick = (key) => {
     case 'editor':
       router.push('/editor')
       break
+    case 'messages':
+      router.push('/user/messages')
+      break
+    case 'profile':
+      router.push('/user/profile')
+      break
   }
+}
+
+const handleDrawerMenuClick = (key) => {
+  mobileMenuOpen.value = false
+  handleMenuClick(key)
 }
 
 const handleUserMenuSelect = (key) => {
@@ -233,11 +363,135 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.app-root {
+  position: relative;
+  min-height: 100vh;
+}
+
+.app-root.menu-open {
+  overflow: hidden;
+}
+
+.mobile-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+
+.mobile-menu-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 85%;
+  max-width: 320px;
+  height: 100vh;
+  background: white;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+}
+
+.drawer-header {
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: calc(20px + var(--safe-area-inset-top));
+}
+
+.drawer-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawer-user-info {
+  color: white;
+}
+
+.drawer-username {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.drawer-user-sub {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.drawer-close {
+  color: white !important;
+}
+
+.drawer-menu {
+  padding: 12px 0;
+  flex: 1;
+}
+
+.drawer-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  gap: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.drawer-item:active {
+  background: #f5f5f5;
+}
+
+.drawer-item.active {
+  background: #f9f0ff;
+}
+
+.drawer-item.active .drawer-item-label {
+  color: #9d4edd;
+  font-weight: 600;
+}
+
+.drawer-item-icon {
+  font-size: 22px;
+  width: 28px;
+  text-align: center;
+}
+
+.drawer-item-label {
+  flex: 1;
+  font-size: 15px;
+  color: #333;
+}
+
+.drawer-item-arrow {
+  color: #ccc;
+  font-size: 20px;
+}
+
+.drawer-divider {
+  height: 8px;
+  background: #f5f5f5;
+  margin: 4px 0;
+}
+
 .header {
   position: sticky;
   top: 0;
   z-index: 100;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.header.mobile-header {
+  height: 56px;
+  padding-top: var(--safe-area-inset-top);
 }
 
 .header-content {
@@ -248,6 +502,24 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   height: 64px;
+}
+
+.mobile-header .header-content {
+  height: 56px;
+  padding: 0 12px;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hamburger-btn {
+  color: #e0aaff !important;
+  font-size: 24px !important;
+  padding: 4px 8px !important;
 }
 
 .logo {
@@ -261,6 +533,10 @@ onMounted(() => {
   font-size: 28px;
 }
 
+.mobile-header .logo-icon {
+  font-size: 24px;
+}
+
 .logo-text {
   font-size: 20px;
   font-weight: bold;
@@ -272,10 +548,10 @@ onMounted(() => {
 
 .nav-menu {
   flex: 1;
-  max-width: 300px;
+  max-width: 500px;
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .header-search {
@@ -284,11 +560,18 @@ onMounted(() => {
   margin: 0 16px;
 }
 
+.mobile-search-icon {
+  font-size: 22px;
+  padding: 8px;
+  cursor: pointer;
+  color: #e0aaff;
+}
+
 .nav-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -352,6 +635,15 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
+.main-content.mobile-content {
+  max-width: 100%;
+  padding: 12px;
+}
+
+.main-content.has-tabbar {
+  padding-bottom: calc(60px + var(--safe-area-inset-bottom) + 12px);
+}
+
 .footer {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #c77dff;
@@ -373,13 +665,82 @@ onMounted(() => {
   opacity: 0.7;
 }
 
+.mobile-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  padding-bottom: var(--safe-area-inset-bottom);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  border-top: 1px solid #eee;
+  z-index: 150;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tabbar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+  position: relative;
+  color: #999;
+}
+
+.tabbar-item:active {
+  opacity: 0.7;
+}
+
+.tabbar-item.active {
+  color: #9d4edd;
+}
+
+.tabbar-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.tabbar-label {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.tabbar-badge {
+  position: absolute;
+  top: 4px;
+  right: 50%;
+  transform: translateX(16px);
+}
+
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
+  opacity: 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.slide-left-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
   opacity: 0;
 }
 </style>

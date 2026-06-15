@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import naive from 'naive-ui'
 import 'vfonts/Lato.css'
 import 'vfonts/FiraCode.css'
+import './styles/mobile.css'
 
 import App from './App.vue'
 import Home from './views/Home.vue'

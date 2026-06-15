@@ -1,31 +1,87 @@
 <template>
-  <div class="story-reader">
-    <div class="reader-header">
-      <n-button text @click="goBack">
-        <template #icon>←</template>
-        返回
-      </n-button>
+  <div 
+    class="story-reader" 
+    :class="{ 
+      'is-mobile': isMobile,
+      'immersive': isMobile && immersiveMode
+    }"
+    ref="readerRef"
+  >
+    <div class="reader-header" :class="{ 'mobile-header': isMobile, 'header-hidden': isMobile && immersiveMode }">
+      <div class="header-left">
+        <n-button text @click="goBack">
+          <template #icon>←</template>
+          <span v-if="!isMobile">返回</span>
+        </n-button>
+      </div>
       <div class="story-title-section" v-if="story">
-        <h1 class="story-title">{{ story.title }}</h1>
-        <div class="story-author">作者：{{ story.authorName }}</div>
+        <h1 class="story-title" :class="{ 'mobile-title': isMobile }">{{ story.title }}</h1>
+        <div v-if="!isMobile" class="story-author">作者：{{ story.authorName }}</div>
       </div>
       <div class="header-actions">
         <n-button text @click="toggleFavorite" :class="{ 'is-favorited': isFavorited }">
           <template #icon>{{ isFavorited ? '⭐' : ' ☆' }}</template>
-          {{ isFavorited ? '已收藏' : '收藏' }}
+          <span v-if="!isMobile">{{ isFavorited ? '已收藏' : '收藏' }}</span>
         </n-button>
         <n-button text @click="toggleLike">
           <template #icon>{{ isLiked ? '❤️' : '🤍' }}</template>
-          {{ story?.likes || 0 }}
+          <span v-if="!isMobile">{{ story?.likes || 0 }}</span>
+          <span v-else class="mobile-count">{{ story?.likes || 0 }}</span>
+        </n-button>
+        <n-button v-if="isMobile" text @click="toggleSettingPanel = !toggleSettingPanel">
+          <template #icon>⚙️</template>
         </n-button>
       </div>
     </div>
 
-    <div class="reader-container">
+    <transition name="fade">
+      <div v-if="isMobile && toggleSettingPanel" class="settings-panel">
+        <div class="settings-backdrop" @click="toggleSettingPanel = false"></div>
+        <div class="settings-content">
+          <div class="settings-title">阅读设置</div>
+          <div class="setting-group">
+            <div class="setting-label">字号大小</div>
+            <div class="font-size-control">
+              <n-button text size="small" @click="adjustFontSize(-1)" :disabled="fontSize <= 14">A-</n-button>
+              <span class="font-size-display">{{ fontSize }}px</span>
+              <n-button text size="small" @click="adjustFontSize(1)" :disabled="fontSize >= 24">A+</n-button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">主题背景</div>
+            <div class="theme-options">
+              <div 
+                v-for="t in themeOptions" 
+                :key="t.key"
+                class="theme-option"
+                :class="{ active: themeKey === t.key }"
+                :style="{ background: t.bg, color: t.text }"
+                @click="themeKey = t.key"
+              >
+                {{ t.label }}
+              </div>
+            </div>
+          </div>
+          <div class="setting-group">
+            <div class="setting-row">
+              <span>沉浸式阅读</span>
+              <n-switch v-model:value="immersiveMode" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <div 
+      class="reader-container" 
+      :class="{ 'mobile-container': isMobile }"
+      :style="readerStyle"
+      @click="handleReaderClick"
+    >
       <n-spin :show="loading" size="large">
         <div v-if="currentNode" class="node-content">
-          <div class="node-header">
-            <h2 class="node-title">{{ currentNode.title }}</h2>
+          <div class="node-header" :class="{ 'mobile-node-header': isMobile }">
+            <h2 class="node-title" :class="{ 'mobile-node-title': isMobile }">{{ currentNode.title }}</h2>
             <div v-if="currentNode.isEnding" class="ending-badge" :class="currentNode.endingType">
               <span v-if="currentNode.endingType === 'good'">✨ 完美结局</span>
               <span v-else-if="currentNode.endingType === 'normal'">🌟 普通结局</span>
@@ -33,7 +89,7 @@
             </div>
           </div>
 
-          <div class="story-text">
+          <div class="story-text" :class="{ 'mobile-story-text': isMobile }">
             <p v-for="(paragraph, index) in paragraphs" :key="index" class="story-paragraph">
               {{ paragraph }}
             </p>
@@ -41,7 +97,7 @@
 
           <div v-if="!currentNode.isEnding && currentNode.choices?.length > 0" class="choices-section">
             <div class="choices-label">请选择你的行动：</div>
-            <div class="choices-list">
+            <div class="choices-list" :class="{ 'mobile-choices-list': isMobile }">
               <n-button 
                 v-for="choice in currentNode.choices" 
                 :key="choice.id"
@@ -49,6 +105,7 @@
                 ghost
                 block
                 class="choice-btn"
+                :class="{ 'mobile-choice-btn': isMobile }"
                 @click="makeChoice(choice)"
               >
                 {{ choice.text }}
@@ -56,31 +113,32 @@
             </div>
           </div>
 
-          <div v-if="currentNode.isEnding" class="ending-actions">
+          <div v-if="currentNode.isEnding" class="ending-actions" :class="{ 'mobile-ending-actions': isMobile }">
             <p class="ending-text">恭喜你达成了一个结局！</p>
-            <div class="ending-buttons">
-              <n-button @click="restartStory">
+            <div class="ending-buttons" :class="{ 'mobile-ending-buttons': isMobile }">
+              <n-button :size="isMobile ? 'medium' : 'default'" @click="restartStory">
                 <template #icon>🔄</template>
                 重新开始
               </n-button>
-              <n-button type="primary" @click="goBack">
+              <n-button type="primary" :size="isMobile ? 'medium' : 'default'" @click="goBack">
                 <template #icon>📚</template>
                 查看其他故事
               </n-button>
             </div>
           </div>
 
-          <div v-if="history.length > 1" class="history-section">
-            <n-divider>阅读进度</n-divider>
-            <div class="history-trail">
+          <div v-if="history.length > 1" class="history-section" :class="{ 'mobile-history-section': isMobile }">
+            <n-divider v-if="!isMobile">阅读进度</n-divider>
+            <div v-if="isMobile" class="mobile-history-label">📜 阅读路径</div>
+            <div class="history-trail" :class="{ 'mobile-history-trail': isMobile }">
               <span 
                 v-for="(node, index) in history" 
                 :key="node.id"
                 class="history-node"
-                :class="{ active: index === history.length - 1 }"
+                :class="{ active: index === history.length - 1, 'mobile-history-node': isMobile }"
                 @click="jumpToNode(index)"
               >
-                {{ node.title }}
+                {{ isMobile ? (index + 1) : node.title }}
               </span>
             </div>
           </div>
@@ -88,8 +146,14 @@
       </n-spin>
     </div>
 
-    <div class="comments-section">
-      <n-divider>评论互动</n-divider>
+    <div v-if="isMobile" class="mobile-reading-tips" :class="{ 'tips-hidden': immersiveMode }">
+      <span class="tip-icon">💡</span>
+      点击屏幕中间可切换沉浸式模式，左右滑动翻页
+    </div>
+
+    <div class="comments-section" :class="{ 'mobile-comments': isMobile }">
+      <n-divider v-if="!isMobile">评论互动</n-divider>
+      <div v-if="isMobile" class="mobile-comments-header">💬 评论互动</div>
       <CommentSection 
         :story-id="storyId" 
         :node-id="currentNodeId" 
@@ -100,16 +164,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NSpin, NDivider, useMessage } from 'naive-ui'
+import { NButton, NSpin, NDivider, useMessage, NSwitch } from 'naive-ui'
 import { storyApi, userApi } from '../api'
 import CommentSection from '../components/CommentSection.vue'
+import { useResponsive, useTouchGestures } from '../composables/useResponsive'
 
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const userId = 'user-1'
+const { isMobile } = useResponsive()
 
 const storyId = computed(() => route.params.id)
 const story = ref(null)
@@ -122,10 +188,77 @@ const isFavorited = ref(false)
 const allNodes = ref([])
 const pendingCommentId = ref(null)
 
+const fontSize = ref(16)
+const themeKey = ref('default')
+const immersiveMode = ref(false)
+const toggleSettingPanel = ref(false)
+
+const readerRef = ref(null)
+
+const themeOptions = [
+  { key: 'default', label: '默认', bg: '#fafafa', text: '#444' },
+  { key: 'sepia', label: '护眼', bg: '#f4ecd8', text: '#5b4636' },
+  { key: 'green', label: '绿屏', bg: '#cce8cf', text: '#002b36' },
+  { key: 'dark', label: '夜间', bg: '#1a1a2e', text: '#c77dff' }
+]
+
+const readerStyle = computed(() => {
+  const theme = themeOptions.find(t => t.key === themeKey.value) || themeOptions[0]
+  return {
+    '--reader-font-size': `${fontSize.value}px`,
+    '--reader-bg': theme.bg,
+    '--reader-text': theme.text
+  }
+})
+
 const paragraphs = computed(() => {
   if (!currentNode.value?.content) return []
   return currentNode.value.content.split('\n').filter(p => p.trim())
 })
+
+useTouchGestures(readerRef, {
+  onSwipeLeft: () => {
+    if (!isMobile.value) return
+    const currentIndex = history.value.length - 1
+    if (currentIndex < history.value.length - 1) {
+      jumpToNode(currentIndex + 1)
+    }
+  },
+  onSwipeRight: () => {
+    if (!isMobile.value) return
+    const currentIndex = history.value.length - 1
+    if (currentIndex > 0) {
+      jumpToNode(currentIndex - 1)
+    } else {
+      goBack()
+    }
+  },
+  onTap: () => {
+    if (isMobile.value && !toggleSettingPanel.value) {
+      immersiveMode.value = !immersiveMode.value
+    }
+  }
+})
+
+const adjustFontSize = (delta) => {
+  const newSize = fontSize.value + delta
+  if (newSize >= 14 && newSize <= 24) {
+    fontSize.value = newSize
+  }
+}
+
+const handleReaderClick = (e) => {
+  if (!isMobile.value) return
+  const target = e.target
+  if (target.tagName === 'BUTTON' || 
+      target.closest('.choice-btn') || 
+      target.closest('.settings-panel') ||
+      target.closest('.ending-buttons') ||
+      target.closest('.history-trail') ||
+      target.closest('.comments-section')) {
+    return
+  }
+}
 
 const scrollToComment = (commentId) => {
   setTimeout(() => {
@@ -237,7 +370,11 @@ const makeChoice = (choice) => {
     currentNode.value = nextNode
     currentNodeId.value = nextNode.id
     history.value.push(nextNode)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (isMobile.value) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 }
 
@@ -282,6 +419,10 @@ const goBack = () => {
   router.push('/')
 }
 
+watch(() => route.params.id, () => {
+  loadStory()
+})
+
 onMounted(() => {
   loadStory()
 })
@@ -291,6 +432,12 @@ onMounted(() => {
 .story-reader {
   max-width: 800px;
   margin: 0 auto;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.story-reader.immersive {
+  padding-bottom: 0;
 }
 
 .reader-header {
@@ -304,17 +451,38 @@ onMounted(() => {
   backdrop-filter: blur(10px);
   z-index: 10;
   border-bottom: 1px solid #f0f0f0;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.reader-header.mobile-header {
+  top: 56px;
+  padding: 10px 0;
+}
+
+.reader-header.header-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-left {
+  min-width: 60px;
 }
 
 .story-title-section {
   text-align: center;
   flex: 1;
+  padding: 0 16px;
 }
 
 .story-title {
   font-size: 20px;
   margin: 0 0 4px 0;
   color: #333;
+}
+
+.story-title.mobile-title {
+  font-size: 15px;
 }
 
 .story-author {
@@ -326,7 +494,7 @@ onMounted(() => {
   min-width: 80px;
   text-align: right;
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -334,8 +502,116 @@ onMounted(() => {
   color: #f0a020;
 }
 
+.mobile-count {
+  font-size: 12px;
+  margin-left: 2px;
+}
+
+.settings-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+}
+
+.settings-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.settings-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px;
+  padding-bottom: calc(20px + var(--safe-area-inset-bottom));
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.settings-title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.font-size-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.font-size-display {
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.theme-option {
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.theme-option.active {
+  border-color: #9d4edd;
+  transform: scale(1.02);
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
 .reader-container {
   padding: 30px 0;
+}
+
+.reader-container.mobile-container {
+  padding: 16px 0;
 }
 
 .node-header {
@@ -343,10 +619,19 @@ onMounted(() => {
   margin-bottom: 30px;
 }
 
+.node-header.mobile-node-header {
+  margin-bottom: 20px;
+}
+
 .node-title {
   font-size: 24px;
   margin: 0 0 12px 0;
   color: #333;
+}
+
+.node-title.mobile-node-title {
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .ending-badge {
@@ -373,16 +658,22 @@ onMounted(() => {
 }
 
 .story-text {
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  background: var(--reader-bg, linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%));
   padding: 40px;
   border-radius: 16px;
   margin-bottom: 30px;
+  color: var(--reader-text, #444);
+}
+
+.story-text.mobile-story-text {
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
 }
 
 .story-paragraph {
-  font-size: 16px;
+  font-size: var(--reader-font-size, 16px);
   line-height: 2;
-  color: #444;
   margin: 0 0 16px 0;
   text-indent: 2em;
 }
@@ -410,6 +701,11 @@ onMounted(() => {
   margin: 0 auto;
 }
 
+.choices-list.mobile-choices-list {
+  gap: 10px;
+  max-width: 100%;
+}
+
 .choice-btn {
   padding: 16px 24px;
   font-size: 15px;
@@ -422,12 +718,24 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
 }
 
+.choice-btn.mobile-choice-btn {
+  padding: 14px 16px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
 .ending-actions {
   text-align: center;
   margin-top: 40px;
   padding: 30px;
   background: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
   border-radius: 16px;
+}
+
+.ending-actions.mobile-ending-actions {
+  margin-top: 24px;
+  padding: 20px 16px;
+  border-radius: 12px;
 }
 
 .ending-text {
@@ -442,8 +750,28 @@ onMounted(() => {
   justify-content: center;
 }
 
+.ending-buttons.mobile-ending-buttons {
+  gap: 10px;
+  flex-direction: column;
+}
+
+.ending-buttons.mobile-ending-buttons :deep(.n-button) {
+  width: 100%;
+}
+
 .history-section {
   margin-top: 40px;
+}
+
+.history-section.mobile-history-section {
+  margin-top: 24px;
+}
+
+.mobile-history-label {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
 }
 
 .history-trail {
@@ -451,6 +779,15 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
+}
+
+.history-trail.mobile-history-trail {
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  padding-bottom: 4px;
 }
 
 .history-node {
@@ -473,8 +810,68 @@ onMounted(() => {
   color: white;
 }
 
+.history-node.mobile-history-node {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+.mobile-reading-tips {
+  position: fixed;
+  bottom: calc(60px + var(--safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 50;
+  white-space: nowrap;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.mobile-reading-tips.tips-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+  pointer-events: none;
+}
+
+.tip-icon {
+  margin-right: 4px;
+}
+
 .comments-section {
   margin-top: 40px;
   padding-bottom: 40px;
+}
+
+.comments-section.mobile-comments {
+  margin-top: 24px;
+  padding-bottom: 0;
+}
+
+.mobile-comments-header {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
