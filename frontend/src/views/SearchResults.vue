@@ -8,6 +8,7 @@
           size="large"
           :auto-route="false"
           @search="handleSearch"
+          @tag-select="handleTagSelect"
           @clear="handleClear"
         />
       </div>
@@ -145,7 +146,7 @@
               v-for="(item, index) in hotKeywords" 
               :key="item.keyword"
               class="hot-keyword-item"
-              @click="searchKeyword = item.keyword; handleSearch()"
+              @click="handleSearch(item.keyword)"
             >
               <span class="rank" :class="{ top: index < 3 }">{{ index + 1 }}</span>
               <span class="keyword">{{ item.keyword }}</span>
@@ -203,22 +204,38 @@ const selectedTag = ref('')
 const hotKeywords = ref([])
 const popularTags = ref([])
 
-const handleSearch = () => {
+const resetResults = () => {
+  results.value = []
+  counts.value = { stories: 0, worlds: 0, comments: 0 }
+  total.value = 0
   currentPage.value = 1
+}
+
+const handleSearch = (keyword) => {
+  if (keyword !== undefined) {
+    searchKeyword.value = keyword
+  }
+  selectedTag.value = ''
+  resetResults()
+  loadResults()
+}
+
+const handleTagSelect = (tag) => {
+  searchKeyword.value = ''
+  selectedTag.value = tag
+  resetResults()
   loadResults()
 }
 
 const handleClear = () => {
   searchKeyword.value = ''
   selectedTag.value = ''
-  results.value = []
-  counts.value = { stories: 0, worlds: 0, comments: 0 }
-  total.value = 0
+  resetResults()
   hasSearched.value = false
 }
 
 const handleTabChange = () => {
-  currentPage.value = 1
+  resetResults()
   loadResults()
 }
 
@@ -239,6 +256,7 @@ const loadResults = async () => {
   }
 
   loading.value = true
+  hasSearched.value = true
   try {
     const params = {
       keyword: searchKeyword.value,
@@ -253,15 +271,9 @@ const loadResults = async () => {
     const res = await searchApi.search(params)
     const data = res.data
     
-    if (activeTab.value === 'all') {
-      results.value = data.results || []
-    } else {
-      results.value = data.results || []
-    }
-    
+    results.value = data.results || []
     counts.value = data.counts || { stories: 0, worlds: 0, comments: 0 }
     total.value = data.total || 0
-    hasSearched.value = true
   } catch (err) {
     console.error('搜索失败:', err)
   } finally {
@@ -288,21 +300,19 @@ const loadPopularTags = async () => {
 }
 
 const filterByTag = (tag) => {
-  selectedTag.value = tag
   searchKeyword.value = ''
-  currentPage.value = 1
+  selectedTag.value = tag
+  resetResults()
   loadResults()
 }
 
 const clearTagFilter = () => {
   selectedTag.value = ''
   if (!searchKeyword.value) {
-    results.value = []
-    counts.value = { stories: 0, worlds: 0, comments: 0 }
-    total.value = 0
+    resetResults()
     hasSearched.value = false
   } else {
-    currentPage.value = 1
+    resetResults()
     loadResults()
   }
 }
@@ -341,6 +351,8 @@ watch(() => route.query, (query) => {
   if (query.q !== undefined && query.q !== searchKeyword.value) {
     searchKeyword.value = query.q || ''
     handleSearch()
+  } else if (query.tag !== undefined && query.tag !== selectedTag.value) {
+    handleTagSelect(query.tag)
   }
 })
 </script>

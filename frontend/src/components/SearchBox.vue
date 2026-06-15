@@ -62,7 +62,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'search', 'clear'])
+const emit = defineEmits(['update:modelValue', 'search', 'tag-select', 'clear'])
 
 const router = useRouter()
 const searchText = ref('')
@@ -130,11 +130,12 @@ const handleValueChange = (value) => {
 
 const handleSelect = (value, option) => {
   if (option.type === 'tag') {
+    tagSuggestions.value = []
     if (props.autoRoute) {
       router.push({ path: '/search', query: { tag: option.tag } })
     } else {
       searchText.value = option.tag
-      emit('search', option.tag)
+      emit('tag-select', option.tag)
     }
   } else if (option.type === 'history') {
     searchText.value = option.keyword
