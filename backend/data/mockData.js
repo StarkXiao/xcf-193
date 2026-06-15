@@ -1375,6 +1375,19 @@ const worldSettings = [
   }
 ];
 
+const readingHistory = {
+  'user-1': [
+    { storyId: 'story-1', currentNodeId: 'node-1-2a', historyNodeIds: ['node-1-1', 'node-1-2a'], readAt: '2024-06-14T10:30:00Z' },
+    { storyId: 'story-2', currentNodeId: 'node-2-1', historyNodeIds: ['node-2-1'], readAt: '2024-06-13T08:15:00Z' }
+  ],
+  'user-2': [
+    { storyId: 'story-1', currentNodeId: 'node-1-1', historyNodeIds: ['node-1-1'], readAt: '2024-06-12T14:00:00Z' }
+  ],
+  'user-3': [
+    { storyId: 'story-2', currentNodeId: 'node-2-1', historyNodeIds: ['node-2-1'], readAt: '2024-06-11T09:20:00Z' }
+  ]
+};
+
 const favorites = {
   'user-1': {
     stories: ['story-2', 'story-3'],
@@ -3737,6 +3750,7 @@ module.exports = {
   storyNodes,
   comments,
   worldSettings,
+  readingHistory,
   favorites,
   notifications,
   collaborators,

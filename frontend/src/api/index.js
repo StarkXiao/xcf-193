@@ -128,7 +128,19 @@ export const userApi = {
   checkFavorite(id, params = {}) {
     return api.get('/users/' + id + '/favorites/check', { params })
   },
-  
+
+  getReadingHistory(id, params = {}) {
+    return api.get('/users/' + id + '/reading-history', { params })
+  },
+
+  saveReadingHistory(id, data) {
+    return api.post('/users/' + id + '/reading-history', data)
+  },
+
+  deleteReadingHistory(id, storyId) {
+    return api.delete('/users/' + id + '/reading-history/' + storyId)
+  },
+
   getNotifications(id, params = {}) {
     return api.get('/users/' + id + '/notifications', { params })
   },

@@ -28,6 +28,10 @@
           <span v-if="!isMobile">{{ story?.likes || 0 }}</span>
           <span v-else class="mobile-count">{{ story?.likes || 0 }}</span>
         </n-button>
+        <n-button text @click="showBranchPanel = !showBranchPanel" :class="{ 'active-btn': showBranchPanel }">
+          <template #icon>🌳</template>
+          <span v-if="!isMobile">分支</span>
+        </n-button>
         <n-button v-if="isMobile" text @click="toggleSettingPanel = !toggleSettingPanel">
           <template #icon>⚙️</template>
         </n-button>
@@ -67,6 +71,52 @@
               <span>沉浸式阅读</span>
               <n-switch v-model:value="immersiveMode" />
             </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="showBranchPanel && history.length > 0" class="branch-panel">
+        <div class="branch-backdrop" @click="showBranchPanel = false"></div>
+        <div class="branch-content" :class="{ 'mobile-branch-content': isMobile }">
+          <div class="branch-header">
+            <span class="branch-title">🌳 分支路径</span>
+            <n-button text size="small" @click="showBranchPanel = false">✕</n-button>
+          </div>
+          <div class="branch-path">
+            <div 
+              v-for="(node, index) in history" 
+              :key="node.id"
+              class="branch-step"
+              :class="{ 
+                active: index === history.length - 1,
+                past: index < history.length - 1 
+              }"
+              @click="jumpToNode(index)"
+            >
+              <div class="step-connector" v-if="index > 0">
+                <div class="connector-line"></div>
+                <div class="connector-arrow">▼</div>
+              </div>
+              <div class="step-card">
+                <div class="step-index">{{ index + 1 }}</div>
+                <div class="step-info">
+                  <div class="step-title">{{ node.title }}</div>
+                  <div v-if="node.choices && index < history.length - 1" class="step-choice">
+                    → {{ history[index + 1]?._choiceText || '选择了分支' }}
+                  </div>
+                </div>
+                <div v-if="index === history.length - 1" class="step-current">当前</div>
+                <div v-if="index < history.length - 1" class="step-back-hint">回溯</div>
+              </div>
+            </div>
+          </div>
+          <div v-if="history.length > 1" class="branch-actions">
+            <n-button size="small" @click="restartStory">
+              <template #icon>🔄</template>
+              重新开始
+            </n-button>
           </div>
         </div>
       </div>
@@ -128,18 +178,25 @@
           </div>
 
           <div v-if="history.length > 1" class="history-section" :class="{ 'mobile-history-section': isMobile }">
-            <n-divider v-if="!isMobile">阅读进度</n-divider>
-            <div v-if="isMobile" class="mobile-history-label">📜 阅读路径</div>
+            <div class="history-header">
+              <n-divider v-if="!isMobile">阅读进度</n-divider>
+              <div v-if="isMobile" class="mobile-history-label">📜 阅读路径</div>
+              <n-button text type="primary" size="small" @click="showBranchPanel = true">
+                <template #icon>🌳</template>
+                查看分支
+              </n-button>
+            </div>
             <div class="history-trail" :class="{ 'mobile-history-trail': isMobile }">
-              <span 
-                v-for="(node, index) in history" 
-                :key="node.id"
-                class="history-node"
-                :class="{ active: index === history.length - 1, 'mobile-history-node': isMobile }"
-                @click="jumpToNode(index)"
-              >
-                {{ isMobile ? (index + 1) : node.title }}
-              </span>
+              <template v-for="(node, index) in history" :key="node.id">
+                <span 
+                  class="history-node"
+                  :class="{ active: index === history.length - 1, 'mobile-history-node': isMobile }"
+                  @click="jumpToNode(index)"
+                >
+                  {{ isMobile ? (index + 1) : node.title }}
+                </span>
+                <span v-if="index < history.length - 1" class="history-arrow">›</span>
+              </template>
             </div>
           </div>
         </div>
@@ -164,7 +221,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NSpin, NDivider, useMessage, NSwitch } from 'naive-ui'
 import { storyApi, userApi } from '../api'
@@ -187,6 +244,7 @@ const isLiked = ref(false)
 const isFavorited = ref(false)
 const allNodes = ref([])
 const pendingCommentId = ref(null)
+const showBranchPanel = ref(false)
 
 const fontSize = ref(16)
 const themeKey = ref('default')
@@ -305,17 +363,45 @@ const loadStory = async () => {
         currentNodeId.value = targetNode.id
         history.value = [targetNode]
       }
-    } else if (story.value.startNodeId) {
-      const startNode = nodesRes.data.find(n => n.id === story.value.startNodeId)
-      if (startNode) {
-        currentNode.value = startNode
-        currentNodeId.value = startNode.id
-        history.value = [startNode]
+    } else {
+      let restored = false
+      try {
+        const histRes = await userApi.getReadingHistory(userId, { limit: 20 })
+        const record = histRes.data.history.find(r => r.storyId === storyId.value)
+        if (record) {
+          const restoreNodes = record.historyNodeIds
+            .map(nid => nodesRes.data.find(n => n.id === nid))
+            .filter(Boolean)
+          if (restoreNodes.length > 0) {
+            history.value = restoreNodes
+            const current = nodesRes.data.find(n => n.id === record.currentNodeId)
+            if (current) {
+              currentNode.value = current
+              currentNodeId.value = current.id
+            } else {
+              currentNode.value = restoreNodes[restoreNodes.length - 1]
+              currentNodeId.value = restoreNodes[restoreNodes.length - 1].id
+            }
+            restored = true
+          }
+        }
+      } catch (e) {
+        console.error('恢复阅读进度失败:', e)
+      }
+      
+      if (!restored && story.value.startNodeId) {
+        const startNode = nodesRes.data.find(n => n.id === story.value.startNodeId)
+        if (startNode) {
+          currentNode.value = startNode
+          currentNodeId.value = startNode.id
+          history.value = [startNode]
+        }
       }
     }
     
     storyApi.viewStory(storyId.value)
     checkFavorite()
+    saveReadingProgress()
     
     if (queryCommentId) {
       pendingCommentId.value = queryCommentId
@@ -367,14 +453,13 @@ const toggleFavorite = async () => {
 const makeChoice = (choice) => {
   const nextNode = allNodes.value.find(n => n.id === choice.nextNodeId)
   if (nextNode) {
+    nextNode._choiceText = choice.text
     currentNode.value = nextNode
     currentNodeId.value = nextNode.id
     history.value.push(nextNode)
-    if (isMobile.value) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    showBranchPanel.value = false
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    saveReadingProgress()
   }
 }
 
@@ -383,7 +468,9 @@ const jumpToNode = (index) => {
     history.value = history.value.slice(0, index + 1)
     currentNode.value = history.value[index]
     currentNodeId.value = history.value[index].id
+    showBranchPanel.value = false
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    saveReadingProgress()
   }
 }
 
@@ -394,7 +481,9 @@ const restartStory = () => {
       currentNode.value = startNode
       currentNodeId.value = startNode.id
       history.value = [startNode]
+      showBranchPanel.value = false
       window.scrollTo({ top: 0, behavior: 'smooth' })
+      saveReadingProgress()
     }
   }
 }
@@ -415,7 +504,21 @@ const toggleLike = async () => {
   }
 }
 
+const saveReadingProgress = async () => {
+  if (!storyId.value || !currentNodeId.value) return
+  try {
+    await userApi.saveReadingHistory(userId, {
+      storyId: storyId.value,
+      currentNodeId: currentNodeId.value,
+      historyNodeIds: history.value.map(n => n.id)
+    })
+  } catch (err) {
+    console.error('保存阅读进度失败:', err)
+  }
+}
+
 const goBack = () => {
+  saveReadingProgress()
   router.push('/')
 }
 
@@ -425,6 +528,10 @@ watch(() => route.params.id, () => {
 
 onMounted(() => {
   loadStory()
+})
+
+onUnmounted(() => {
+  saveReadingProgress()
 })
 </script>
 
@@ -502,9 +609,185 @@ onMounted(() => {
   color: #f0a020;
 }
 
+.header-actions .active-btn {
+  color: #9d4edd;
+}
+
 .mobile-count {
   font-size: 12px;
   margin-left: 2px;
+}
+
+.branch-panel {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.branch-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 49;
+}
+
+.branch-content {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 50;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.branch-content.mobile-branch-content {
+  border-radius: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  z-index: 201;
+  border-radius: 20px 20px 0 0;
+  padding-bottom: calc(20px + var(--safe-area-inset-bottom));
+  animation: slideUp 0.3s ease;
+}
+
+.branch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.branch-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.branch-path {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.branch-step {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.branch-step:hover .step-card {
+  background: #f9f0ff;
+}
+
+.branch-step.active .step-card {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e8d5ff 100%);
+  border-color: #9d4edd;
+}
+
+.step-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.connector-line {
+  width: 2px;
+  height: 8px;
+  background: #e0e0e0;
+}
+
+.connector-arrow {
+  font-size: 10px;
+  color: #ccc;
+  line-height: 1;
+}
+
+.step-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.step-index {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9d4edd 0%, #c77dff 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.branch-step.past .step-index {
+  background: #e0e0e0;
+  color: #999;
+}
+
+.step-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-choice {
+  font-size: 12px;
+  color: #9d4edd;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-current {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #9d4edd 0%, #c77dff 100%);
+  color: white;
+  flex-shrink: 0;
+}
+
+.step-back-hint {
+  font-size: 11px;
+  color: #999;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.branch-step.past:hover .step-back-hint {
+  opacity: 1;
+  color: #9d4edd;
+}
+
+.branch-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
 }
 
 .settings-panel {
@@ -763,6 +1046,16 @@ onMounted(() => {
   margin-top: 40px;
 }
 
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-header :deep(.n-divider) {
+  flex: 1;
+}
+
 .history-section.mobile-history-section {
   margin-top: 24px;
 }
@@ -779,6 +1072,12 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
+  align-items: center;
+}
+
+.history-arrow {
+  color: #ccc;
+  font-size: 14px;
 }
 
 .history-trail.mobile-history-trail {

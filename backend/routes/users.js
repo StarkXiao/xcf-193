@@ -8,6 +8,7 @@ let usersData = store.users;
 let storiesData = store.stories;
 let worldsData = store.worldSettings;
 let favoritesData = store.favorites;
+let readingHistoryData = store.readingHistory;
 
 router.get('/:id', (req, res) => {
   const user = usersData.find(u => u.id === req.params.id);
@@ -241,6 +242,74 @@ router.delete('/:id/notifications/:notificationId', (req, res) => {
   
   notificationsData.splice(index, 1);
   res.json({ message: '通知已删除' });
+});
+
+router.get('/:id/reading-history', (req, res) => {
+  const { limit = 10 } = req.query;
+  const userId = req.params.id;
+  const history = readingHistoryData[userId] || [];
+
+  const enriched = history.map(record => {
+    const story = storiesData.find(s => s.id === record.storyId);
+    const nodes = store.storyNodes[record.storyId] || [];
+    const currentNode = nodes.find(n => n.id === record.currentNodeId);
+    const historyNodes = record.historyNodeIds
+      .map(nid => {
+        const n = nodes.find(node => node.id === nid);
+        return n ? { id: n.id, title: n.title } : null;
+      })
+      .filter(Boolean);
+    return {
+      storyId: record.storyId,
+      story: story || null,
+      currentNodeId: record.currentNodeId,
+      currentNodeTitle: currentNode ? currentNode.title : '',
+      historyNodes,
+      readAt: record.readAt
+    };
+  }).filter(r => r.story);
+
+  enriched.sort((a, b) => new Date(b.readAt) - new Date(a.readAt));
+
+  const result = enriched.slice(0, parseInt(limit));
+  res.json({ history: result });
+});
+
+router.post('/:id/reading-history', (req, res) => {
+  const userId = req.params.id;
+  const { storyId, currentNodeId, historyNodeIds } = req.body;
+
+  if (!readingHistoryData[userId]) {
+    readingHistoryData[userId] = [];
+  }
+
+  const existing = readingHistoryData[userId].findIndex(r => r.storyId === storyId);
+  const record = {
+    storyId,
+    currentNodeId,
+    historyNodeIds: historyNodeIds || [currentNodeId],
+    readAt: new Date().toISOString()
+  };
+
+  if (existing >= 0) {
+    readingHistoryData[userId][existing] = record;
+  } else {
+    readingHistoryData[userId].unshift(record);
+  }
+
+  res.json({ message: '阅读进度已保存', record });
+});
+
+router.delete('/:id/reading-history/:storyId', (req, res) => {
+  const userId = req.params.id;
+  const storyId = req.params.storyId;
+
+  if (!readingHistoryData[userId]) {
+    return res.json({ message: '无阅读记录' });
+  }
+
+  readingHistoryData[userId] = readingHistoryData[userId].filter(r => r.storyId !== storyId);
+  res.json({ message: '阅读记录已删除' });
 });
 
 module.exports = router;

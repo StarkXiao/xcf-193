@@ -25,6 +25,55 @@
       </div>
     </div>
 
+    <div v-if="recentReads.length > 0 || favoriteStoryIds.length > 0" 
+         class="quick-access-section" 
+         :class="{ 'mobile-quick-access': isMobile }"
+    >
+      <div v-if="recentReads.length > 0" class="quick-access-block">
+        <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+          <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">📖 继续阅读</h2>
+          <n-button text type="primary" size="small" @click="goToProfile">查看全部 →</n-button>
+        </div>
+        <div class="recent-reads-row" :class="{ 'mobile-recent-reads-row': isMobile }">
+          <n-card 
+            v-for="record in recentReads" 
+            :key="record.storyId"
+            hoverable
+            class="recent-card"
+            :class="{ 'mobile-recent-card': isMobile }"
+            @click="continueReading(record)"
+          >
+            <div class="recent-card-cover">{{ record.story?.cover || '📖' }}</div>
+            <div class="recent-card-info">
+              <h4 class="recent-card-title">{{ record.story?.title }}</h4>
+              <p class="recent-card-progress">读到：{{ record.currentNodeTitle || '开始' }}</p>
+              <p class="recent-card-time">{{ formatReadTime(record.readAt) }}</p>
+            </div>
+            <n-button type="primary" size="small" class="continue-btn">
+              继续
+            </n-button>
+          </n-card>
+        </div>
+      </div>
+
+      <div v-if="favoriteStoryIds.length > 0" class="quick-access-block">
+        <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+          <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">⭐ 我的收藏</h2>
+          <n-button text type="primary" size="small" @click="goToFavorites">管理收藏 →</n-button>
+        </div>
+        <div class="favorite-summary" :class="{ 'mobile-favorite-summary': isMobile }">
+          <span class="fav-stat">
+            <span class="fav-icon">📖</span>
+            {{ favoriteStoryIds.length }} 个故事
+          </span>
+          <span class="fav-stat">
+            <span class="fav-icon">🌍</span>
+            {{ favoriteWorldIds.length }} 个世界设定
+          </span>
+        </div>
+      </div>
+    </div>
+
     <div class="filter-section" ref="storiesSection">
       <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
         <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">📚 故事广场</h2>
@@ -59,7 +108,10 @@
           :class="{ 'mobile-story-card': isMobile }"
           @click="openStory(story.id)"
         >
-          <div class="story-cover" :class="{ 'mobile-story-cover': isMobile }">{{ story.cover }}</div>
+          <div class="story-cover" :class="{ 'mobile-story-cover': isMobile }">
+            {{ story.cover }}
+            <span v-if="favoriteStoryIds.includes(story.id)" class="fav-badge">⭐</span>
+          </div>
           <div class="story-info">
             <h3 class="story-title" :class="{ 'mobile-story-title': isMobile }">{{ story.title }}</h3>
             <p class="story-summary" :class="{ 'mobile-story-summary': isMobile }">{{ story.summary }}</p>
@@ -138,18 +190,22 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NTag, NRadioGroup, NRadioButton, NSpin } from 'naive-ui'
-import { storyApi, worldApi } from '../api'
+import { storyApi, worldApi, userApi } from '../api'
 import { useResponsive } from '../composables/useResponsive'
 
 const router = useRouter()
 const { isMobile } = useResponsive()
 
+const userId = 'user-1'
 const stories = ref([])
 const worlds = ref([])
 const loading = ref(false)
 const sortBy = ref('newest')
 const selectedTag = ref('')
 const allTags = ['奇幻', '恋爱', '冒险', '科幻', '百合', '治愈', '古风']
+const recentReads = ref([])
+const favoriteStoryIds = ref([])
+const favoriteWorldIds = ref([])
 
 const storiesSection = ref(null)
 
@@ -214,6 +270,51 @@ const goToWorlds = () => {
   router.push('/worlds')
 }
 
+const loadRecentReads = async () => {
+  try {
+    const res = await userApi.getReadingHistory(userId, { limit: 4 })
+    recentReads.value = res.data.history
+  } catch (err) {
+    console.error('加载阅读记录失败:', err)
+  }
+}
+
+const loadFavorites = async () => {
+  try {
+    const res = await userApi.getFavorites(userId)
+    favoriteStoryIds.value = (res.data.stories || []).map(s => s.id)
+    favoriteWorldIds.value = (res.data.worlds || []).map(w => w.id)
+  } catch (err) {
+    console.error('加载收藏失败:', err)
+  }
+}
+
+const formatReadTime = (timeStr) => {
+  if (!timeStr) return ''
+  const date = new Date(timeStr)
+  const now = new Date()
+  const diff = now - date
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
+  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
+  return Math.floor(diff / 86400000) + '天前'
+}
+
+const continueReading = (record) => {
+  router.push({
+    path: `/story/${record.storyId}`,
+    query: { nodeId: record.currentNodeId }
+  })
+}
+
+const goToProfile = () => {
+  router.push('/user/profile')
+}
+
+const goToFavorites = () => {
+  router.push('/user/favorites')
+}
+
 const scrollToStories = () => {
   storiesSection.value?.scrollIntoView({ behavior: 'smooth' })
 }
@@ -221,6 +322,8 @@ const scrollToStories = () => {
 onMounted(() => {
   loadStories()
   loadWorlds()
+  loadRecentReads()
+  loadFavorites()
 })
 </script>
 
@@ -321,6 +424,135 @@ onMounted(() => {
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.quick-access-section {
+  margin-bottom: 40px;
+  display: flex;
+  gap: 24px;
+}
+
+.quick-access-section.mobile-quick-access {
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.quick-access-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-reads-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.recent-reads-row.mobile-recent-reads-row {
+  gap: 10px;
+}
+
+.recent-card {
+  cursor: pointer;
+  transition: transform 0.3s;
+  min-width: 240px;
+  flex-shrink: 0;
+}
+
+.recent-card.mobile-recent-card {
+  min-width: 200px;
+}
+
+.recent-card:hover {
+  transform: translateY(-2px);
+}
+
+.recent-card :deep(.n-card__content) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+}
+
+.recent-card-cover {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.recent-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-card-title {
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-card-progress {
+  font-size: 12px;
+  color: #9d4edd;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-card-time {
+  font-size: 11px;
+  color: #bbb;
+  margin: 0;
+}
+
+.continue-btn {
+  flex-shrink: 0;
+}
+
+.favorite-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);
+  border-radius: 12px;
+}
+
+.favorite-summary.mobile-favorite-summary {
+  gap: 16px;
+  padding: 14px;
+}
+
+.fav-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.fav-icon {
+  font-size: 18px;
+}
+
+.fav-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.story-cover {
+  position: relative;
 }
 
 .filter-section {
