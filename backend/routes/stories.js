@@ -62,6 +62,23 @@ router.get('/:id/nodes/:nodeId', (req, res) => {
   res.json(node);
 });
 
+router.put('/:id', (req, res) => {
+  const story = storiesData.find(s => s.id === req.params.id);
+  if (!story) {
+    return res.status(404).json({ message: '故事不存在' });
+  }
+
+  const { title, summary, cover, tags } = req.body;
+
+  if (title !== undefined) story.title = title;
+  if (summary !== undefined) story.summary = summary;
+  if (cover !== undefined) story.cover = cover;
+  if (tags !== undefined) story.tags = tags;
+  story.updatedAt = new Date().toISOString().split('T')[0];
+
+  res.json(story);
+});
+
 router.post('/', (req, res) => {
   const { title, summary, cover, authorId, authorName, tags } = req.body;
   const newStory = {

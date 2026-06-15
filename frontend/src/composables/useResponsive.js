@@ -14,8 +14,10 @@ const touchSupported = ref(
 )
 
 let resizeHandler = null
+let listenerCount = 0
 
 const initResize = () => {
+  listenerCount++
   if (resizeHandler) return
   resizeHandler = () => {
     windowWidth.value = window.innerWidth
@@ -25,7 +27,8 @@ const initResize = () => {
 }
 
 const cleanupResize = () => {
-  if (resizeHandler) {
+  listenerCount = Math.max(0, listenerCount - 1)
+  if (listenerCount === 0 && resizeHandler) {
     window.removeEventListener('resize', resizeHandler)
     resizeHandler = null
   }

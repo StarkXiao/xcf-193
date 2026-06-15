@@ -440,10 +440,17 @@ const saveStory = async () => {
     return
   }
 
+  parseTags()
+
   saving.value = true
   try {
     if (story.value.id) {
-      await storyApi.updateStory(story.value.id, story.value)
+      await storyApi.updateStory(story.value.id, {
+        title: story.value.title,
+        summary: story.value.summary,
+        cover: story.value.cover,
+        tags: story.value.tags
+      })
       message.success('故事已保存')
     } else {
       const res = await storyApi.createStory(story.value)

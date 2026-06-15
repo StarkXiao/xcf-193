@@ -26,6 +26,10 @@ export const storyApi = {
     return api.post('/stories', data)
   },
   
+  updateStory(id, data) {
+    return api.put('/stories/' + id, data)
+  },
+  
   createNode(storyId, data) {
     return api.post('/stories/' + storyId + '/nodes', data)
   },
