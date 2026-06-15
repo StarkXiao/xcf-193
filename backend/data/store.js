@@ -21,7 +21,12 @@ const {
   branchConversions,
   settingReferenceTrends,
   auditLogs,
-  auditStats
+  auditStats,
+  themeHalls,
+  themeHallCharacters,
+  themeHallFactions,
+  themeHallTimeline,
+  themeHallStories
 } = require('./mockData');
 
 const store = {
@@ -47,7 +52,12 @@ const store = {
   branchConversions: JSON.parse(JSON.stringify(branchConversions)),
   settingReferenceTrends: JSON.parse(JSON.stringify(settingReferenceTrends)),
   auditLogs: [...auditLogs],
-  auditStats: JSON.parse(JSON.stringify(auditStats))
+  auditStats: JSON.parse(JSON.stringify(auditStats)),
+  themeHalls: JSON.parse(JSON.stringify(themeHalls)),
+  themeHallCharacters: JSON.parse(JSON.stringify(themeHallCharacters)),
+  themeHallFactions: JSON.parse(JSON.stringify(themeHallFactions)),
+  themeHallTimeline: JSON.parse(JSON.stringify(themeHallTimeline)),
+  themeHallStories: JSON.parse(JSON.stringify(themeHallStories))
 };
 
 module.exports = store;

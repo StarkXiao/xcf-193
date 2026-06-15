@@ -2809,6 +2809,469 @@ const auditStats = {
   }
 };
 
+const themeHalls = [
+  {
+    id: 'hall-1',
+    name: '九霄云天录',
+    cover: '🏔️',
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    description: '一个修仙问道的宏大世界，万族林立，宗门万千，少年踏歌而行，逆天改命。',
+    tagline: '一念仙魔，万载春秋',
+    fullDescription: '九霄云天，九天之上，云海翻涌，万族共生于此界。上古一战，仙魔争锋，天道崩碎，留万载纷争。三千年后，仙门鼎盛，魔道蛰伏，妖族盘踞西荒，人族居中土。青云宗少年云凌霄，身怀上古剑冢传承，誓要踏破九天，问道长生。一路红颜相伴，兄弟同袍，问剑天涯。然天道苍茫，正邪难辨，宿命之局早已铺开，少年执剑，直指九霄！',
+    genre: '仙侠',
+    likes: 12580,
+    characterCount: 86,
+    factionCount: 12,
+    timelineCount: 9,
+    storyCount: 34,
+    regions: ['中土神州', '西荒魔域', '北海冰原', '南疆十万大山', '东海外域'],
+    powerSystems: ['炼气筑基', '金丹元婴', '化神渡劫', '大乘飞升'],
+    coreConflicts: ['仙魔之争，正邪不两立', '宗门利益纠葛', '上古秘辛复苏', '天道轮回宿命'],
+    featuredCharacters: [
+      { name: '云凌霄', avatar: '⚔️' },
+      { name: '慕清寒', avatar: '🌸' },
+      { name: '炎无极', avatar: '🔥' }
+    ],
+    featuredFactions: [
+      { name: '青云宗', colorType: 'primary' },
+      { name: '天魔殿', colorType: 'error' },
+      { name: '万剑阁', colorType: 'info' }
+    ],
+    authorId: 'user-1',
+    authorName: '月下独酌',
+    createdAt: '2024-03-15'
+  },
+  {
+    id: 'hall-2',
+    name: '奥斯特瑞亚大陆',
+    cover: '🐉',
+    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    description: '龙与骑士的史诗大陆，人类、精灵、矮人、兽人在诸神见证下谱写传奇。',
+    tagline: '龙族之誓，不灭的荣耀',
+    fullDescription: '奥斯特瑞亚大陆，一片被诸神祝福的土地。千年之前，巨龙一族与人类签下誓约，共同守护这片大陆的和平。然而黑暗的力量正在北境悄然苏醒，死亡骑士率领亡灵大军步步紧逼。年轻的圣骑士阿尔萨斯，背负着家族的荣耀与诅咒，踏上了寻找真相的旅途。在精灵公主艾蕾娜和矮人战士索林的陪伴下，他们将揭开龙族最古老的秘密。',
+    genre: '西幻',
+    likes: 9876,
+    characterCount: 72,
+    factionCount: 8,
+    timelineCount: 7,
+    storyCount: 28,
+    regions: ['人类王国', '精灵森林', '矮人山脉', '兽人草原', '北境冰原'],
+    powerSystems: ['圣光之力', '自然魔法', '符文锻造', '龙血秘术'],
+    coreConflicts: ['光明与黑暗的永恒之战', '龙族誓约的秘密', '诸神遗产的争夺', '王国的内忧外患'],
+    featuredCharacters: [
+      { name: '阿尔萨斯', avatar: '🗡️' },
+      { name: '艾蕾娜', avatar: '💎' },
+      { name: '索林', avatar: '🔨' }
+    ],
+    featuredFactions: [
+      { name: '圣光骑士团', colorType: 'warning' },
+      { name: '银月议会', colorType: 'info' },
+      { name: '龙鳞守护', colorType: 'success' }
+    ],
+    authorId: 'user-2',
+    authorName: '星河漫步者',
+    createdAt: '2024-02-20'
+  },
+  {
+    id: 'hall-3',
+    name: '霓虹纪元2099',
+    cover: '🌃',
+    gradient: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+    description: '霓虹闪烁的未来都市，义体改造、黑客入侵、企业霸权，霓虹灯下谁主沉浮？',
+    tagline: '义体不朽，数据永生',
+    fullDescription: '2099年，第三次世界大战后，巨型企业掌握了世界的主权。荒坂集团、军用科技、网络监察者……无数庞然大物在名为夜之城的舞台上角逐。雇佣兵V，在一次失败的任务中意外获得了神秘生物芯片，从此他的意识与传奇黑客银翼共享同一个身体。他们必须在企业的追杀下，找到通往自由的道路。',
+    genre: '赛博朋克',
+    likes: 8432,
+    characterCount: 54,
+    factionCount: 10,
+    timelineCount: 8,
+    storyCount: 22,
+    regions: ['沃森区', '歌舞伎町', '太平洲', '市政中心', '圣多明戈'],
+    powerSystems: ['义体改造', '赛博黑客', '企业科技', '战斗芯片'],
+    coreConflicts: ['企业霸权与自由意志', '义体过载与人性挣扎', '数据永生的伦理', '地下秩序的博弈'],
+    featuredCharacters: [
+      { name: 'V', avatar: '🕶️' },
+      { name: '银翼', avatar: '🦾' },
+      { name: '幽灵', avatar: '💀' }
+    ],
+    featuredFactions: [
+      { name: '荒坂集团', colorType: 'error' },
+      { name: '夜之城佣兵', colorType: 'warning' },
+      { name: '网络黑客', colorType: 'info' }
+    ],
+    authorId: 'user-3',
+    authorName: '梦境织者',
+    createdAt: '2024-04-10'
+  },
+  {
+    id: 'hall-4',
+    name: '锦绣京华',
+    cover: '🏯',
+    gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    description: '大明风华，皇城巍巍，权谋交织，儿女情长，一卷盛世丹青。',
+    tagline: '朱墙之内，风月无边',
+    fullDescription: '天启三年，大明王朝正值鼎盛。然而盛世之下，暗流涌动。东宫太子与裕王的储君之争愈演愈烈，朝中世家联盟与锦衣卫的博弈日趋白热化。将门之女苏云裳，在一场宫宴中邂逅了微服出访的皇三子萧景琰，从此两人的命运紧紧交织。权谋、宫斗、爱情、忠义……在这座锦绣皇城中，每个人都在书写自己的传奇。',
+    genre: '古风',
+    likes: 15230,
+    characterCount: 98,
+    factionCount: 14,
+    timelineCount: 12,
+    storyCount: 45,
+    regions: ['紫禁皇城', '江南水乡', '漠北边关', '巴蜀天府', '岭南百越'],
+    powerSystems: ['儒家理学', '武林绝学', '宫廷权术', '商贾之道'],
+    coreConflicts: ['储君之争，骨肉相残', '文臣武将的朝堂博弈', '后宫佳丽的爱恨纠葛', '江湖与庙堂的恩怨'],
+    featuredCharacters: [
+      { name: '萧景琰', avatar: '👑' },
+      { name: '苏云裳', avatar: '🎐' },
+      { name: '卫无忌', avatar: '🏮' }
+    ],
+    featuredFactions: [
+      { name: '东宫太子党', colorType: 'primary' },
+      { name: '世家联盟', colorType: 'success' },
+      { name: '锦衣卫', colorType: 'error' }
+    ],
+    authorId: 'user-1',
+    authorName: '月下独酌',
+    createdAt: '2024-01-30'
+  },
+  {
+    id: 'hall-5',
+    name: '星穹学院',
+    cover: '🎓',
+    gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+    description: '漂浮于云海之上的魔法学院，来自五湖四海的少年们在此开启青春冒险。',
+    tagline: '星辰指路，青春无悔',
+    fullDescription: '在云海之巅，有一座漂浮的学院——星穹学院。这里汇聚着来自五湖四海的魔法天才，他们将在这里度过七年的青春岁月。来自偏远小镇的少年夜星尘，以特等生的身份进入学院，却意外发现自己身怀传说中的星辰之体。在室友风间澈和神秘少女林晓月的陪伴下，他将一步步揭开学院千年前的秘密，以及自己身世的真相。',
+    genre: '校园',
+    likes: 11050,
+    characterCount: 67,
+    factionCount: 6,
+    timelineCount: 10,
+    storyCount: 31,
+    regions: ['星穹主校区', '试炼之森', '元素之塔', '图书馆迷宫', '夜空竞技场'],
+    powerSystems: ['元素魔法', '星辰之力', '召唤契约', '符文炼金术'],
+    coreConflicts: ['学院内部的派系斗争', '千年前的灾厄重现', '天才之间的较量', '青春与梦想的抉择'],
+    featuredCharacters: [
+      { name: '夜星尘', avatar: '⭐' },
+      { name: '林晓月', avatar: '🌙' },
+      { name: '风间澈', avatar: '🍃' }
+    ],
+    featuredFactions: [
+      { name: '星辰社', colorType: 'primary' },
+      { name: '月华会', colorType: 'info' },
+      { name: '拂晓骑士团', colorType: 'warning' }
+    ],
+    authorId: 'user-2',
+    authorName: '星河漫步者',
+    createdAt: '2024-03-05'
+  },
+  {
+    id: 'hall-6',
+    name: '灰烬纪元',
+    cover: '☄️',
+    gradient: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+    description: '大灾变后的废土世界，幸存者们在辐射与变异中寻找文明的火种。',
+    tagline: '灰烬之中，希望不灭',
+    fullDescription: '天启之日，核弹与天灾同时降临，文明在一夜之间化为灰烬。一百年后，世界被辐射尘与变异生物所统治，幸存者们在废土上建立起一个个小型聚落。流浪者雷烬，在一次拾荒中意外救下了神秘的少女寒霜。她身上携带着大灾变前最尖端科技实验室的钥匙。为了找到传说中的「新伊甸」避难所，他们和铁皮组成的三人小队踏上了跨越整个废土的旅程。',
+    genre: '末世',
+    likes: 7820,
+    characterCount: 45,
+    factionCount: 9,
+    timelineCount: 6,
+    storyCount: 19,
+    regions: ['死亡沙漠', '辐射都市', '地下避难所', '山脉要塞', '海岸遗城'],
+    powerSystems: ['辐射异能', '基因改造', '机械义体', '生化变异'],
+    coreConflicts: ['生存与人性的抉择', '资源争夺的残酷', '变异与进化的边界', '文明火种的延续'],
+    featuredCharacters: [
+      { name: '雷烬', avatar: '⚡' },
+      { name: '寒霜', avatar: '❄️' },
+      { name: '铁皮', avatar: '🦾' }
+    ],
+    featuredFactions: [
+      { name: '钢铁兄弟会', colorType: 'default' },
+      { name: '新纪元军', colorType: 'warning' },
+      { name: '流浪商队', colorType: 'success' }
+    ],
+    authorId: 'user-3',
+    authorName: '梦境织者',
+    createdAt: '2024-04-22'
+  }
+];
+
+const themeHallCharacters = {
+  'hall-1': [
+    {
+      id: 'char-1', hallId: 'hall-1', name: '云凌霄', avatar: '⚔️',
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      role: '主角', roleType: 'primary', title: '青云宗首席弟子 · 剑冢传人',
+      traits: ['重情重义', '坚韧不拔', '剑心通明'],
+      bio: '青云宗外门弟子，身怀上古剑冢传承，以一柄青霜剑踏遍九州。年少时惨遭灭门，被青云宗宗主收养，立志踏破天道，寻回家人真相。',
+      relations: [
+        { name: '慕清寒', icon: '🌸', relation: '道侣' },
+        { name: '炎无极', icon: '🔥', relation: '结义兄弟' },
+        { name: '墨千秋', icon: '🗡️', relation: '亦师亦父' }
+      ]
+    },
+    {
+      id: 'char-2', hallId: 'hall-1', name: '慕清寒', avatar: '🌸',
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      role: '主角', roleType: 'primary', title: '冰心谷圣女 · 上古丹道天才',
+      traits: ['外冷内热', '医术通神', '痴情不悔'],
+      bio: '冰心谷百年一遇的丹道天才，身具先天道体。初遇云凌霄便芳心暗许，从此相伴天涯，生死与共。',
+      relations: [
+        { name: '云凌霄', icon: '⚔️', relation: '道侣' },
+        { name: '苏灵儿', icon: '🦋', relation: '师姐' }
+      ]
+    },
+    {
+      id: 'char-3', hallId: 'hall-1', name: '炎无极', avatar: '🔥',
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      role: '主角', roleType: 'warning', title: '焚天阁少主 · 赤炎之体',
+      traits: ['豪迈不羁', '热血赤胆', '至情至性'],
+      bio: '焚天阁少主，身具赤炎之体，性格豪迈，与云凌霄一见如故，结为异姓兄弟。为兄弟两肋插刀，在所不辞。',
+      relations: [
+        { name: '云凌霄', icon: '⚔️', relation: '结义兄弟' },
+        { name: '铁山', icon: '🔨', relation: '师父' }
+      ]
+    },
+    {
+      id: 'char-4', hallId: 'hall-1', name: '血无痕', avatar: '💀',
+      gradient: 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+      role: '反派', roleType: 'error', title: '天魔殿殿主 · 魔道至尊',
+      traits: ['冷酷无情', '城府极深', '杀伐果断'],
+      bio: '天魔殿之主，上古魔功盖世，欲一统九界，建立魔道秩序。与青云宗有血海深仇，云凌霄最大的对手。',
+      relations: [
+        { name: '云凌霄', icon: '⚔️', relation: '宿敌' }
+      ]
+    },
+    {
+      id: 'char-5', hallId: 'hall-1', name: '墨千秋', avatar: '🗡️',
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      role: '配角', roleType: 'info', title: '青云宗宗主 · 剑道泰斗',
+      traits: ['正气凛然', '慧眼识才', '深藏不露'],
+      bio: '青云宗宗主，剑道第一人。收养云凌霄，传其衣钵，实为上古剑仙转世，默默守护九霄。',
+      relations: [
+        { name: '云凌霄', icon: '⚔️', relation: '师徒' }
+      ]
+    },
+    {
+      id: 'char-6', hallId: 'hall-1', name: '白无恨', avatar: '🦊',
+      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      role: '中立', roleType: 'success', title: '九尾天狐 · 妖族公主',
+      traits: ['聪慧狡黠', '亦正亦邪', '游戏人间'],
+      bio: '妖族公主，化形入世游戏红尘。与云凌霄亦敌亦友，时常相助，背后似乎藏着妖族的古老秘密。',
+      relations: [
+        { name: '云凌霄', icon: '⚔️', relation: '亦敌亦友' }
+      ]
+    }
+  ],
+  'hall-2': [
+    {
+      id: 'char-7', hallId: 'hall-2', name: '阿尔萨斯', avatar: '🗡️',
+      gradient: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+      role: '主角', roleType: 'primary', title: '圣光骑士团圣剑骑士',
+      traits: ['正直勇敢', '荣誉感强', '坚韧不拔'],
+      bio: '出生于没落贵族家庭，年少时便展现出惊人的圣光亲和力。以第一名成绩从骑士学院毕业，加入骑士团。',
+      relations: [
+        { name: '艾蕾娜', icon: '💎', relation: '爱人' },
+        { name: '索林', icon: '🔨', relation: '战友' }
+      ]
+    },
+    {
+      id: 'char-8', hallId: 'hall-2', name: '艾蕾娜', avatar: '💎',
+      gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+      role: '主角', roleType: 'primary', title: '银月精灵族公主 · 自然祭司',
+      traits: ['优雅高贵', '善良博爱', '精通魔法'],
+      bio: '精灵族百年一遇的魔法天才，继承了月光女神的祝福。为阻止黑暗扩散而离开故乡，踏上了冒险之旅。',
+      relations: [
+        { name: '阿尔萨斯', icon: '🗡️', relation: '爱人' }
+      ]
+    }
+  ]
+};
+
+const themeHallFactions = {
+  'hall-1': [
+    {
+      id: 'fact-1', hallId: 'hall-1', name: '青云宗', logo: '🗡️',
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      alignment: '正道领袖', alignmentType: 'success',
+      description: '正道第一大宗门，位于青云山脉之上，剑道传承千年，弟子遍布天下。以除魔卫道为己任。',
+      territory: '青云山脉', leader: '墨千秋', memberCount: 3280,
+      keyMembers: [
+        { name: '墨千秋', avatar: '🗡️' },
+        { name: '云凌霄', avatar: '⚔️' },
+        { name: '李长风', avatar: '📜' }
+      ]
+    },
+    {
+      id: 'fact-2', hallId: 'hall-1', name: '天魔殿', logo: '💀',
+      gradient: 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+      alignment: '魔道至尊', alignmentType: 'error',
+      description: '魔道第一势力，盘踞西荒魔域。殿主血无痕魔功盖世，欲一统九霄建立魔道秩序。',
+      territory: '西荒魔域', leader: '血无痕', memberCount: 5600,
+      keyMembers: [
+        { name: '血无痕', avatar: '💀' },
+        { name: '暗影', avatar: '🌑' }
+      ]
+    },
+    {
+      id: 'fact-3', hallId: 'hall-1', name: '冰心谷', logo: '🌸',
+      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      alignment: '正道', alignmentType: 'info',
+      description: '女子宗门，以炼丹医术冠绝天下。谷中弟子皆为女子，医术通神，丹道无双。',
+      territory: '冰心谷', leader: '苏灵儿', memberCount: 1200,
+      keyMembers: [
+        { name: '苏灵儿', avatar: '🦋' },
+        { name: '慕清寒', avatar: '🌸' }
+      ]
+    },
+    {
+      id: 'fact-4', hallId: 'hall-1', name: '焚天阁', logo: '🔥',
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      alignment: '正道盟友', alignmentType: 'warning',
+      description: '火系功法天下闻名，少主炎无极身具赤炎之体。与青云宗世代交好。',
+      territory: '赤炎山脉', leader: '炎霸天', memberCount: 2100,
+      keyMembers: [
+        { name: '炎霸天', avatar: '🔥' },
+        { name: '炎无极', avatar: '🔥' }
+      ]
+    }
+  ],
+  'hall-2': [
+    {
+      id: 'fact-5', hallId: 'hall-2', name: '圣光骑士团', logo: '🛡️',
+      gradient: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+      alignment: '光明阵营', alignmentType: 'success',
+      description: '人类王国最精锐的武装力量，信奉光明之神，以圣光照耀黑暗之地。',
+      territory: '圣光城堡', leader: '大团长 塞拉斯', memberCount: 5000,
+      keyMembers: [
+        { name: '塞拉斯', avatar: '⚔️' },
+        { name: '阿尔萨斯', avatar: '🗡️' }
+      ]
+    },
+    {
+      id: 'fact-6', hallId: 'hall-2', name: '银月议会', logo: '🌙',
+      gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+      alignment: '精灵王国', alignmentType: 'info',
+      description: '精灵族的最高统治机构，由各大氏族长老组成，守护着世界最古老的魔法秘密。',
+      territory: '银月森林', leader: '月之祭司 塞琳娜', memberCount: 8000,
+      keyMembers: [
+        { name: '塞琳娜', avatar: '🌟' },
+        { name: '艾蕾娜', avatar: '💎' }
+      ]
+    }
+  ]
+};
+
+const themeHallTimeline = {
+  'hall-1': [
+    {
+      id: 'tl-1', hallId: 'hall-1', era: '上古纪元', icon: '⭐', dotColor: '#ff6b6b',
+      title: '仙魔大战', type: 'error',
+      description: '上古仙人与魔族展开惊世大战，九天崩碎，无数强者陨落。天道残缺，留下无数秘辛。',
+      impacts: ['天道残缺', '仙魔永世对立', '剑冢封印']
+    },
+    {
+      id: 'tl-2', hallId: 'hall-1', era: '太古纪元', icon: '🏔️', dotColor: '#4ecdc4',
+      title: '青云宗立派', type: 'success',
+      description: '墨剑仙开宗立派，创青云剑道，护佑人族。传承千年，成为正道领袖。',
+      impacts: ['正道崛起', '剑道传承']
+    },
+    {
+      id: 'tl-3', hallId: 'hall-1', era: '近古纪元', icon: '💥', dotColor: '#ffe66d',
+      title: '天魔殿复兴', type: 'warning',
+      description: '血无痕一统魔道，建立天魔殿，西荒魔域成为魔道据点。',
+      impacts: ['魔道统一', '正邪对立加剧']
+    },
+    {
+      id: 'tl-4', hallId: 'hall-1', era: '当代 · 三年前', icon: '🔥', dotColor: '#ff9ff3',
+      title: '云家灭门', type: 'error',
+      description: '云家满门被灭，年幼的云凌霄被墨千秋所救，带入青云宗。',
+      impacts: ['云凌霄入青云', '埋下复仇种子']
+    },
+    {
+      id: 'tl-5', hallId: 'hall-1', era: '当代 · 今朝', icon: '⚔️', dotColor: '#9d4edd',
+      title: '剑冢开启', type: 'success',
+      description: '云凌霄获得上古剑冢传承，踏上修行之路。与慕清寒、炎无极相识。',
+      impacts: ['主角团聚首', '上古秘辛初现']
+    }
+  ],
+  'hall-2': [
+    {
+      id: 'tl-6', hallId: 'hall-2', era: '神话纪元', icon: '🐉', dotColor: '#ff6b6b',
+      title: '龙誓之盟', type: 'success',
+      description: '巨龙与人类始祖签下永恒誓约，共同守护奥斯特瑞亚大陆。',
+      impacts: ['龙族庇护', '魔法传承']
+    },
+    {
+      id: 'tl-7', hallId: 'hall-2', era: '当代 · 今日', icon: '⚔️', dotColor: '#9d4edd',
+      title: '黑暗苏醒', type: 'warning',
+      description: '死亡骑士率亡灵大军出现在北境，阿尔萨斯受命前去调查。',
+      impacts: ['冒险开始', '主线启动']
+    }
+  ]
+};
+
+const themeHallStories = {
+  'hall-1': [
+    {
+      id: 'story-th-1', hallId: 'hall-1', title: '九霄剑歌行', cover: '⚔️',
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      type: '主线正篇',
+      summary: '少年云凌霄踏入仙门，开启逆天修行之路。剑斩九天，问道长生，红颜相伴，兄弟同行。',
+      author: '墨剑书生', wordCount: '128万', likes: 8920,
+      protagonists: [
+        { name: '云凌霄', avatar: '⚔️' },
+        { name: '慕清寒', avatar: '🌸' }
+      ]
+    },
+    {
+      id: 'story-th-2', hallId: 'hall-1', title: '冰心照玉壶', cover: '🌸',
+      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      type: '女主视角',
+      summary: '慕清寒从冰心谷圣女到与云凌霄相识相知的往事。',
+      author: '清寒仙子', wordCount: '45万', likes: 5230,
+      protagonists: [
+        { name: '慕清寒', avatar: '🌸' }
+      ]
+    },
+    {
+      id: 'story-th-3', hallId: 'hall-1', title: '赤炎焚天录', cover: '🔥',
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      type: '兄弟篇',
+      summary: '炎无极的成长故事，从焚天阁少主到独当一面的强者之路。',
+      author: '赤炎', wordCount: '68万', likes: 4560,
+      protagonists: [
+        { name: '炎无极', avatar: '🔥' }
+      ]
+    },
+    {
+      id: 'story-th-4', hallId: 'hall-1', title: '魔血无痕', cover: '💀',
+      gradient: 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+      type: '反派番外',
+      summary: '血无痕的过往，他为何要一统九霄建立魔道秩序的真正原因。',
+      author: '魔道观察者', wordCount: '32万', likes: 3890,
+      protagonists: [
+        { name: '血无痕', avatar: '💀' }
+      ]
+    }
+  ],
+  'hall-2': [
+    {
+      id: 'story-th-5', hallId: 'hall-2', title: '龙誓', cover: '🐉',
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      type: '主线正篇',
+      summary: '阿尔萨斯与艾蕾娜跨越种族的爱恋，和他们共同面对黑暗威胁的冒险故事。',
+      author: '龙语者', wordCount: '98万', likes: 7234,
+      protagonists: [
+        { name: '阿尔萨斯', avatar: '🗡️' },
+        { name: '艾蕾娜', avatar: '💎' }
+      ]
+    }
+  ]
+};
+
 module.exports = {
   users,
   stories,
@@ -2832,5 +3295,10 @@ module.exports = {
   branchConversions,
   settingReferenceTrends,
   auditLogs,
-  auditStats
+  auditStats,
+  themeHalls,
+  themeHallCharacters,
+  themeHallFactions,
+  themeHallTimeline,
+  themeHallStories
 };

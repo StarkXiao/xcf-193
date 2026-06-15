@@ -542,12 +542,14 @@ const loadHallDetail = async () => {
   try {
     const id = route.params.id
     const res = await themeHallApi.getThemeHall(id)
-    hall.value = res.data || { ...mockHallDetail, id }
-    characters.value = res.data?.characters || mockCharacters
-    factions.value = res.data?.factions || mockFactions
-    timeline.value = res.data?.timeline || mockTimeline
-    stories.value = res.data?.stories || mockStories
+    const data = res.data
+    hall.value = data
+    characters.value = data.characters || []
+    factions.value = data.factions || []
+    timeline.value = data.timeline || []
+    stories.value = data.stories || []
   } catch (err) {
+    console.error('加载专题馆详情失败:', err)
     hall.value = mockHallDetail
     characters.value = mockCharacters
     factions.value = mockFactions
@@ -560,11 +562,22 @@ const loadHallDetail = async () => {
 
 const handleLike = async () => {
   try {
-    await themeHallApi.likeThemeHall(route.params.id, { userId: 'user-1' })
+    const res = await themeHallApi.likeThemeHall(route.params.id, {
+      userId: 'user-1',
+      username: '月下独酌',
+      avatar: '🌸'
+    })
     isLiked.value = true
+    if (hall.value && res.data?.likes !== undefined) {
+      hall.value.likes = res.data.likes
+    }
     message.success('已记录你的心动 ♥')
   } catch (err) {
+    console.error('点赞失败:', err)
     isLiked.value = true
+    if (hall.value) {
+      hall.value.likes += 1
+    }
     message.success('已记录你的心动 ♥')
   }
 }

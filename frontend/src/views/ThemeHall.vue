@@ -288,34 +288,30 @@ const mockHalls = [
 ]
 
 const loadFeaturedHalls = async () => {
+  loading.value = true
   try {
     const res = await themeHallApi.getFeaturedThemeHalls()
-    featuredHalls.value = res.data.halls || mockHalls.slice(0, 2)
+    featuredHalls.value = res.data.halls
   } catch (err) {
+    console.error('加载精选专题失败:', err)
     featuredHalls.value = mockHalls.slice(0, 2)
+  } finally {
+    loading.value = false
   }
 }
 
 const loadHalls = async () => {
-  loading.value = true
   try {
     const res = await themeHallApi.getThemeHalls({
       sort: sortBy.value,
       filter: activeFilter.value
     })
-    let data = res.data.halls || mockHalls.slice(2)
-    if (activeFilter.value !== 'all') {
-      data = data.filter(h => h.genre === activeFilter.value)
-    }
-    halls.value = data
+    halls.value = res.data.halls
   } catch (err) {
-    let data = mockHalls.slice(2)
-    if (activeFilter.value !== 'all') {
-      data = mockHalls.filter(h => h.genre === activeFilter.value)
-    }
-    halls.value = data
-  } finally {
-    loading.value = false
+    console.error('加载专题馆列表失败:', err)
+    halls.value = activeFilter.value === 'all'
+      ? mockHalls.slice(2)
+      : mockHalls.filter(h => h.genre === activeFilter.value)
   }
 }
 
