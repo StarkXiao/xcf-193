@@ -20,6 +20,7 @@ import ActivityCenter from './views/ActivityCenter.vue'
 import ActivityDetail from './views/ActivityDetail.vue'
 import SearchResults from './views/SearchResults.vue'
 import AuthorDashboard from './views/AuthorDashboard.vue'
+import ContentAudit from './views/ContentAudit.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -38,7 +39,8 @@ const routes = [
   { path: '/user/dashboard', name: 'AuthorDashboard', component: AuthorDashboard },
   { path: '/world/:id/collaboration', name: 'WorldCollaboration', component: WorldCollaboration },
   { path: '/activities', name: 'ActivityCenter', component: ActivityCenter },
-  { path: '/activity/:id', name: 'ActivityDetail', component: ActivityDetail }
+  { path: '/activity/:id', name: 'ActivityDetail', component: ActivityDetail },
+  { path: '/admin/audit', name: 'ContentAudit', component: ContentAudit }
 ]
 
 const router = createRouter({

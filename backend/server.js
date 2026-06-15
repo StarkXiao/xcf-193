@@ -11,6 +11,7 @@ const activitiesRouter = require('./routes/activities');
 const { router: notificationsRouter } = require('./routes/notifications');
 const searchRouter = require('./routes/search');
 const analyticsRouter = require('./routes/analytics');
+const auditRouter = require('./routes/audit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +37,7 @@ app.use('/api/activities', activitiesRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/audit', auditRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: '接口不存在' });

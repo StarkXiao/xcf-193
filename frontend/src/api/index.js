@@ -356,4 +356,30 @@ export const analyticsApi = {
   }
 }
 
+export const auditApi = {
+  getStats() {
+    return api.get('/audit/stats')
+  },
+
+  getPendingItems(params = {}) {
+    return api.get('/audit/pending', { params })
+  },
+
+  getAuditLogs(params = {}) {
+    return api.get('/audit/logs', { params })
+  },
+
+  approveItem(type, id, data) {
+    return api.post(`/audit/${type}/${id}/approve`, data)
+  },
+
+  rejectItem(type, id, data) {
+    return api.post(`/audit/${type}/${id}/reject`, data)
+  },
+
+  getAuditLevels() {
+    return api.get('/audit/levels')
+  }
+}
+
 export default api

@@ -38,7 +38,9 @@ const stories = [
     createdAt: '2024-04-01',
     updatedAt: '2024-05-10',
     status: 'ongoing',
-    startNodeId: 'node-1-1'
+    startNodeId: 'node-1-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
   },
   {
     id: 'story-2',
@@ -53,7 +55,9 @@ const stories = [
     createdAt: '2024-03-15',
     updatedAt: '2024-04-28',
     status: 'completed',
-    startNodeId: 'node-2-1'
+    startNodeId: 'node-2-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
   },
   {
     id: 'story-3',
@@ -68,7 +72,9 @@ const stories = [
     createdAt: '2024-02-10',
     updatedAt: '2024-05-05',
     status: 'ongoing',
-    startNodeId: 'node-3-1'
+    startNodeId: 'node-3-1',
+    auditStatus: 'pending',
+    auditLevel: null
   }
 ];
 
@@ -1180,7 +1186,9 @@ const comments = {
       avatar: '⭐',
       content: '第一章就很有画面感！银发少年好神秘~',
       likes: 23,
-      createdAt: '2024-04-05 10:30'
+      createdAt: '2024-04-05 10:30',
+      auditStatus: 'approved',
+      auditLevel: 'G'
     },
     {
       id: 'comment-2',
@@ -1191,7 +1199,9 @@ const comments = {
       avatar: '🌙',
       content: '浮城的设定好棒，好想住在云上面！',
       likes: 15,
-      createdAt: '2024-04-06 14:20'
+      createdAt: '2024-04-06 14:20',
+      auditStatus: 'approved',
+      auditLevel: 'G'
     },
     {
       id: 'comment-3',
@@ -1202,7 +1212,9 @@ const comments = {
       avatar: '⭐',
       content: '天空的守护者！这个结局好甜~',
       likes: 45,
-      createdAt: '2024-04-10 09:15'
+      createdAt: '2024-04-10 09:15',
+      auditStatus: 'approved',
+      auditLevel: 'G'
     }
   ],
   'story-2': [
@@ -1215,7 +1227,9 @@ const comments = {
       avatar: '🌸',
       content: '科幻百合！太对我胃口了！',
       likes: 34,
-      createdAt: '2024-03-20 16:45'
+      createdAt: '2024-03-20 16:45',
+      auditStatus: 'approved',
+      auditLevel: 'G'
     },
     {
       id: 'comment-5',
@@ -1226,7 +1240,9 @@ const comments = {
       avatar: '🌙',
       content: '星河旅人这个结局太浪漫了！一起探索宇宙什么的...',
       likes: 56,
-      createdAt: '2024-04-01 11:30'
+      createdAt: '2024-04-01 11:30',
+      auditStatus: 'approved',
+      auditLevel: 'G'
     }
   ],
   'story-3': [
@@ -1239,7 +1255,9 @@ const comments = {
       avatar: '🌸',
       content: '九尾狐！古风恋爱我的最爱！',
       likes: 67,
-      createdAt: '2024-02-15 08:00'
+      createdAt: '2024-02-15 08:00',
+      auditStatus: 'pending',
+      auditLevel: null
     },
     {
       id: 'comment-7',
@@ -1250,7 +1268,10 @@ const comments = {
       avatar: '⭐',
       content: '京城烟火这个结局太圆满了！为了爱人放弃功名什么的...',
       likes: 89,
-      createdAt: '2024-03-01 20:10'
+      createdAt: '2024-03-01 20:10',
+      auditStatus: 'rejected',
+      auditLevel: null,
+      rejectReason: '内容包含不当表述'
     }
   ]
 };
@@ -1264,6 +1285,8 @@ const worldSettings = [
     authorId: 'user-1',
     authorName: '月下独酌',
     likes: 128,
+    auditStatus: 'approved',
+    auditLevel: 'G',
     entries: [
       {
         id: 'entry-1',
@@ -1294,6 +1317,8 @@ const worldSettings = [
     authorId: 'user-2',
     authorName: '星河漫步者',
     likes: 96,
+    auditStatus: 'approved',
+    auditLevel: 'G',
     entries: [
       {
         id: 'entry-4',
@@ -1324,6 +1349,8 @@ const worldSettings = [
     authorId: 'user-3',
     authorName: '梦境织者',
     likes: 156,
+    auditStatus: 'pending',
+    auditLevel: null,
     entries: [
       {
         id: 'entry-7',
@@ -2698,6 +2725,90 @@ const settingReferenceTrends = {
   }
 };
 
+const auditLogs = [
+  {
+    id: 'audit-log-1',
+    targetType: 'story',
+    targetId: 'story-1',
+    targetTitle: '浮城之恋',
+    action: 'approve',
+    auditLevel: 'G',
+    auditorId: 'admin-1',
+    auditorName: '管理员',
+    remark: '内容健康，适合全年龄段阅读',
+    createdAt: '2024-04-02 10:00:00'
+  },
+  {
+    id: 'audit-log-2',
+    targetType: 'story',
+    targetId: 'story-2',
+    targetTitle: '星海彼端的约定',
+    action: 'approve',
+    auditLevel: 'G',
+    auditorId: 'admin-1',
+    auditorName: '管理员',
+    remark: '内容积极向上，无违规内容',
+    createdAt: '2024-03-16 14:30:00'
+  },
+  {
+    id: 'audit-log-3',
+    targetType: 'world',
+    targetId: 'world-1',
+    targetTitle: '浮城世界观',
+    action: 'approve',
+    auditLevel: 'G',
+    auditorId: 'admin-1',
+    auditorName: '管理员',
+    remark: '世界观设定完整，内容健康',
+    createdAt: '2024-01-22 09:15:00'
+  },
+  {
+    id: 'audit-log-4',
+    targetType: 'world',
+    targetId: 'world-2',
+    targetTitle: '星际时代',
+    action: 'approve',
+    auditLevel: 'G',
+    auditorId: 'admin-2',
+    auditorName: '审核员小王',
+    remark: '科幻设定合理，无违规内容',
+    createdAt: '2024-02-12 16:45:00'
+  },
+  {
+    id: 'audit-log-5',
+    targetType: 'comment',
+    targetId: 'comment-7',
+    targetTitle: '评论-京城烟火这个结局太圆满了...',
+    action: 'reject',
+    auditLevel: null,
+    auditorId: 'admin-1',
+    auditorName: '管理员',
+    remark: '内容包含不当表述',
+    createdAt: '2024-03-02 11:20:00'
+  }
+];
+
+const auditStats = {
+  pending: {
+    stories: 1,
+    worlds: 1,
+    comments: 1,
+    total: 3
+  },
+  approved: {
+    stories: 2,
+    worlds: 2,
+    comments: 5,
+    total: 9
+  },
+  rejected: {
+    stories: 0,
+    worlds: 0,
+    comments: 1,
+    total: 1
+  }
+};
+
 module.exports = {
   users,
   stories,
@@ -2719,5 +2830,7 @@ module.exports = {
   storyPerformance,
   readerProfiles,
   branchConversions,
-  settingReferenceTrends
+  settingReferenceTrends,
+  auditLogs,
+  auditStats
 };

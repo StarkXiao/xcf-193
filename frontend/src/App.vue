@@ -133,6 +133,11 @@ const userMenuOptions = [
     icon: () => '📊'
   },
   {
+    label: '内容审核',
+    key: 'audit',
+    icon: () => '🛡️'
+  },
+  {
     type: 'divider',
     key: 'd1'
   },
@@ -192,6 +197,9 @@ const handleUserMenuSelect = (key) => {
       break
     case 'dashboard':
       router.push('/user/dashboard')
+      break
+    case 'audit':
+      router.push('/admin/audit')
       break
     case 'editor':
       router.push('/editor')

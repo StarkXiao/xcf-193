@@ -19,7 +19,9 @@ const {
   storyPerformance,
   readerProfiles,
   branchConversions,
-  settingReferenceTrends
+  settingReferenceTrends,
+  auditLogs,
+  auditStats
 } = require('./mockData');
 
 const store = {
@@ -43,7 +45,9 @@ const store = {
   storyPerformance: JSON.parse(JSON.stringify(storyPerformance)),
   readerProfiles: JSON.parse(JSON.stringify(readerProfiles)),
   branchConversions: JSON.parse(JSON.stringify(branchConversions)),
-  settingReferenceTrends: JSON.parse(JSON.stringify(settingReferenceTrends))
+  settingReferenceTrends: JSON.parse(JSON.stringify(settingReferenceTrends)),
+  auditLogs: [...auditLogs],
+  auditStats: JSON.parse(JSON.stringify(auditStats))
 };
 
 module.exports = store;
