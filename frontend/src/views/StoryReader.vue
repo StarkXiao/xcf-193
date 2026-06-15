@@ -274,6 +274,20 @@ const paragraphs = computed(() => {
   return currentNode.value.content.split('\n').filter(p => p.trim())
 })
 
+const restoreChoiceTexts = (nodes) => {
+  for (let i = 1; i < nodes.length; i++) {
+    const prevNode = nodes[i - 1]
+    const currNode = nodes[i]
+    if (prevNode.choices && !currNode._choiceText) {
+      const choice = prevNode.choices.find(c => c.nextNodeId === currNode.id)
+      if (choice) {
+        currNode._choiceText = choice.text
+      }
+    }
+  }
+  return nodes
+}
+
 useTouchGestures(readerRef, {
   onSwipeLeft: () => {
     if (!isMobile.value) return
@@ -356,46 +370,66 @@ const loadStory = async () => {
     const queryNodeId = route.query.nodeId
     const queryCommentId = route.query.commentId
     
+    let restored = false
+    let histRecord = null
+    
+    try {
+      const histRes = await userApi.getReadingHistory(userId, { limit: 20 })
+      histRecord = histRes.data.history.find(r => r.storyId === storyId.value)
+    } catch (e) {
+      console.error('获取阅读历史失败:', e)
+    }
+    
     if (queryNodeId) {
       const targetNode = nodesRes.data.find(n => n.id === queryNodeId)
       if (targetNode) {
-        currentNode.value = targetNode
-        currentNodeId.value = targetNode.id
-        history.value = [targetNode]
-      }
-    } else {
-      let restored = false
-      try {
-        const histRes = await userApi.getReadingHistory(userId, { limit: 20 })
-        const record = histRes.data.history.find(r => r.storyId === storyId.value)
-        if (record) {
-          const restoreNodes = record.historyNodeIds
-            .map(nid => nodesRes.data.find(n => n.id === nid))
-            .filter(Boolean)
-          if (restoreNodes.length > 0) {
-            history.value = restoreNodes
-            const current = nodesRes.data.find(n => n.id === record.currentNodeId)
-            if (current) {
-              currentNode.value = current
-              currentNodeId.value = current.id
-            } else {
-              currentNode.value = restoreNodes[restoreNodes.length - 1]
-              currentNodeId.value = restoreNodes[restoreNodes.length - 1].id
+        if (histRecord && histRecord.historyNodeIds && histRecord.historyNodeIds.length > 0) {
+          const nodeIndex = histRecord.historyNodeIds.indexOf(queryNodeId)
+          if (nodeIndex >= 0) {
+            const pathNodeIds = histRecord.historyNodeIds.slice(0, nodeIndex + 1)
+            const pathNodes = pathNodeIds
+              .map(nid => nodesRes.data.find(n => n.id === nid))
+              .filter(Boolean)
+            if (pathNodes.length > 0) {
+              restoreChoiceTexts(pathNodes)
+              history.value = pathNodes
+              currentNode.value = pathNodes[pathNodes.length - 1]
+              currentNodeId.value = pathNodes[pathNodes.length - 1].id
+              restored = true
             }
-            restored = true
           }
         }
-      } catch (e) {
-        console.error('恢复阅读进度失败:', e)
-      }
-      
-      if (!restored && story.value.startNodeId) {
-        const startNode = nodesRes.data.find(n => n.id === story.value.startNodeId)
-        if (startNode) {
-          currentNode.value = startNode
-          currentNodeId.value = startNode.id
-          history.value = [startNode]
+        if (!restored) {
+          history.value = [targetNode]
+          currentNode.value = targetNode
+          currentNodeId.value = targetNode.id
         }
+      }
+    } else if (histRecord) {
+      const restoreNodes = histRecord.historyNodeIds
+        .map(nid => nodesRes.data.find(n => n.id === nid))
+        .filter(Boolean)
+      if (restoreNodes.length > 0) {
+        restoreChoiceTexts(restoreNodes)
+        history.value = restoreNodes
+        const current = nodesRes.data.find(n => n.id === histRecord.currentNodeId)
+        if (current) {
+          currentNode.value = current
+          currentNodeId.value = current.id
+        } else {
+          currentNode.value = restoreNodes[restoreNodes.length - 1]
+          currentNodeId.value = restoreNodes[restoreNodes.length - 1].id
+        }
+        restored = true
+      }
+    }
+    
+    if (!restored && story.value.startNodeId) {
+      const startNode = nodesRes.data.find(n => n.id === story.value.startNodeId)
+      if (startNode) {
+        currentNode.value = startNode
+        currentNodeId.value = startNode.id
+        history.value = [startNode]
       }
     }
     
