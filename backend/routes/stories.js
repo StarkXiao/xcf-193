@@ -7,6 +7,7 @@ const { createNotification } = require('./notifications');
 let storiesData = store.stories;
 let storyNodesData = store.storyNodes;
 let favoritesData = store.favorites;
+let worldSettingsData = store.worldSettings;
 
 router.get('/', (req, res) => {
   const { tag, sort, page = 1, limit = 10 } = req.query;
@@ -255,6 +256,134 @@ router.post('/:id/view', (req, res) => {
   }
   story.views += 1;
   res.json({ views: story.views });
+});
+
+router.get('/:id/nodes/:nodeId/references', (req, res) => {
+  const { id, nodeId } = req.params;
+  
+  const nodes = storyNodesData[id];
+  if (!nodes) {
+    return res.status(404).json({ message: '故事不存在' });
+  }
+  
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) {
+    return res.status(404).json({ message: '节点不存在' });
+  }
+  
+  res.json({
+    nodeId,
+    nodeTitle: node.title,
+    references: node.referencedEntries || []
+  });
+});
+
+router.post('/:id/nodes/:nodeId/references', (req, res) => {
+  const { id, nodeId } = req.params;
+  const { worldId, worldName, entryId, entryTitle, entryCategory } = req.body;
+  
+  const nodes = storyNodesData[id];
+  if (!nodes) {
+    return res.status(404).json({ message: '故事不存在' });
+  }
+  
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) {
+    return res.status(404).json({ message: '节点不存在' });
+  }
+  
+  if (!node.referencedEntries) {
+    node.referencedEntries = [];
+  }
+  
+  const exists = node.referencedEntries.some(e => e.entryId === entryId);
+  if (!exists) {
+    node.referencedEntries.push({ worldId, worldName, entryId, entryTitle, entryCategory });
+  }
+  
+  const world = worldSettingsData.find(w => w.id === worldId);
+  if (world) {
+    const entry = world.entries.find(e => e.id === entryId);
+    if (entry) {
+      if (!entry.referencedStories) {
+        entry.referencedStories = [];
+      }
+      const story = storiesData.find(s => s.id === id);
+      const refExists = entry.referencedStories.some(
+        r => r.storyId === id && r.nodeId === nodeId
+      );
+      if (!refExists) {
+        entry.referencedStories.push({
+          storyId: id,
+          storyTitle: story?.title || '',
+          nodeId,
+          nodeTitle: node.title
+        });
+      }
+    }
+  }
+  
+  res.json({ message: '关联已添加', referencedEntries: node.referencedEntries });
+});
+
+router.delete('/:id/nodes/:nodeId/references', (req, res) => {
+  const { id, nodeId } = req.params;
+  const { worldId, entryId } = req.body;
+  
+  const nodes = storyNodesData[id];
+  if (!nodes) {
+    return res.status(404).json({ message: '故事不存在' });
+  }
+  
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) {
+    return res.status(404).json({ message: '节点不存在' });
+  }
+  
+  if (node.referencedEntries) {
+    node.referencedEntries = node.referencedEntries.filter(e => e.entryId !== entryId);
+  }
+  
+  const world = worldSettingsData.find(w => w.id === worldId);
+  if (world) {
+    const entry = world.entries.find(e => e.id === entryId);
+    if (entry && entry.referencedStories) {
+      entry.referencedStories = entry.referencedStories.filter(
+        r => !(r.storyId === id && r.nodeId === nodeId)
+      );
+    }
+  }
+  
+  res.json({ message: '关联已删除', referencedEntries: node.referencedEntries || [] });
+});
+
+router.get('/:id/references', (req, res) => {
+  const { id } = req.params;
+  
+  const nodes = storyNodesData[id];
+  if (!nodes) {
+    return res.status(404).json({ message: '故事不存在' });
+  }
+  
+  const allReferences = [];
+  const seenEntries = new Set();
+  
+  nodes.forEach(node => {
+    if (node.referencedEntries) {
+      node.referencedEntries.forEach(ref => {
+        if (!seenEntries.has(ref.entryId)) {
+          seenEntries.add(ref.entryId);
+          allReferences.push(ref);
+        }
+      });
+    }
+  });
+  
+  res.json({
+    storyId: id,
+    totalReferences: allReferences.length,
+    references: allReferences
+  });
 });
 
 module.exports = router;

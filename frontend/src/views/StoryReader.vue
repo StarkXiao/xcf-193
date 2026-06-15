@@ -199,6 +199,40 @@
               </template>
             </div>
           </div>
+
+          <div 
+            v-if="currentNode?.referencedEntries?.length > 0 || storyWideReferences?.length > 0" 
+            class="world-settings-section"
+            :class="{ 'mobile-world-settings-section': isMobile }"
+          >
+            <div class="settings-header">
+              <n-divider v-if="!isMobile">🌍 相关设定</n-divider>
+              <div v-if="isMobile" class="mobile-settings-label">🌍 相关设定</div>
+            </div>
+            <div class="settings-list" :class="{ 'mobile-settings-list': isMobile }">
+              <div 
+                v-for="ref in allReferencedEntries" 
+                :key="ref.entryId"
+                class="setting-card"
+                :class="{ 'mobile-setting-card': isMobile }"
+                @click="goToWorldEntry(ref)"
+              >
+                <div class="setting-icon">📚</div>
+                <div class="setting-info">
+                  <div class="setting-world" :title="ref.worldName">
+                    {{ ref.worldName }}
+                  </div>
+                  <div class="setting-name">
+                    <n-tag size="small" type="primary" style="margin-right: 6px;">
+                      {{ ref.entryCategory }}
+                    </n-tag>
+                    {{ ref.entryTitle }}
+                  </div>
+                </div>
+                <div class="setting-arrow">→</div>
+              </div>
+            </div>
+          </div>
         </div>
       </n-spin>
     </div>
@@ -223,7 +257,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NSpin, NDivider, useMessage, NSwitch } from 'naive-ui'
+import { NButton, NSpin, NDivider, NTag, useMessage, NSwitch } from 'naive-ui'
 import { storyApi, userApi } from '../api'
 import CommentSection from '../components/CommentSection.vue'
 import { useResponsive, useTouchGestures } from '../composables/useResponsive'
@@ -250,6 +284,7 @@ const fontSize = ref(16)
 const themeKey = ref('default')
 const immersiveMode = ref(false)
 const toggleSettingPanel = ref(false)
+const storyWideReferences = ref([])
 
 const readerRef = ref(null)
 
@@ -272,6 +307,28 @@ const readerStyle = computed(() => {
 const paragraphs = computed(() => {
   if (!currentNode.value?.content) return []
   return currentNode.value.content.split('\n').filter(p => p.trim())
+})
+
+const allReferencedEntries = computed(() => {
+  const seen = new Set()
+  const result = []
+  
+  const nodeRefs = currentNode.value?.referencedEntries || []
+  nodeRefs.forEach(ref => {
+    if (!seen.has(ref.entryId)) {
+      seen.add(ref.entryId)
+      result.push({ ...ref, scope: '本章' })
+    }
+  })
+  
+  storyWideReferences.value.forEach(ref => {
+    if (!seen.has(ref.entryId)) {
+      seen.add(ref.entryId)
+      result.push({ ...ref, scope: '全局' })
+    }
+  })
+  
+  return result
 })
 
 const restoreChoiceTexts = (nodes) => {
@@ -437,6 +494,13 @@ const loadStory = async () => {
     checkFavorite()
     saveReadingProgress()
     
+    try {
+      const refRes = await storyApi.getStoryReferences(storyId.value)
+      storyWideReferences.value = refRes.data.references || []
+    } catch (e) {
+      console.error('加载故事设定引用失败:', e)
+    }
+    
     if (queryCommentId) {
       pendingCommentId.value = queryCommentId
     }
@@ -554,6 +618,13 @@ const saveReadingProgress = async () => {
 const goBack = () => {
   saveReadingProgress()
   router.push('/')
+}
+
+const goToWorldEntry = (ref) => {
+  router.push({
+    path: `/world/${ref.worldId}`,
+    query: { entryId: ref.entryId }
+  })
 }
 
 watch(() => route.params.id, () => {
@@ -1153,6 +1224,103 @@ onUnmounted(() => {
   justify-content: center;
   border-radius: 50%;
   font-size: 12px;
+}
+
+.world-settings-section {
+  margin-top: 40px;
+}
+
+.world-settings-section.mobile-world-settings-section {
+  margin-top: 24px;
+}
+
+.settings-header {
+  margin-bottom: 16px;
+}
+
+.settings-header :deep(.n-divider) {
+  flex: 1;
+}
+
+.mobile-settings-label {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.settings-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.settings-list.mobile-settings-list {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.setting-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #e6f7ff 0%, #e6fffb 100%);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.setting-card:hover {
+  transform: translateY(-2px);
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+.setting-card.mobile-setting-card {
+  padding: 12px;
+}
+
+.setting-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.setting-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-world {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.setting-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.setting-arrow {
+  color: #999;
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
 .mobile-reading-tips {

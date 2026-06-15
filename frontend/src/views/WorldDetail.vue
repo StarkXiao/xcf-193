@@ -95,13 +95,39 @@
       v-model:show="showEntryModal" 
       preset="card"
       :title="selectedEntry?.title || ''"
-      style="width: 600px"
+      style="width: 650px"
     >
       <div v-if="selectedEntry" class="entry-detail">
         <n-tag type="primary" style="margin-bottom: 16px;">
           {{ selectedEntry.category }}
         </n-tag>
         <p class="entry-detail-content">{{ selectedEntry.content }}</p>
+        
+        <n-divider v-if="selectedEntry.referencedStories?.length > 0" style="margin: 24px 0 16px 0;">
+          <span style="font-size: 14px; color: #666;">📖 引用此设定的故事</span>
+        </n-divider>
+        
+        <div v-if="selectedEntry.referencedStories?.length > 0" class="referenced-stories">
+          <div 
+            v-for="ref in selectedEntry.referencedStories" 
+            :key="`${ref.storyId}-${ref.nodeId}`"
+            class="ref-story-card"
+            @click="goToStory(ref)"
+          >
+            <div class="ref-story-icon">📖</div>
+            <div class="ref-story-info">
+              <div class="ref-story-title">{{ ref.storyTitle }}</div>
+              <div class="ref-story-node">章节：{{ ref.nodeTitle }}</div>
+            </div>
+            <div class="ref-story-arrow">→</div>
+          </div>
+        </div>
+        
+        <div v-else class="no-ref-stories" style="margin-top: 16px;">
+          <n-alert type="info" :show-icon="true">
+            暂无故事引用此设定
+          </n-alert>
+        </div>
       </div>
     </n-modal>
   </div>
@@ -116,6 +142,8 @@ import {
   NTag,
   NSpin,
   NModal,
+  NDivider,
+  NAlert,
   useMessage
 } from 'naive-ui'
 import { worldApi, userApi } from '../api'
@@ -239,6 +267,13 @@ const goToEditor = () => {
 
 const goToCollaboration = () => {
   router.push(`/world/${route.params.id}/collaboration`)
+}
+
+const goToStory = (ref) => {
+  router.push({
+    path: `/story/${ref.storyId}`,
+    query: { nodeId: ref.nodeId }
+  })
 }
 
 onMounted(() => {
@@ -394,5 +429,68 @@ onMounted(() => {
   line-height: 1.8;
   color: #444;
   margin: 0;
+}
+
+.referenced-stories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ref-story-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.ref-story-card:hover {
+  transform: translateX(4px);
+  border-color: #9d4edd;
+  box-shadow: 0 2px 8px rgba(157, 78, 221, 0.15);
+}
+
+.ref-story-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.ref-story-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ref-story-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.ref-story-node {
+  font-size: 12px;
+  color: #9d4edd;
+}
+
+.ref-story-arrow {
+  color: #999;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.no-ref-stories {
+  margin-top: 16px;
 }
 </style>

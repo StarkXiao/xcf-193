@@ -48,6 +48,22 @@ export const storyApi = {
   
   viewStory(id) {
     return api.post('/stories/' + id + '/view')
+  },
+  
+  getNodeReferences(storyId, nodeId) {
+    return api.get('/stories/' + storyId + '/nodes/' + nodeId + '/references')
+  },
+  
+  addNodeReference(storyId, nodeId, data) {
+    return api.post('/stories/' + storyId + '/nodes/' + nodeId + '/references', data)
+  },
+  
+  removeNodeReference(storyId, nodeId, data) {
+    return api.delete('/stories/' + storyId + '/nodes/' + nodeId + '/references', { data })
+  },
+  
+  getStoryReferences(storyId) {
+    return api.get('/stories/' + storyId + '/references')
   }
 }
 
@@ -97,6 +113,18 @@ export const worldApi = {
   
   likeWorld(id, data) {
     return api.post('/worlds/' + id + '/like', data)
+  },
+  
+  getEntryReferences(worldId, entryId) {
+    return api.get('/worlds/' + worldId + '/entries/' + entryId + '/references')
+  },
+  
+  addEntryReference(worldId, entryId, data) {
+    return api.post('/worlds/' + worldId + '/entries/' + entryId + '/references', data)
+  },
+  
+  removeEntryReference(worldId, entryId, data) {
+    return api.delete('/worlds/' + worldId + '/entries/' + entryId + '/references', { data })
   }
 }
 

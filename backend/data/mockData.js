@@ -97,7 +97,11 @@ const storyNodes = {
         { id: 'choice-1-1-1', text: '热情地帮他找书', nextNodeId: 'node-1-2a' },
         { id: 'choice-1-1-2', text: '保持距离，指给他方向', nextNodeId: 'node-1-2b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-1', worldName: '浮城世界观', entryId: 'entry-1', entryTitle: '浮城', entryCategory: '地理' },
+        { worldId: 'world-1', worldName: '浮城世界观', entryId: 'entry-2', entryTitle: '天空之境', entryCategory: '传说' }
+      ]
     },
     {
       id: 'node-1-2a',
@@ -118,7 +122,10 @@ const storyNodes = {
         { id: 'choice-1-2a-1', text: '询问他的名字', nextNodeId: 'node-1-3a' },
         { id: 'choice-1-2a-2', text: '邀请他明天再来', nextNodeId: 'node-1-3b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-1', worldName: '浮城世界观', entryId: 'entry-3', entryTitle: '天空守护者', entryCategory: '种族' }
+      ]
     },
     {
       id: 'node-1-2b',
@@ -162,7 +169,11 @@ const storyNodes = {
 【结局达成：天空的守护者】`,
       choices: [],
       isEnding: true,
-      endingType: 'good'
+      endingType: 'good',
+      referencedEntries: [
+        { worldId: 'world-1', worldName: '浮城世界观', entryId: 'entry-2', entryTitle: '天空之境', entryCategory: '传说' },
+        { worldId: 'world-1', worldName: '浮城世界观', entryId: 'entry-3', entryTitle: '天空守护者', entryCategory: '种族' }
+      ]
     },
     {
       id: 'node-1-3b',
@@ -326,7 +337,12 @@ const storyNodes = {
         { id: 'choice-2-1-1', text: '谨慎行事，先做外部扫描', nextNodeId: 'node-2-2a' },
         { id: 'choice-2-1-2', text: '直接进入空间站探索', nextNodeId: 'node-2-2b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-2', worldName: '星际时代', entryId: 'entry-4', entryTitle: '星际联邦', entryCategory: '政治' },
+        { worldId: 'world-2', worldName: '星际时代', entryId: 'entry-5', entryTitle: '超光速航行', entryCategory: '科技' },
+        { worldId: 'world-2', worldName: '星际时代', entryId: 'entry-6', entryTitle: '北辰号空间站', entryCategory: '地点' }
+      ]
     },
     {
       id: 'node-2-2a',
@@ -374,7 +390,10 @@ const storyNodes = {
         { id: 'choice-2-2b-1', text: '唤醒她', nextNodeId: 'node-2-3c' },
         { id: 'choice-2-2b-2', text: '先搞清楚状况', nextNodeId: 'node-2-3b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-2', worldName: '星际时代', entryId: 'entry-6', entryTitle: '北辰号空间站', entryCategory: '地点' }
+      ]
     },
     {
       id: 'node-2-3a',
@@ -624,7 +643,10 @@ const storyNodes = {
         { id: 'choice-3-1-1', text: '上前帮助它', nextNodeId: 'node-3-2a' },
         { id: 'choice-3-1-2', text: '保持警惕，远远观察', nextNodeId: 'node-3-2b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-3', worldName: '大靖王朝', entryId: 'entry-9', entryTitle: '九尾狐', entryCategory: '种族' }
+      ]
     },
     {
       id: 'node-3-2a',
@@ -657,7 +679,11 @@ const storyNodes = {
         { id: 'choice-3-2a-1', text: '惊讶地询问她的身份', nextNodeId: 'node-3-3a' },
         { id: 'choice-3-2a-2', text: '镇定地接受这个事实', nextNodeId: 'node-3-3b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-3', worldName: '大靖王朝', entryId: 'entry-8', entryTitle: '妖族', entryCategory: '种族' },
+        { worldId: 'world-3', worldName: '大靖王朝', entryId: 'entry-9', entryTitle: '九尾狐', entryCategory: '种族' }
+      ]
     },
     {
       id: 'node-3-2b',
@@ -723,7 +749,10 @@ const storyNodes = {
         { id: 'choice-3-3a-1', text: '答应她的提议', nextNodeId: 'node-3-4a' },
         { id: 'choice-3-3a-2', text: '婉言谢绝', nextNodeId: 'node-3-4b' }
       ],
-      isEnding: false
+      isEnding: false,
+      referencedEntries: [
+        { worldId: 'world-3', worldName: '大靖王朝', entryId: 'entry-9', entryTitle: '九尾狐', entryCategory: '种族' }
+      ]
     },
     {
       id: 'node-3-3b',
@@ -897,7 +926,10 @@ const storyNodes = {
 【结局达成：京城烟火】`,
       choices: [],
       isEnding: true,
-      endingType: 'good'
+      endingType: 'good',
+      referencedEntries: [
+        { worldId: 'world-3', worldName: '大靖王朝', entryId: 'entry-7', entryTitle: '大靖王朝', entryCategory: '政治' }
+      ]
     },
     {
       id: 'node-3-4b',
@@ -1292,19 +1324,30 @@ const worldSettings = [
         id: 'entry-1',
         title: '浮城',
         category: '地理',
-        content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。浮城的能源来自天空晶石，这是一种稀有的矿石，蕴含着强大的能量。'
+        content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。浮城的能源来自天空晶石，这是一种稀有的矿石，蕴含着强大的能量。',
+        referencedStories: [
+          { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-1', nodeTitle: '第一章：云中之城' }
+        ]
       },
       {
         id: 'entry-2',
         title: '天空之境',
         category: '传说',
-        content: '天空之境是传说中的圣地，据说在云层之上的更高处。那里是天空守护者的居所，有着无穷无尽的天空之力。没有人真正到达过天空之境，只有传说流传下来。'
+        content: '天空之境是传说中的圣地，据说在云层之上的更高处。那里是天空守护者的居所，有着无穷无尽的天空之力。没有人真正到达过天空之境，只有传说流传下来。',
+        referencedStories: [
+          { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-1', nodeTitle: '第一章：云中之城' },
+          { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-3a', nodeTitle: '结局：天空的守护者' }
+        ]
       },
       {
         id: 'entry-3',
         title: '天空守护者',
         category: '种族',
-        content: '天空守护者是一群神秘的存在，他们守护着天空之境和天空之力。他们有着银色的头发和紫色的眼眸，能够操控风和云。天空守护者通常不与凡人接触，但偶尔也会有守护者来到浮城。'
+        content: '天空守护者是一群神秘的存在，他们守护着天空之境和天空之力。他们有着银色的头发和紫色的眼眸，能够操控风和云。天空守护者通常不与凡人接触，但偶尔也会有守护者来到浮城。',
+        referencedStories: [
+          { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-2a', nodeTitle: '第二章：神秘的访客' },
+          { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-3a', nodeTitle: '结局：天空的守护者' }
+        ]
       }
     ],
     createdAt: '2024-01-20'
@@ -1324,19 +1367,29 @@ const worldSettings = [
         id: 'entry-4',
         title: '星际联邦',
         category: '政治',
-        content: '星际联邦是人类星际殖民地的联合政府，成立于公元2500年。联邦的首都是地球，但实际权力中心在火星城。星际联邦负责管理人类的所有殖民地，维护星际秩序。'
+        content: '星际联邦是人类星际殖民地的联合政府，成立于公元2500年。联邦的首都是地球，但实际权力中心在火星城。星际联邦负责管理人类的所有殖民地，维护星际秩序。',
+        referencedStories: [
+          { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-1', nodeTitle: '序章：废弃空间站' }
+        ]
       },
       {
         id: 'entry-5',
         title: '超光速航行',
         category: '科技',
-        content: '超光速航行技术是星际时代的基石，于公元2300年被发明。通过曲速引擎，飞船可以进入亚空间进行超光速旅行。然而，超光速航行仍然有风险，每年都有飞船在航行中失踪。'
+        content: '超光速航行技术是星际时代的基石，于公元2300年被发明。通过曲速引擎，飞船可以进入亚空间进行超光速旅行。然而，超光速航行仍然有风险，每年都有飞船在航行中失踪。',
+        referencedStories: [
+          { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-1', nodeTitle: '序章：废弃空间站' }
+        ]
       },
       {
         id: 'entry-6',
         title: '北辰号空间站',
         category: '地点',
-        content: '北辰号是一座建造于公元2800年的科研空间站，位于猎户座小行星带。两百年前，这座空间站突然与联邦失去联系，成为了一座废弃空间站。关于它的废弃原因，有很多传闻。'
+        content: '北辰号是一座建造于公元2800年的科研空间站，位于猎户座小行星带。两百年前，这座空间站突然与联邦失去联系，成为了一座废弃空间站。关于它的废弃原因，有很多传闻。',
+        referencedStories: [
+          { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-1', nodeTitle: '序章：废弃空间站' },
+          { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-2b', nodeTitle: '第二章：神秘的少女' }
+        ]
       }
     ],
     createdAt: '2024-02-10'
@@ -1356,19 +1409,30 @@ const worldSettings = [
         id: 'entry-7',
         title: '大靖王朝',
         category: '政治',
-        content: '大靖王朝是一个传承了三百年的王朝，国力强盛，文化繁荣。王朝的都城是长安，那里是天下最繁华的地方。王朝崇尚儒学，但也兼容并包，各种思想都能找到立足之地。'
+        content: '大靖王朝是一个传承了三百年的王朝，国力强盛，文化繁荣。王朝的都城是长安，那里是天下最繁华的地方。王朝崇尚儒学，但也兼容并包，各种思想都能找到立足之地。',
+        referencedStories: [
+          { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-4a', nodeTitle: '结局：京城烟火' }
+        ]
       },
       {
         id: 'entry-8',
         title: '妖族',
         category: '种族',
-        content: '妖族是一群拥有智慧和法力的精怪，它们通常隐居在深山老林之中，不与人类接触。妖族修炼成人形需要很长时间，通常需要几百年。妖族中有善有恶，不能一概而论。'
+        content: '妖族是一群拥有智慧和法力的精怪，它们通常隐居在深山老林之中，不与人类接触。妖族修炼成人形需要很长时间，通常需要几百年。妖族中有善有恶，不能一概而论。',
+        referencedStories: [
+          { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-2a', nodeTitle: '第二章：受伤的九尾狐' }
+        ]
       },
       {
         id: 'entry-9',
         title: '九尾狐',
         category: '种族',
-        content: '九尾狐是妖族中比较高贵的种族，它们天生就有强大的法力，化形也比其他妖族容易。九尾狐通常有着白色的毛发和金色的眼眸，九条尾巴是它们力量的象征。九尾狐大多住在深山古寺之中。'
+        content: '九尾狐是妖族中比较高贵的种族，它们天生就有强大的法力，化形也比其他妖族容易。九尾狐通常有着白色的毛发和金色的眼眸，九条尾巴是它们力量的象征。九尾狐大多住在深山古寺之中。',
+        referencedStories: [
+          { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-1', nodeTitle: '第一章：深山古寺' },
+          { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-2a', nodeTitle: '第二章：受伤的九尾狐' },
+          { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-3a', nodeTitle: '第三章：狐妖小九' }
+        ]
       }
     ],
     createdAt: '2024-01-05'

@@ -320,6 +320,49 @@
                 </div>
               </div>
             </div>
+
+            <div class="references-editor">
+              <div class="references-header">
+                <span class="editor-label">🌍 关联设定条目</span>
+                <n-button size="small" type="primary" @click="openWorldPicker">
+                  <template #icon>+</template>
+                  关联设定
+                </n-button>
+              </div>
+              <div v-if="selectedNode.referencedEntries?.length > 0" class="references-list">
+                <div 
+                  v-for="ref in selectedNode.referencedEntries" 
+                  :key="ref.entryId"
+                  class="reference-card"
+                >
+                  <div class="ref-icon">📚</div>
+                  <div class="ref-info">
+                    <div class="ref-world" :title="ref.worldName">
+                      {{ ref.worldName }}
+                    </div>
+                    <div class="ref-entry">
+                      <n-tag size="small" type="primary" style="margin-right: 6px;">
+                        {{ ref.entryCategory }}
+                      </n-tag>
+                      {{ ref.entryTitle }}
+                    </div>
+                  </div>
+                  <n-button 
+                    text 
+                    size="tiny" 
+                    type="error"
+                    @click="removeReference(ref)"
+                  >
+                    <template #icon>✕</template>
+                  </n-button>
+                </div>
+              </div>
+              <div v-else class="empty-references">
+                <n-alert type="info" :show-icon="true">
+                  暂无关联设定，点击"关联设定"添加
+                </n-alert>
+              </div>
+            </div>
           </div>
 
           <div v-else class="no-node-selected">
@@ -340,6 +383,68 @@
         </n-spin>
       </div>
     </div>
+
+    <n-modal
+      v-model:show="showWorldPicker"
+      preset="card"
+      title="选择世界设定"
+      style="width: min(640px, 90vw);"
+      :mask-closable="true"
+    >
+      <div class="world-picker-content">
+        <n-select
+          v-model:value="pickerWorldId"
+          placeholder="选择世界观..."
+          :options="worldOptions"
+          style="margin-bottom: 16px;"
+          @update:value="loadWorldEntries"
+        />
+        
+        <div v-if="loadingWorlds" class="picker-loading">
+          加载中...
+        </div>
+        
+        <div v-else-if="pickerWorldId && pickerWorld" class="picker-entry-list">
+          <div class="picker-entries">
+            <div
+              v-for="entry in pickerWorld.entries || []"
+              :key="entry.id"
+              class="picker-entry-item"
+              :class="{ selected: isEntrySelected(entry.id) }"
+              @click="toggleEntrySelection(entry)"
+            >
+              <div class="picker-entry-check">
+                <span v-if="isEntrySelected(entry.id)">✓</span>
+              </div>
+              <div class="picker-entry-info">
+                <n-tag size="small" type="primary" style="margin-right: 6px;">
+                  {{ entry.category }}
+                </n-tag>
+                <span class="picker-entry-title">{{ entry.title }}</span>
+              </div>
+              <div class="picker-entry-preview" :title="entry.content">
+                {{ entry.content?.slice(0, 40) || '' }}{{ entry.content?.length > 40 ? '...' : '' }}
+              </div>
+            </div>
+          </div>
+          <div v-if="pickerWorld.entries?.length === 0" class="picker-empty">
+            该世界观暂无设定条目
+          </div>
+        </div>
+        <div v-else-if="!pickerWorldId" class="picker-hint">
+          请先选择世界观
+        </div>
+      </div>
+
+      <template #footer>
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <n-button @click="showWorldPicker = false">取消</n-button>
+          <n-button type="primary" @click="confirmReferences" :disabled="pickerSelectedEntries.length === 0">
+            确定关联 ({{ pickerSelectedEntries.length }})
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
   </div>
 </template>
 
@@ -358,9 +463,12 @@ import {
   NRadioGroup,
   NRadioButton,
   NSpin,
+  NModal,
+  NAlert,
+  NEmpty,
   useMessage
 } from 'naive-ui'
-import { storyApi } from '../api'
+import { storyApi, worldApi } from '../api'
 import { useResponsive } from '../composables/useResponsive'
 
 const route = useRoute()
@@ -394,6 +502,20 @@ const saving = ref(false)
 const isEditing = computed(() => !!route.params.id)
 const lastSavedTime = ref('')
 const activeMobileTab = ref('info')
+
+const showWorldPicker = ref(false)
+const pickerWorldId = ref(null)
+const pickerWorld = ref(null)
+const allWorlds = ref([])
+const loadingWorlds = ref(false)
+const pickerSelectedEntries = ref([])
+
+const worldOptions = computed(() => {
+  return allWorlds.value.map(w => ({
+    label: `${w.cover || '🌍'} ${w.name}`,
+    value: w.id
+  }))
+})
 
 const nodeOptions = computed(() => {
   return nodes.value
@@ -567,6 +689,121 @@ const removeTag = (tag) => {
   if (index !== -1) {
     story.value.tags.splice(index, 1)
     tagsInput.value = story.value.tags.join(', ')
+  }
+}
+
+const loadAllWorlds = async () => {
+  loadingWorlds.value = true
+  try {
+    const res = await worldApi.getWorlds()
+    allWorlds.value = res.data || []
+  } catch (e) {
+    console.error('加载世界观列表失败:', e)
+    message.error('加载世界观列表失败')
+  } finally {
+    loadingWorlds.value = false
+  }
+}
+
+const loadWorldEntries = async (worldId) => {
+  if (!worldId) {
+    pickerWorld.value = null
+    return
+  }
+  loadingWorlds.value = true
+  try {
+    const res = await worldApi.getWorld(worldId)
+    pickerWorld.value = res.data
+  } catch (e) {
+    console.error('加载世界观条目失败:', e)
+    message.error('加载世界观条目失败')
+  } finally {
+    loadingWorlds.value = false
+  }
+}
+
+const openWorldPicker = async () => {
+  if (!selectedNode.value) {
+    message.warning('请先选择一个章节')
+    return
+  }
+  if (allWorlds.value.length === 0) {
+    await loadAllWorlds()
+  }
+  pickerWorldId.value = null
+  pickerWorld.value = null
+  pickerSelectedEntries.value = []
+  showWorldPicker.value = true
+}
+
+const isEntrySelected = (entryId) => {
+  return pickerSelectedEntries.value.some(e => e.id === entryId)
+}
+
+const toggleEntrySelection = (entry) => {
+  const idx = pickerSelectedEntries.value.findIndex(e => e.id === entry.id)
+  if (idx >= 0) {
+    pickerSelectedEntries.value.splice(idx, 1)
+  } else {
+    pickerSelectedEntries.value.push(entry)
+  }
+}
+
+const confirmReferences = async () => {
+  if (!selectedNode.value || !pickerWorld.value || pickerSelectedEntries.value.length === 0) {
+    return
+  }
+  
+  try {
+    if (!selectedNode.value.referencedEntries) {
+      selectedNode.value.referencedEntries = []
+    }
+    
+    const existingIds = new Set(selectedNode.value.referencedEntries.map(r => r.entryId))
+    
+    for (const entry of pickerSelectedEntries.value) {
+      if (existingIds.has(entry.id)) continue
+      
+      const refData = {
+        entryId: entry.id,
+        entryTitle: entry.title,
+        entryCategory: entry.category,
+        worldId: pickerWorld.value.id,
+        worldName: pickerWorld.value.name
+      }
+      
+      try {
+        await storyApi.addNodeReference(story.value.id, selectedNode.value.id, refData)
+        selectedNode.value.referencedEntries.push(refData)
+      } catch (e) {
+        console.error('添加关联失败:', e)
+      }
+    }
+    
+    message.success(`已关联 ${pickerSelectedEntries.value.length} 个设定条目`)
+    showWorldPicker.value = false
+  } catch (e) {
+    console.error('确认关联失败:', e)
+    message.error('关联设定失败')
+  }
+}
+
+const removeReference = async (ref) => {
+  if (!selectedNode.value) return
+  
+  try {
+    await storyApi.removeNodeReference(story.value.id, selectedNode.value.id, {
+      entryId: ref.entryId
+    })
+    
+    const idx = selectedNode.value.referencedEntries.findIndex(r => r.entryId === ref.entryId)
+    if (idx >= 0) {
+      selectedNode.value.referencedEntries.splice(idx, 1)
+    }
+    message.success('已取消关联')
+  } catch (e) {
+    console.error('取消关联失败:', e)
+    message.error('取消关联失败')
   }
 }
 
@@ -1035,6 +1272,169 @@ onMounted(() => {
 
 .no-node-selected .hint {
   font-size: 13px;
+  color: #bbb;
+}
+
+.references-editor {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.references-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.references-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reference-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #e6f7ff 0%, #e6fffb 100%);
+  border-radius: 10px;
+  border: 1px solid #b3e5fc;
+}
+
+.ref-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.ref-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ref-world {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ref-entry {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.empty-references {
+  margin-top: 8px;
+}
+
+.world-picker-content {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.picker-loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.picker-entry-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.picker-entry-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.picker-entry-item:hover {
+  border-color: #1890ff;
+  background: #f0f9ff;
+}
+
+.picker-entry-item.selected {
+  border-color: #1890ff;
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+}
+
+.picker-entry-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: white;
+  background: white;
+  transition: all 0.2s;
+}
+
+.picker-entry-item.selected .picker-entry-check {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+.picker-entry-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.picker-entry-title {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.picker-entry-preview {
+  font-size: 12px;
+  color: #999;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-empty {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}
+
+.picker-hint {
+  text-align: center;
+  padding: 40px;
   color: #bbb;
 }
 </style>
