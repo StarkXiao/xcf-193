@@ -96,6 +96,8 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['comments-loaded'])
+
 const currentUser = ref({
   id: 'user-1',
   username: '月下独酌',
@@ -112,6 +114,7 @@ const loadComments = async () => {
   try {
     const res = await commentApi.getComments(props.storyId, props.nodeId)
     comments.value = res.data.map(c => ({ ...c, isLiked: false }))
+    emit('comments-loaded', comments.value)
   } catch (err) {
     console.error('加载评论失败:', err)
   } finally {

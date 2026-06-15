@@ -10,13 +10,14 @@
         @keyup.enter="handleSearch"
         @select="handleSelect"
         @search="handleInput"
+        @update:value="handleValueChange"
       >
         <template #prefix>
           <n-icon size="16">🔍</n-icon>
         </template>
         <template #default="{ option }">
           <div class="suggestion-item">
-            <span class="suggestion-icon">{{ option.type === 'tag' ? '🏷️' : '�' }}</span>
+            <span class="suggestion-icon">{{ option.type === 'tag' ? '🏷️' : '🕐' }}</span>
             <span class="suggestion-text">{{ option.label }}</span>
             <span v-if="option.type === 'tag'" class="suggestion-count">
               {{ option.storyCount }} 作品
@@ -54,10 +55,14 @@ const props = defineProps({
   modelValue: {
     type: String,
     default: ''
+  },
+  autoRoute: {
+    type: Boolean,
+    default: true
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'search'])
+const emit = defineEmits(['update:modelValue', 'search', 'clear'])
 
 const router = useRouter()
 const searchText = ref('')
@@ -116,9 +121,21 @@ const handleInput = (value) => {
   }, 300)
 }
 
+const handleValueChange = (value) => {
+  if (!value || value.trim() === '') {
+    tagSuggestions.value = []
+    emit('clear')
+  }
+}
+
 const handleSelect = (value, option) => {
   if (option.type === 'tag') {
-    router.push({ path: '/search', query: { tag: option.tag } })
+    if (props.autoRoute) {
+      router.push({ path: '/search', query: { tag: option.tag } })
+    } else {
+      searchText.value = option.tag
+      emit('search', option.tag)
+    }
   } else if (option.type === 'history') {
     searchText.value = option.keyword
     handleSearch()
@@ -131,7 +148,9 @@ const handleSearch = () => {
   
   addToHistory(keyword)
   emit('search', keyword)
-  router.push({ path: '/search', query: { q: keyword } })
+  if (props.autoRoute) {
+    router.push({ path: '/search', query: { q: keyword } })
+  }
 }
 
 const addToHistory = (keyword) => {
@@ -153,7 +172,9 @@ const loadHistory = () => {
 }
 
 watch(() => props.modelValue, (val) => {
-  searchText.value = val
+  if (val !== searchText.value) {
+    searchText.value = val
+  }
 })
 
 watch(searchText, (val) => {

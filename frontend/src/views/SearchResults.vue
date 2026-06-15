@@ -2,23 +2,14 @@
   <div class="search-page">
     <div class="search-header">
       <div class="search-box-wrapper">
-        <n-input
-          v-model:value="searchKeyword"
+        <SearchBox
+          v-model="searchKeyword"
           placeholder="搜索故事、世界设定、评论..."
           size="large"
-          clearable
-          @keyup.enter="handleSearch"
+          :auto-route="false"
+          @search="handleSearch"
           @clear="handleClear"
-        >
-          <template #prefix>
-            <n-icon size="20">🔍</n-icon>
-          </template>
-          <template #suffix>
-            <n-button type="primary" size="medium" @click="handleSearch">
-              搜索
-            </n-button>
-          </template>
-        </n-input>
+        />
       </div>
     </div>
 
@@ -190,10 +181,11 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { 
-  NInput, NButton, NIcon, NTabs, NTabPane, NSpin, 
+  NTabs, NTabPane, NSpin, 
   NTag, NPagination 
 } from 'naive-ui'
 import { searchApi } from '../api'
+import SearchBox from '../components/SearchBox.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -322,7 +314,13 @@ const openResult = (item) => {
   } else if (type === 'world') {
     router.push(`/world/${item.id}`)
   } else if (type === 'comment') {
-    router.push(`/story/${item.storyId}`)
+    router.push({
+      path: `/story/${item.storyId}`,
+      query: {
+        nodeId: item.nodeId,
+        commentId: item.id
+      }
+    })
   }
 }
 

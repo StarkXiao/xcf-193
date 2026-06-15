@@ -90,7 +90,11 @@
 
     <div class="comments-section">
       <n-divider>评论互动</n-divider>
-      <CommentSection :story-id="storyId" :node-id="currentNodeId" />
+      <CommentSection 
+        :story-id="storyId" 
+        :node-id="currentNodeId" 
+        @comments-loaded="handleCommentsLoaded"
+      />
     </div>
   </div>
 </template>
@@ -116,6 +120,7 @@ const history = ref([])
 const isLiked = ref(false)
 const isFavorited = ref(false)
 const allNodes = ref([])
+const pendingCommentId = ref(null)
 
 const paragraphs = computed(() => {
   if (!currentNode.value?.content) return []
@@ -127,17 +132,24 @@ const scrollToComment = (commentId) => {
     const commentEl = document.getElementById(`comment-${commentId}`)
     if (commentEl) {
       commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      commentEl.style.backgroundColor = 'rgba(157, 78, 221, 0.1)'
+      commentEl.style.backgroundColor = 'rgba(157, 78, 221, 0.15)'
       setTimeout(() => {
         commentEl.style.backgroundColor = 'transparent'
-      }, 2000)
+      }, 2500)
     } else {
       const commentsSection = document.querySelector('.comments-section')
       if (commentsSection) {
         commentsSection.scrollIntoView({ behavior: 'smooth' })
       }
     }
-  }, 500)
+  }, 200)
+}
+
+const handleCommentsLoaded = () => {
+  if (pendingCommentId.value) {
+    scrollToComment(pendingCommentId.value)
+    pendingCommentId.value = null
+  }
 }
 
 const loadStory = async () => {
@@ -173,7 +185,7 @@ const loadStory = async () => {
     checkFavorite()
     
     if (queryCommentId) {
-      scrollToComment(queryCommentId)
+      pendingCommentId.value = queryCommentId
     }
   } catch (err) {
     console.error('加载故事失败:', err)
