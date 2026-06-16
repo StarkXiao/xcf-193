@@ -11,7 +11,7 @@ let storyNodesData = store.storyNodes;
 
 router.get('/', (req, res) => {
   const { sort, page = 1, limit = 10, keyword, category, authorId } = req.query;
-  let result = [...worldSettingsData];
+  let result = [...worldSettingsData].filter(w => !w.isTakenDown);
 
   if (keyword) {
     const kw = keyword.toLowerCase();
@@ -19,16 +19,16 @@ router.get('/', (req, res) => {
       w.name.toLowerCase().includes(kw) ||
       w.description.toLowerCase().includes(kw) ||
       w.authorName.toLowerCase().includes(kw) ||
-      (w.entries && w.entries.some(e => 
+      (w.entries && w.entries.some(e => !e.isTakenDown && (
         e.title.toLowerCase().includes(kw) || 
         e.content.toLowerCase().includes(kw)
-      ))
+      )))
     );
   }
 
   if (category) {
     result = result.filter(w => 
-      w.entries && w.entries.some(e => e.category === category)
+      w.entries && w.entries.some(e => !e.isTakenDown && e.category === category)
     );
   }
 
@@ -41,7 +41,11 @@ router.get('/', (req, res) => {
   } else if (sort === 'popular') {
     result.sort((a, b) => b.likes - a.likes);
   } else if (sort === 'entries') {
-    result.sort((a, b) => (b.entries?.length || 0) - (a.entries?.length || 0));
+    result.sort((a, b) => {
+      const aCount = (a.entries || []).filter(e => !e.isTakenDown).length;
+      const bCount = (b.entries || []).filter(e => !e.isTakenDown).length;
+      return bCount - aCount;
+    });
   } else if (sort === 'name') {
     result.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
   }
@@ -61,8 +65,13 @@ router.get('/', (req, res) => {
 router.get('/categories/list', (req, res) => {
   const categories = new Set();
   worldSettingsData.forEach(w => {
+    if (w.isTakenDown) return;
     if (w.entries) {
-      w.entries.forEach(e => categories.add(e.category));
+      w.entries.forEach(e => {
+        if (!e.isTakenDown) {
+          categories.add(e.category);
+        }
+      });
     }
   });
   res.json({
@@ -75,6 +84,9 @@ router.get('/:id', (req, res) => {
   if (!world) {
     return res.status(404).json({ message: '世界设定不存在' });
   }
+  if (world.isTakenDown) {
+    return res.status(404).json({ message: '该世界设定已被下架' });
+  }
   res.json(world);
 });
 
@@ -86,8 +98,11 @@ router.get('/:id/entries', (req, res) => {
   if (!world) {
     return res.status(404).json({ message: '世界设定不存在' });
   }
+  if (world.isTakenDown) {
+    return res.status(404).json({ message: '该世界设定已被下架' });
+  }
 
-  let entries = [...(world.entries || [])];
+  let entries = [...(world.entries || [])].filter(e => !e.isTakenDown);
 
   if (keyword) {
     const kw = keyword.toLowerCase();
@@ -109,7 +124,7 @@ router.get('/:id/entries', (req, res) => {
     entries.sort((a, b) => (b.referencedStories?.length || 0) - (a.referencedStories?.length || 0));
   }
 
-  const categories = [...new Set((world.entries || []).map(e => e.category))];
+  const categories = [...new Set((world.entries || []).filter(e => !e.isTakenDown).map(e => e.category))];
 
   res.json({
     total: entries.length,

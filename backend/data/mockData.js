@@ -40,7 +40,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-1-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-2',
@@ -57,7 +58,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-2-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-3',
@@ -74,7 +76,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-3-1',
     auditStatus: 'pending',
-    auditLevel: null
+    auditLevel: null,
+    isTakenDown: false
   },
   {
     id: 'story-4',
@@ -91,7 +94,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-4-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-5',
@@ -108,7 +112,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-5-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-6',
@@ -125,7 +130,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-6-1',
     auditStatus: 'approved',
-    auditLevel: 'PG'
+    auditLevel: 'PG',
+    isTakenDown: false
   },
   {
     id: 'story-7',
@@ -142,7 +148,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-7-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-8',
@@ -159,7 +166,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-8-1',
     auditStatus: 'approved',
-    auditLevel: 'PG'
+    auditLevel: 'PG',
+    isTakenDown: false
   },
   {
     id: 'story-9',
@@ -176,7 +184,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-9-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-10',
@@ -193,7 +202,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-10-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-11',
@@ -210,7 +220,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-11-1',
     auditStatus: 'approved',
-    auditLevel: 'PG'
+    auditLevel: 'PG',
+    isTakenDown: false
   },
   {
     id: 'story-12',
@@ -227,7 +238,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-12-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-13',
@@ -244,7 +256,8 @@ const stories = [
     status: 'completed',
     startNodeId: 'node-13-1',
     auditStatus: 'approved',
-    auditLevel: 'PG'
+    auditLevel: 'PG',
+    isTakenDown: false
   },
   {
     id: 'story-14',
@@ -261,7 +274,8 @@ const stories = [
     status: 'ongoing',
     startNodeId: 'node-14-1',
     auditStatus: 'approved',
-    auditLevel: 'G'
+    auditLevel: 'G',
+    isTakenDown: false
   },
   {
     id: 'story-15',
@@ -1653,7 +1667,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-05 10:30',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-1-reply-1',
@@ -1675,7 +1690,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-05 11:20',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-1-reply-2',
@@ -1697,7 +1713,8 @@ const comments = {
       isAuthor: true,
       createdAt: '2024-04-05 12:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-2',
@@ -1719,7 +1736,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-06 14:20',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-2-reply-1',
@@ -1741,7 +1759,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-06 15:10',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-3',
@@ -1763,7 +1782,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-08 16:45',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-4',
@@ -1785,7 +1805,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-10 09:15',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-4-reply-1',
@@ -1807,7 +1828,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-10 10:30',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-5',
@@ -1853,7 +1875,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-03-20 16:45',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-6-reply-1',
@@ -1875,7 +1898,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-03-20 17:30',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-7',
@@ -1897,7 +1921,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-01 11:30',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-7-reply-1',
@@ -1919,7 +1944,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-04-01 12:15',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-7-reply-2',
@@ -1941,7 +1967,8 @@ const comments = {
       isAuthor: true,
       createdAt: '2024-04-01 13:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-8',
@@ -1987,7 +2014,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-02-15 08:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-9-reply-1',
@@ -2009,7 +2037,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-02-15 09:30',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-9-reply-2',
@@ -2031,7 +2060,8 @@ const comments = {
       isAuthor: true,
       createdAt: '2024-02-15 10:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-10',
@@ -2053,7 +2083,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-03-01 20:10',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-10-reply-1',
@@ -2075,7 +2106,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-03-01 21:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-10-reply-2',
@@ -2097,7 +2129,8 @@ const comments = {
       isAuthor: true,
       createdAt: '2024-03-01 21:30',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-10-reply-3',
@@ -2119,7 +2152,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-03-01 22:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-11',
@@ -2141,7 +2175,8 @@ const comments = {
       isAuthor: false,
       createdAt: '2024-02-20 16:00',
       auditStatus: 'approved',
-      auditLevel: 'G'
+      auditLevel: 'G',
+      isTakenDown: false
     },
     {
       id: 'comment-12',
@@ -2179,6 +2214,7 @@ const worldSettings = [
     likes: 128,
     auditStatus: 'approved',
     auditLevel: 'G',
+    isTakenDown: false,
     entries: [
       {
         id: 'entry-1',
@@ -2187,7 +2223,8 @@ const worldSettings = [
         content: '浮城是一座漂浮在万米高空之上的城市，依靠神秘的天空之力悬浮。城市分为多层，最上层是贵族区，中间是商业区，最下层是平民区。浮城的能源来自天空晶石，这是一种稀有的矿石，蕴含着强大的能量。',
         referencedStories: [
           { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-1', nodeTitle: '第一章：云中之城' }
-        ]
+        ],
+        isTakenDown: false
       },
       {
         id: 'entry-2',
@@ -2197,7 +2234,8 @@ const worldSettings = [
         referencedStories: [
           { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-1', nodeTitle: '第一章：云中之城' },
           { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-3a', nodeTitle: '结局：天空的守护者' }
-        ]
+        ],
+        isTakenDown: false
       },
       {
         id: 'entry-3',
@@ -2207,7 +2245,8 @@ const worldSettings = [
         referencedStories: [
           { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-2a', nodeTitle: '第二章：神秘的访客' },
           { storyId: 'story-1', storyTitle: '浮城之恋', nodeId: 'node-1-3a', nodeTitle: '结局：天空的守护者' }
-        ]
+        ],
+        isTakenDown: false
       }
     ],
     createdAt: '2024-01-20'
@@ -2222,6 +2261,7 @@ const worldSettings = [
     likes: 96,
     auditStatus: 'approved',
     auditLevel: 'G',
+    isTakenDown: false,
     entries: [
       {
         id: 'entry-4',
@@ -2230,7 +2270,8 @@ const worldSettings = [
         content: '星际联邦是人类星际殖民地的联合政府，成立于公元2500年。联邦的首都是地球，但实际权力中心在火星城。星际联邦负责管理人类的所有殖民地，维护星际秩序。',
         referencedStories: [
           { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-1', nodeTitle: '序章：废弃空间站' }
-        ]
+        ],
+        isTakenDown: false
       },
       {
         id: 'entry-5',
@@ -2239,7 +2280,8 @@ const worldSettings = [
         content: '超光速航行技术是星际时代的基石，于公元2300年被发明。通过曲速引擎，飞船可以进入亚空间进行超光速旅行。然而，超光速航行仍然有风险，每年都有飞船在航行中失踪。',
         referencedStories: [
           { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-1', nodeTitle: '序章：废弃空间站' }
-        ]
+        ],
+        isTakenDown: false
       },
       {
         id: 'entry-6',
@@ -2249,7 +2291,8 @@ const worldSettings = [
         referencedStories: [
           { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-1', nodeTitle: '序章：废弃空间站' },
           { storyId: 'story-2', storyTitle: '星海彼端的约定', nodeId: 'node-2-2b', nodeTitle: '第二章：神秘的少女' }
-        ]
+        ],
+        isTakenDown: false
       }
     ],
     createdAt: '2024-02-10'
@@ -2264,6 +2307,7 @@ const worldSettings = [
     likes: 156,
     auditStatus: 'pending',
     auditLevel: null,
+    isTakenDown: false,
     entries: [
       {
         id: 'entry-7',
@@ -2272,7 +2316,8 @@ const worldSettings = [
         content: '大靖王朝是一个传承了三百年的王朝，国力强盛，文化繁荣。王朝的都城是长安，那里是天下最繁华的地方。王朝崇尚儒学，但也兼容并包，各种思想都能找到立足之地。',
         referencedStories: [
           { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-4a', nodeTitle: '结局：京城烟火' }
-        ]
+        ],
+        isTakenDown: false
       },
       {
         id: 'entry-8',
@@ -2281,7 +2326,8 @@ const worldSettings = [
         content: '妖族是一群拥有智慧和法力的精怪，它们通常隐居在深山老林之中，不与人类接触。妖族修炼成人形需要很长时间，通常需要几百年。妖族中有善有恶，不能一概而论。',
         referencedStories: [
           { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-2a', nodeTitle: '第二章：受伤的九尾狐' }
-        ]
+        ],
+        isTakenDown: false
       },
       {
         id: 'entry-9',
@@ -2292,7 +2338,8 @@ const worldSettings = [
           { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-1', nodeTitle: '第一章：深山古寺' },
           { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-2a', nodeTitle: '第二章：受伤的九尾狐' },
           { storyId: 'story-3', storyTitle: '妖狐与书生', nodeId: 'node-3-3a', nodeTitle: '第三章：狐妖小九' }
-        ]
+        ],
+        isTakenDown: false
       }
     ],
     createdAt: '2024-01-05'
@@ -3189,7 +3236,8 @@ const storyPerformance = {
           { date: '2024-05-10', views: 175, likes: 38 },
           { date: '2024-05-11', views: 210, likes: 45 },
           { date: '2024-05-12', views: 186, likes: 36 }
-        ]
+        ],
+        isTakenDown: false
       }
     ],
     topEndings: [
@@ -3230,7 +3278,8 @@ const storyPerformance = {
           { date: '2024-04-26', views: 140, likes: 38 },
           { date: '2024-04-27', views: 148, likes: 40 },
           { date: '2024-04-28', views: 103, likes: 26 }
-        ]
+        ],
+        isTakenDown: false
       }
     ],
     topEndings: [
@@ -3271,7 +3320,8 @@ const storyPerformance = {
           { date: '2024-05-03', views: 225, likes: 62 },
           { date: '2024-05-04', views: 180, likes: 45 },
           { date: '2024-05-05', views: 136, likes: 39 }
-        ]
+        ],
+        isTakenDown: false
       }
     ],
     topEndings: [

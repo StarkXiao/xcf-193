@@ -246,6 +246,7 @@
                   <n-radio-button value="story">故事</n-radio-button>
                   <n-radio-button value="world">设定</n-radio-button>
                   <n-radio-button value="comment">评论</n-radio-button>
+                  <n-radio-button value="world_entry">设定条目</n-radio-button>
                 </n-radio-group>
               </div>
 
@@ -273,6 +274,8 @@
                     <div class="takedown-meta">
                       <span class="meta-item">👤 {{ item.authorName }}</span>
                       <span class="meta-item" v-if="item.storyTitle">📖 {{ item.storyTitle }}</span>
+                      <span class="meta-item" v-if="item.worldName">🌍 {{ item.worldName }}</span>
+                      <span class="meta-item" v-if="item.category">🏷️ {{ item.category }}</span>
                     </div>
                     <div class="takedown-reason" v-if="item.takedownReason">
                       <span class="report-label">下架原因：</span>
@@ -561,7 +564,8 @@ const getTypeLabel = (type) => {
   const labels = {
     story: '故事',
     world: '设定',
-    comment: '评论'
+    comment: '评论',
+    world_entry: '设定条目'
   }
   return labels[type] || type
 }
@@ -942,7 +946,9 @@ onMounted(() => {
   background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
 }
 
-.report-type-badge.world_entry {
+.item-type-badge.world_entry,
+.report-type-badge.world_entry,
+.takedown-type-badge.world_entry {
   background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
 }
 

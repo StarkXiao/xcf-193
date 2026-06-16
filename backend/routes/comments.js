@@ -51,6 +51,7 @@ router.get('/story/:storyId', (req, res) => {
   const { nodeId, sort = 'newest', scope = 'current' } = req.query;
   
   let storyComments = commentsData[storyId] || [];
+  storyComments = storyComments.filter(c => !c.isTakenDown);
   
   if (scope === 'current' && nodeId) {
     storyComments = storyComments.filter(c => c.nodeId === nodeId);
@@ -93,7 +94,7 @@ router.get('/story/:storyId/hot-aggregate', (req, res) => {
   const { storyId } = req.params;
   const { limit = 5, minLikes = 5 } = req.query;
   
-  const storyComments = commentsData[storyId] || [];
+  const storyComments = (commentsData[storyId] || []).filter(c => !c.isTakenDown);
   const nodes = storyNodesData[storyId] || [];
   
   const hotByNode = {};

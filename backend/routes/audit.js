@@ -535,6 +535,18 @@ router.post('/:type/:id/restore', (req, res) => {
       }
       break;
     }
+    case 'world_entry': {
+      for (const world of worldSettingsData) {
+        const entry = world.entries?.find(e => e.id === id);
+        if (entry) {
+          target = entry;
+          entry.isTakenDown = false;
+          entry.takedownReason = undefined;
+          break;
+        }
+      }
+      break;
+    }
     default:
       return res.status(400).json({ message: '无效的审核类型' });
   }
@@ -549,7 +561,7 @@ router.post('/:type/:id/restore', (req, res) => {
   const authorId = getAuthorId(type, id);
   const targetTitle = getTargetTitle(type, id);
   if (authorId) {
-    const typeLabel = type === 'story' ? '故事' : type === 'world' ? '世界设定' : '评论';
+    const typeLabel = type === 'story' ? '故事' : type === 'world' ? '世界设定' : type === 'world_entry' ? '设定条目' : '评论';
     createNotification({
       userId: authorId,
       type: 'audit_approved',
@@ -621,6 +633,26 @@ router.get('/takedown', (req, res) => {
             authorName: c.username,
             takedownReason: c.rejectReason,
             takenDownAt: c.createdAt
+          });
+        });
+    }
+  }
+
+  if (!type || type === 'world_entry') {
+    for (const world of worldSettingsData) {
+      world.entries?.filter(e => e.isTakenDown)
+        .forEach(e => {
+          allItems.push({
+            id: e.id,
+            type: 'world_entry',
+            title: e.title,
+            category: e.category,
+            worldId: world.id,
+            worldName: world.name,
+            authorId: world.authorId,
+            authorName: world.authorName,
+            takedownReason: e.takedownReason,
+            takenDownAt: e.updatedAt || world.createdAt
           });
         });
     }

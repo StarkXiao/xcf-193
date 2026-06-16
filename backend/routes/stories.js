@@ -13,7 +13,7 @@ let nodeReadingEventsData = store.nodeReadingEvents;
 
 router.get('/', (req, res) => {
   const { tag, sort, page = 1, limit = 10 } = req.query;
-  let result = [...storiesData];
+  let result = [...storiesData].filter(s => !s.isTakenDown);
 
   if (tag) {
     result = result.filter(story => story.tags.includes(tag));
@@ -45,6 +45,9 @@ router.get('/:id', (req, res, next) => {
   const story = storiesData.find(s => s.id === id);
   if (!story) {
     return res.status(404).json({ message: '故事不存在' });
+  }
+  if (story.isTakenDown) {
+    return res.status(404).json({ message: '该故事已被下架' });
   }
   res.json(story);
 });
@@ -892,7 +895,7 @@ const calculateStoryScore = (story, userTags = []) => {
 };
 
 const getApprovedStories = () => {
-  return storiesData.filter(s => s.auditStatus === 'approved');
+  return storiesData.filter(s => s.auditStatus === 'approved' && !s.isTakenDown);
 };
 
 const getUserTags = (userId) => {
