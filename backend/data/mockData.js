@@ -3688,6 +3688,752 @@ const settingReferenceTrends = {
   }
 };
 
+const endingAchievements = {
+  'story-1': {
+    storyId: 'story-1',
+    storyTitle: '浮城之恋',
+    totalReaders: 1024,
+    totalEndings: 4,
+    overallAchievementRate: 44.5,
+    averageEndingsPerReader: 1.2,
+    endings: [
+      {
+        id: 'node-1-4b',
+        title: '结局：云之彼端',
+        endingType: 'happy',
+        achievementCount: 156,
+        achievementRate: 42,
+        firstReachedAt: '2024-04-15',
+        recentWeekCount: 28,
+        trend: 'up'
+      },
+      {
+        id: 'node-1-3a',
+        title: '结局：天空的守护者',
+        endingType: 'normal',
+        achievementCount: 98,
+        achievementRate: 26,
+        firstReachedAt: '2024-04-18',
+        recentWeekCount: 18,
+        trend: 'stable'
+      },
+      {
+        id: 'node-1-4a',
+        title: '结局：烟火人间',
+        endingType: 'bittersweet',
+        achievementCount: 76,
+        achievementRate: 20,
+        firstReachedAt: '2024-04-20',
+        recentWeekCount: 12,
+        trend: 'up'
+      },
+      {
+        id: 'node-1-3b',
+        title: '结局：未完的故事',
+        endingType: 'sad',
+        achievementCount: 54,
+        achievementRate: 14,
+        firstReachedAt: '2024-04-22',
+        recentWeekCount: 8,
+        trend: 'down'
+      }
+    ],
+    achievementTrend: [
+      { date: '2024-05-06', totalAchievements: 320, newAchievements: 18 },
+      { date: '2024-05-07', totalAchievements: 338, newAchievements: 22 },
+      { date: '2024-05-08', totalAchievements: 360, newAchievements: 25 },
+      { date: '2024-05-09', totalAchievements: 385, newAchievements: 28 },
+      { date: '2024-05-10', totalAchievements: 405, newAchievements: 24 },
+      { date: '2024-05-11', totalAchievements: 435, newAchievements: 32 },
+      { date: '2024-05-12', totalAchievements: 456, newAchievements: 26 }
+    ]
+  },
+  'story-2': {
+    storyId: 'story-2',
+    storyTitle: '星海彼端的约定',
+    totalReaders: 756,
+    totalEndings: 4,
+    overallAchievementRate: 52.2,
+    averageEndingsPerReader: 1.5,
+    endings: [
+      {
+        id: 'node-2-4d',
+        title: '结局：两个人的空间站',
+        endingType: 'happy',
+        achievementCount: 168,
+        achievementRate: 45,
+        firstReachedAt: '2024-03-20',
+        recentWeekCount: 25,
+        trend: 'up'
+      },
+      {
+        id: 'node-2-4a',
+        title: '结局：星河旅人',
+        endingType: 'normal',
+        achievementCount: 112,
+        achievementRate: 30,
+        firstReachedAt: '2024-03-25',
+        recentWeekCount: 16,
+        trend: 'stable'
+      },
+      {
+        id: 'node-2-4b',
+        title: '结局：记忆的重量',
+        endingType: 'bittersweet',
+        achievementCount: 60,
+        achievementRate: 16,
+        firstReachedAt: '2024-04-01',
+        recentWeekCount: 8,
+        trend: 'stable'
+      },
+      {
+        id: 'node-2-4c',
+        title: '结局：各自的轨道',
+        endingType: 'sad',
+        achievementCount: 33,
+        achievementRate: 9,
+        firstReachedAt: '2024-04-05',
+        recentWeekCount: 4,
+        trend: 'down'
+      }
+    ],
+    achievementTrend: [
+      { date: '2024-04-22', totalAchievements: 280, newAchievements: 15 },
+      { date: '2024-04-23', totalAchievements: 295, newAchievements: 18 },
+      { date: '2024-04-24', totalAchievements: 315, newAchievements: 22 },
+      { date: '2024-04-25', totalAchievements: 335, newAchievements: 20 },
+      { date: '2024-04-26', totalAchievements: 355, newAchievements: 24 },
+      { date: '2024-04-27', totalAchievements: 380, newAchievements: 28 },
+      { date: '2024-04-28', totalAchievements: 395, newAchievements: 16 }
+    ]
+  },
+  'story-3': {
+    storyId: 'story-3',
+    storyTitle: '妖狐与书生',
+    totalReaders: 1280,
+    totalEndings: 4,
+    overallAchievementRate: 53.5,
+    averageEndingsPerReader: 1.8,
+    endings: [
+      {
+        id: 'node-3-4a',
+        title: '结局：京城烟火',
+        endingType: 'happy',
+        achievementCount: 245,
+        achievementRate: 48,
+        firstReachedAt: '2024-02-25',
+        recentWeekCount: 35,
+        trend: 'up'
+      },
+      {
+        id: 'node-3-4d',
+        title: '结局：一人一狐',
+        endingType: 'normal',
+        achievementCount: 128,
+        achievementRate: 25,
+        firstReachedAt: '2024-03-05',
+        recentWeekCount: 22,
+        trend: 'up'
+      },
+      {
+        id: 'node-3-4f',
+        title: '结局：古寺余生',
+        endingType: 'bittersweet',
+        achievementCount: 78,
+        achievementRate: 15,
+        firstReachedAt: '2024-03-12',
+        recentWeekCount: 10,
+        trend: 'stable'
+      },
+      {
+        id: 'node-3-4c',
+        title: '结局：山中岁月长',
+        endingType: 'sad',
+        achievementCount: 61,
+        achievementRate: 12,
+        firstReachedAt: '2024-03-18',
+        recentWeekCount: 6,
+        trend: 'down'
+      }
+    ],
+    achievementTrend: [
+      { date: '2024-04-29', totalAchievements: 450, newAchievements: 28 },
+      { date: '2024-04-30', totalAchievements: 480, newAchievements: 32 },
+      { date: '2024-05-01', totalAchievements: 520, newAchievements: 42 },
+      { date: '2024-05-02', totalAchievements: 555, newAchievements: 38 },
+      { date: '2024-05-03', totalAchievements: 600, newAchievements: 48 },
+      { date: '2024-05-04', totalAchievements: 630, newAchievements: 30 },
+      { date: '2024-05-05', totalAchievements: 685, newAchievements: 22 }
+    ]
+  }
+};
+
+const popularBranches = {
+  'story-1': {
+    storyId: 'story-1',
+    storyTitle: '浮城之恋',
+    totalBranches: 6,
+    ranking: [
+      {
+        rank: 1,
+        nodeId: 'node-1-1',
+        nodeTitle: '第一章：云中之城',
+        choiceId: 'choice-1-1-1',
+        choiceText: '热情地帮他找书',
+        selectCount: 620,
+        selectRate: 60.5,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 2,
+        nodeId: 'node-1-2b',
+        nodeTitle: '第二章：擦肩而过',
+        choiceId: 'choice-1-2b-1',
+        choiceText: '上前打招呼',
+        selectCount: 256,
+        selectRate: 63.4,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 3,
+        nodeId: 'node-1-2a',
+        nodeTitle: '第二章：神秘的访客',
+        choiceId: 'choice-1-2a-1',
+        choiceText: '询问他的名字',
+        selectCount: 342,
+        selectRate: 55.2,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'stable'
+      },
+      {
+        rank: 4,
+        nodeId: 'node-1-3c',
+        nodeTitle: '第三章：月下谈心',
+        choiceId: 'choice-1-3c-2',
+        choiceText: '陪他看一会儿云',
+        selectCount: 126,
+        selectRate: 49.2,
+        isKeyBranch: false,
+        leadsToEnding: true,
+        endingId: 'node-1-4b',
+        trend: 'up'
+      },
+      {
+        rank: 5,
+        nodeId: 'node-1-3c',
+        nodeTitle: '第三章：月下谈心',
+        choiceId: 'choice-1-3c-1',
+        choiceText: '邀请他一起吃晚饭',
+        selectCount: 130,
+        selectRate: 50.8,
+        isKeyBranch: false,
+        leadsToEnding: true,
+        endingId: 'node-1-4a',
+        trend: 'stable'
+      },
+      {
+        rank: 6,
+        nodeId: 'node-1-1',
+        nodeTitle: '第一章：云中之城',
+        choiceId: 'choice-1-1-2',
+        choiceText: '保持距离，指给他方向',
+        selectCount: 404,
+        selectRate: 39.5,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'down'
+      }
+    ],
+    keyBranchPoints: [
+      { nodeId: 'node-1-1', title: '第一章：云中之城', visitors: 1024, branchCount: 2, isFirstLevel: true },
+      { nodeId: 'node-1-2a', title: '第二章：神秘的访客', visitors: 620, branchCount: 2, isFirstLevel: false },
+      { nodeId: 'node-1-2b', title: '第二章：擦肩而过', visitors: 404, branchCount: 2, isFirstLevel: false }
+    ]
+  },
+  'story-2': {
+    storyId: 'story-2',
+    storyTitle: '星海彼端的约定',
+    totalBranches: 6,
+    ranking: [
+      {
+        rank: 1,
+        nodeId: 'node-2-1',
+        nodeTitle: '序章：废弃空间站',
+        choiceId: 'choice-2-1-1',
+        choiceText: '谨慎行事，先做外部扫描',
+        selectCount: 412,
+        selectRate: 54.5,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 2,
+        nodeId: 'node-2-3b',
+        nodeTitle: '第三章：真相的碎片',
+        choiceId: 'choice-2-3b-1',
+        choiceText: '去找到那个少女',
+        selectCount: 215,
+        selectRate: 60.4,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 3,
+        nodeId: 'node-2-2a',
+        nodeTitle: '第二章：意外的发现',
+        choiceId: 'choice-2-2a-1',
+        choiceText: '前往生命反应所在地',
+        selectCount: 220,
+        selectRate: 53.4,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'stable'
+      },
+      {
+        rank: 4,
+        nodeId: 'node-2-2b',
+        nodeTitle: '第二章：神秘的少女',
+        choiceId: 'choice-2-2b-1',
+        choiceText: '唤醒她',
+        selectCount: 180,
+        selectRate: 52.3,
+        isKeyBranch: false,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 5,
+        nodeId: 'node-2-3b',
+        nodeTitle: '第三章：真相的碎片',
+        choiceId: 'choice-2-3b-2',
+        choiceText: '决定离开，不打扰她',
+        selectCount: 141,
+        selectRate: 39.6,
+        isKeyBranch: false,
+        leadsToEnding: true,
+        endingId: 'node-2-4c',
+        trend: 'down'
+      },
+      {
+        rank: 6,
+        nodeId: 'node-2-1',
+        nodeTitle: '序章：废弃空间站',
+        choiceId: 'choice-2-1-2',
+        choiceText: '直接进入空间站探索',
+        selectCount: 344,
+        selectRate: 45.5,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'stable'
+      }
+    ],
+    keyBranchPoints: [
+      { nodeId: 'node-2-1', title: '序章：废弃空间站', visitors: 756, branchCount: 2, isFirstLevel: true },
+      { nodeId: 'node-2-2a', title: '第二章：意外的发现', visitors: 412, branchCount: 2, isFirstLevel: false },
+      { nodeId: 'node-2-2b', title: '第二章：神秘的少女', visitors: 344, branchCount: 2, isFirstLevel: false }
+    ]
+  },
+  'story-3': {
+    storyId: 'story-3',
+    storyTitle: '妖狐与书生',
+    totalBranches: 6,
+    ranking: [
+      {
+        rank: 1,
+        nodeId: 'node-3-1',
+        nodeTitle: '第一章：深山古寺',
+        choiceId: 'choice-3-1-1',
+        choiceText: '上前帮助它',
+        selectCount: 768,
+        selectRate: 60.0,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 2,
+        nodeId: 'node-3-3a',
+        nodeTitle: '第三章：狐妖小九',
+        choiceId: 'choice-3-3a-1',
+        choiceText: '答应她的提议',
+        selectCount: 245,
+        selectRate: 61.3,
+        isKeyBranch: true,
+        leadsToEnding: true,
+        endingId: 'node-3-4a',
+        trend: 'up'
+      },
+      {
+        rank: 3,
+        nodeId: 'node-3-2a',
+        nodeTitle: '第二章：受伤的九尾狐',
+        choiceId: 'choice-3-2a-1',
+        choiceText: '惊讶地询问她的身份',
+        selectCount: 400,
+        selectRate: 52.1,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'stable'
+      },
+      {
+        rank: 4,
+        nodeId: 'node-3-2b',
+        nodeTitle: '第二章：远远的守望',
+        choiceId: 'choice-3-2b-1',
+        choiceText: '救下它并带它离开',
+        selectCount: 280,
+        selectRate: 54.7,
+        isKeyBranch: false,
+        leadsToEnding: false,
+        trend: 'up'
+      },
+      {
+        rank: 5,
+        nodeId: 'node-3-2b',
+        nodeTitle: '第二章：远远的守望',
+        choiceId: 'choice-3-2b-2',
+        choiceText: '就在这里照顾它',
+        selectCount: 232,
+        selectRate: 45.3,
+        isKeyBranch: false,
+        leadsToEnding: true,
+        endingId: 'node-3-4d',
+        trend: 'stable'
+      },
+      {
+        rank: 6,
+        nodeId: 'node-3-1',
+        nodeTitle: '第一章：深山古寺',
+        choiceId: 'choice-3-1-2',
+        choiceText: '保持警惕，远远观察',
+        selectCount: 512,
+        selectRate: 40.0,
+        isKeyBranch: true,
+        leadsToEnding: false,
+        trend: 'down'
+      }
+    ],
+    keyBranchPoints: [
+      { nodeId: 'node-3-1', title: '第一章：深山古寺', visitors: 1280, branchCount: 2, isFirstLevel: true },
+      { nodeId: 'node-3-2a', title: '第二章：受伤的九尾狐', visitors: 768, branchCount: 2, isFirstLevel: false },
+      { nodeId: 'node-3-2b', title: '第二章：远远的守望', visitors: 512, branchCount: 2, isFirstLevel: false }
+    ]
+  }
+};
+
+const readerEndingDistribution = {
+  'user-1': {
+    authorId: 'user-1',
+    totalReaders: 1024,
+    totalEndingAchievements: 456,
+    stories: [
+      {
+        storyId: 'story-1',
+        storyTitle: '浮城之恋',
+        byGender: {
+          male: [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 52, rate: 38 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 35, rate: 26 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 28, rate: 20 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 22, rate: 16 }
+          ],
+          female: [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 78, rate: 45 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 42, rate: 24 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 35, rate: 20 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 18, rate: 11 }
+          ],
+          other: [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 26, rate: 40 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 21, rate: 32 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 13, rate: 20 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 5, rate: 8 }
+          ]
+        },
+        byAgeGroup: {
+          '18-24': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 68, rate: 45 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 38, rate: 25 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 28, rate: 18 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 18, rate: 12 }
+          ],
+          '25-34': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 52, rate: 40 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 35, rate: 27 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 28, rate: 22 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 14, rate: 11 }
+          ],
+          '35-44': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 22, rate: 35 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 18, rate: 29 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 15, rate: 24 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 8, rate: 12 }
+          ],
+          '45+': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 14, rate: 32 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 12, rate: 27 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 10, rate: 23 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 8, rate: 18 }
+          ]
+        },
+        byRegion: {
+          '华东': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 42, rate: 44 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 25, rate: 26 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 18, rate: 19 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 11, rate: 11 }
+          ],
+          '华南': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 35, rate: 40 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 22, rate: 25 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 20, rate: 23 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 10, rate: 12 }
+          ],
+          '华北': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 28, rate: 42 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 20, rate: 30 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 12, rate: 18 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 7, rate: 10 }
+          ],
+          '其他': [
+            { endingId: 'node-1-4b', endingTitle: '云之彼端', count: 51, rate: 38 },
+            { endingId: 'node-1-3a', endingTitle: '天空的守护者', count: 31, rate: 23 },
+            { endingId: 'node-1-4a', endingTitle: '烟火人间', count: 26, rate: 20 },
+            { endingId: 'node-1-3b', endingTitle: '未完的故事', count: 26, rate: 19 }
+          ]
+        },
+        endingTypeDistribution: [
+          { type: 'happy', label: '喜剧结局', count: 156, rate: 42 },
+          { type: 'normal', label: '普通结局', count: 98, rate: 26 },
+          { type: 'bittersweet', label: '苦乐参半', count: 76, rate: 20 },
+          { type: 'sad', label: '悲剧结局', count: 54, rate: 14 }
+        ],
+        completionPaths: {
+          avgStepsToEnding: 3.2,
+          fastestPath: 'node-1-1 → node-1-2b → node-1-3c → node-1-4b',
+          mostPopularPath: 'node-1-1 → node-1-2a → node-1-3a',
+          avgReplayCount: 1.8
+        }
+      }
+    ],
+    overallInsights: [
+      { insight: '女性读者达成喜剧结局的比例比男性高 7%', type: 'gender' },
+      { insight: '18-24 岁读者更倾向于探索多种结局', type: 'age' },
+      { insight: '华东地区读者的结局达成率最高', type: 'region' },
+      { insight: '「云之彼端」是最受欢迎的结局，占比 42%', type: 'ending' }
+    ]
+  },
+  'user-2': {
+    authorId: 'user-2',
+    totalReaders: 756,
+    totalEndingAchievements: 395,
+    stories: [
+      {
+        storyId: 'story-2',
+        storyTitle: '星海彼端的约定',
+        byGender: {
+          male: [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 58, rate: 42 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 42, rate: 30 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 22, rate: 16 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 17, rate: 12 }
+          ],
+          female: [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 75, rate: 48 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 45, rate: 29 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 25, rate: 16 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 11, rate: 7 }
+          ],
+          other: [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 35, rate: 40 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 25, rate: 29 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 13, rate: 15 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 5, rate: 6 }
+          ]
+        },
+        byAgeGroup: {
+          '18-24': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 62, rate: 48 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 35, rate: 27 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 20, rate: 16 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 12, rate: 9 }
+          ],
+          '25-34': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 58, rate: 44 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 40, rate: 30 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 22, rate: 17 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 12, rate: 9 }
+          ],
+          '35-44': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 32, rate: 40 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 24, rate: 30 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 14, rate: 18 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 10, rate: 12 }
+          ],
+          '45+': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 16, rate: 38 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 13, rate: 31 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 8, rate: 19 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 5, rate: 12 }
+          ]
+        },
+        byRegion: {
+          '华东': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 52, rate: 47 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 30, rate: 27 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 18, rate: 16 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 11, rate: 10 }
+          ],
+          '华南': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 42, rate: 44 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 28, rate: 29 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 15, rate: 16 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 10, rate: 11 }
+          ],
+          '华北': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 35, rate: 42 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 25, rate: 30 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 14, rate: 17 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 8, rate: 11 }
+          ],
+          '其他': [
+            { endingId: 'node-2-4d', endingTitle: '两个人的空间站', count: 39, rate: 39 },
+            { endingId: 'node-2-4a', endingTitle: '星河旅人', count: 29, rate: 29 },
+            { endingId: 'node-2-4b', endingTitle: '记忆的重量', count: 13, rate: 13 },
+            { endingId: 'node-2-4c', endingTitle: '各自的轨道', count: 4, rate: 4 }
+          ]
+        },
+        endingTypeDistribution: [
+          { type: 'happy', label: '喜剧结局', count: 168, rate: 45 },
+          { type: 'normal', label: '普通结局', count: 112, rate: 30 },
+          { type: 'bittersweet', label: '苦乐参半', count: 60, rate: 16 },
+          { type: 'sad', label: '悲剧结局', count: 33, rate: 9 }
+        ],
+        completionPaths: {
+          avgStepsToEnding: 3.5,
+          fastestPath: 'node-2-1 → node-2-2b → node-2-3b → node-2-4c',
+          mostPopularPath: 'node-2-1 → node-2-2a → node-2-3a → node-2-4d',
+          avgReplayCount: 2.1
+        }
+      }
+    ],
+    overallInsights: [
+      { insight: '女性读者更偏好圆满结局，男性更偏好开放结局', type: 'gender' },
+      { insight: '年轻读者重玩率更高，平均重玩 2.5 次', type: 'age' },
+      { insight: '科幻题材在华东地区最受欢迎', type: 'region' },
+      { insight: '「两个人的空间站」是人气最高的结局', type: 'ending' }
+    ]
+  },
+  'user-3': {
+    authorId: 'user-3',
+    totalReaders: 1280,
+    totalEndingAchievements: 685,
+    stories: [
+      {
+        storyId: 'story-3',
+        storyTitle: '妖狐与书生',
+        byGender: {
+          male: [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 82, rate: 45 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 45, rate: 25 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 28, rate: 15 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 28, rate: 15 }
+          ],
+          female: [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 130, rate: 50 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 62, rate: 24 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 38, rate: 15 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 28, rate: 11 }
+          ],
+          other: [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 33, rate: 42 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 21, rate: 27 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 12, rate: 15 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 5, rate: 6 }
+          ]
+        },
+        byAgeGroup: {
+          '18-24': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 108, rate: 50 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 52, rate: 24 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 32, rate: 15 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 24, rate: 11 }
+          ],
+          '25-34': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 85, rate: 47 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 45, rate: 25 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 28, rate: 16 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 22, rate: 12 }
+          ],
+          '35-44': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 35, rate: 42 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 22, rate: 26 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 15, rate: 18 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 12, rate: 14 }
+          ],
+          '45+': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 17, rate: 38 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 9, rate: 20 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 9, rate: 20 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 3, rate: 22 }
+          ]
+        },
+        byRegion: {
+          '华东': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 68, rate: 49 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 32, rate: 23 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 20, rate: 14 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 18, rate: 13 }
+          ],
+          '华南': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 55, rate: 47 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 28, rate: 24 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 18, rate: 15 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 16, rate: 14 }
+          ],
+          '华北': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 48, rate: 46 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 25, rate: 24 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 16, rate: 15 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 15, rate: 15 }
+          ],
+          '其他': [
+            { endingId: 'node-3-4a', endingTitle: '京城烟火', count: 74, rate: 43 },
+            { endingId: 'node-3-4d', endingTitle: '一人一狐', count: 43, rate: 25 },
+            { endingId: 'node-3-4f', endingTitle: '古寺余生', count: 24, rate: 14 },
+            { endingId: 'node-3-4c', endingTitle: '山中岁月长', count: 12, rate: 7 }
+          ]
+        },
+        endingTypeDistribution: [
+          { type: 'happy', label: '喜剧结局', count: 245, rate: 48 },
+          { type: 'normal', label: '普通结局', count: 128, rate: 25 },
+          { type: 'bittersweet', label: '苦乐参半', count: 78, rate: 15 },
+          { type: 'sad', label: '悲剧结局', count: 61, rate: 12 }
+        ],
+        completionPaths: {
+          avgStepsToEnding: 3.8,
+          fastestPath: 'node-3-1 → node-3-2a → node-3-3a → node-3-4a',
+          mostPopularPath: 'node-3-1 → node-3-2a → node-3-3a → node-3-4a',
+          avgReplayCount: 2.5
+        }
+      }
+    ],
+    overallInsights: [
+      { insight: '女性读者对恋爱结局的偏好明显高于男性', type: 'gender' },
+      { insight: '年长读者更能接受悲剧结局', type: 'age' },
+      { insight: '古风题材在北方地区人气更高', type: 'region' },
+      { insight: '「京城烟火」作为真结局，获得近半数读者青睐', type: 'ending' }
+    ]
+  }
+};
+
 const auditLogs = [
   {
     id: 'audit-log-1',
@@ -4718,6 +5464,9 @@ module.exports = {
   storyPerformance,
   readerProfiles,
   branchConversions,
+  endingAchievements,
+  popularBranches,
+  readerEndingDistribution,
   settingReferenceTrends,
   auditLogs,
   auditStats,

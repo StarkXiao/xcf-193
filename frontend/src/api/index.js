@@ -474,6 +474,18 @@ export const analyticsApi = {
 
   getAuthorSummary(userId) {
     return api.get('/analytics/author/' + userId + '/summary')
+  },
+
+  getEndingAchievements(storyId) {
+    return api.get('/analytics/story/' + storyId + '/ending-achievements')
+  },
+
+  getPopularBranches(storyId, params = {}) {
+    return api.get('/analytics/story/' + storyId + '/popular-branches', { params })
+  },
+
+  getEndingDistribution(userId, params = {}) {
+    return api.get('/analytics/author/' + userId + '/ending-distribution', { params })
   }
 }
 

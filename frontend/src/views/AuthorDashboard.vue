@@ -472,6 +472,373 @@
               </div>
             </div>
           </n-tab-pane>
+
+          <n-tab-pane name="endings" tab="🎭 结局分析">
+            <div class="tab-panel">
+              <div class="ending-selector">
+                <div class="section-title" style="margin-bottom: 0;">选择故事查看结局分析</div>
+                <n-select 
+                  v-model:value="selectedEndingStoryId" 
+                  :options="storyOptions"
+                  placeholder="请选择故事"
+                  @update:value="loadEndingData"
+                  style="width: 280px;"
+                />
+              </div>
+
+              <div v-if="endingAchievements" class="ending-content">
+                <div class="section-title">📊 结局达成率概览</div>
+                <div class="achievement-summary">
+                  <n-card hoverable class="achievement-summary-card">
+                    <div class="summary-metric">
+                      <span class="summary-metric-icon">🏆</span>
+                      <div>
+                        <div class="summary-metric-value">{{ endingAchievements.overallAchievementRate }}%</div>
+                        <div class="summary-metric-label">总体达成率</div>
+                      </div>
+                    </div>
+                  </n-card>
+                  <n-card hoverable class="achievement-summary-card">
+                      <div class="summary-metric">
+                        <span class="summary-metric-icon">🎯</span>
+                        <div>
+                          <div class="summary-metric-value">{{ endingAchievements.totalEndings }}</div>
+                          <div class="summary-metric-label">结局总数</div>
+                        </div>
+                      </div>
+                    </n-card>
+                    <n-card hoverable class="achievement-summary-card">
+                      <div class="summary-metric">
+                        <span class="summary-metric-icon">👥</span>
+                        <div>
+                          <div class="summary-metric-value">{{ endingAchievements.totalReaders }}</div>
+                          <div class="summary-metric-label">总阅读人数</div>
+                        </div>
+                      </div>
+                    </n-card>
+                    <n-card hoverable class="achievement-summary-card">
+                      <div class="summary-metric">
+                        <span class="summary-metric-icon">🔄</span>
+                        <div>
+                          <div class="summary-metric-value">{{ endingAchievements.averageEndingsPerReader }}</div>
+                          <div class="summary-metric-label">人均达成结局数</div>
+                        </div>
+                      </div>
+                    </n-card>
+                  </div>
+
+                  <div class="section-title">结局达成趋势</div>
+                  <n-card hoverable class="trend-card">
+                    <div class="chart-bars weekly-bars">
+                      <div 
+                        v-for="item in endingAchievements.achievementTrend" 
+                        :key="item.date"
+                        class="chart-bar-group"
+                      >
+                        <div class="bar-wrapper tall">
+                          <div 
+                            class="bar bar-endings" 
+                            :style="{ height: (item.newAchievements / getMaxNewAchievements(endingAchievements.achievementTrend) * 100) + '%' }"
+                          >
+                            <div class="bar-tooltip">新增 {{ item.newAchievements }} 个</div>
+                          </div>
+                        </div>
+                        <div class="bar-label">{{ item.date.slice(5) }}</div>
+                      </div>
+                    </div>
+                  </n-card>
+
+                  <div class="section-title">各结局达成情况</div>
+                  <n-card hoverable class="endings-detail-card">
+                    <div 
+                      v-for="(ending, idx) in endingAchievements.endings" 
+                      :key="ending.id"
+                      class="ending-detail-item"
+                    >
+                      <div class="ending-detail-header">
+                        <div class="ending-detail-rank" :class="'rank-' + (idx + 1)">{{ idx + 1 }}</div>
+                        <div class="ending-detail-info">
+                          <div class="ending-detail-title">{{ ending.title }}</div>
+                          <n-tag :type="getEndingTypeTag(ending.endingType)" size="small">
+                            {{ getEndingTypeLabel(ending.endingType) }}
+                          </n-tag>
+                        </div>
+                        <div class="ending-detail-stats">
+                          <div class="ending-detail-count">{{ ending.achievementCount }} 人达成</div>
+                          <div class="ending-detail-rate">{{ ending.achievementRate }}%</div>
+                        </div>
+                      </div>
+                      <div class="ending-detail-bar-wrapper">
+                        <div 
+                          class="ending-detail-bar"
+                          :style="{ width: ending.achievementRate + '%' }"
+                        ></div>
+                      </div>
+                      <div class="ending-detail-meta">
+                        <span class="meta-item">首次达成: {{ ending.firstReachedAt }}</span>
+                        <span class="meta-item">本周新增: {{ ending.recentWeekCount }}</span>
+                        <span :class="['meta-trend', ending.trend]">
+                          {{ ending.trend === 'up' ? '↑ 上升' : ending.trend === 'down' ? '↓ 下降' : '→ 平稳' }}
+                        </span>
+                      </div>
+                    </div>
+                  </n-card>
+                </div>
+
+                <div v-if="popularBranches" class="ending-section">
+                  <div class="section-title">🔥 热门分支排行</div>
+                  <div class="branch-ranking-header">
+                    <n-radio-group v-model:value="branchSortBy" size="small" @update:value="onBranchSortChange">
+                      <n-radio value="selectCount">按选择人数</n-radio>
+                      <n-radio value="selectRate">按选择比例</n-radio>
+                    </n-radio-group>
+                  </div>
+                  <n-card hoverable class="branch-ranking-card">
+                    <div 
+                      v-for="branch in popularBranches.ranking" 
+                      :key="branch.choiceId"
+                      class="branch-rank-item"
+                    >
+                      <div class="branch-rank-number" :class="'rank-' + branch.rank">{{ branch.rank }}</div>
+                      <div class="branch-rank-content">
+                        <div class="branch-rank-node">{{ branch.nodeTitle }}</div>
+                        <div class="branch-rank-choice">
+                          <span class="choice-label">选项:</span>
+                          <span class="choice-text">{{ branch.choiceText }}</span>
+                        </div>
+                        <div class="branch-rank-bar-wrapper">
+                          <div 
+                            class="branch-rank-bar"
+                            :style="{ width: branch.selectRate + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                      <div class="branch-rank-stats">
+                        <div class="branch-rank-count">{{ branch.selectCount }} 人</div>
+                        <div class="branch-rank-rate">{{ branch.selectRate }}%</div>
+                        <div v-if="branch.isKeyBranch" class="branch-rank-tag">
+                          <n-tag size="small" type="warning">关键分支</n-tag>
+                        </div>
+                        <div v-if="branch.leadsToEnding" class="branch-rank-tag">
+                          <n-tag size="small" type="success">通向结局</n-tag>
+                        </div>
+                      </div>
+                    </div>
+                  </n-card>
+
+                  <div class="section-title">关键分支节点</div>
+                  <div class="key-branch-points">
+                    <n-card 
+                      v-for="point in popularBranches.keyBranchPoints" 
+                      :key="point.nodeId"
+                      hoverable
+                      class="key-point-card"
+                    >
+                      <div class="key-point-header">
+                        <div class="key-point-title">{{ point.title }}</div>
+                        <n-tag v-if="point.isFirstLevel" size="small" type="primary">一级分支</n-tag>
+                      </div>
+                      <div class="key-point-stats">
+                        <span class="key-point-stat">
+                          <span class="stat-label">访问人数</span>
+                          <span class="stat-value">{{ point.visitors }}</span>
+                        </span>
+                        <span class="key-point-stat">
+                          <span class="stat-label">分支数量</span>
+                          <span class="stat-value">{{ point.branchCount }}</span>
+                        </span>
+                      </div>
+                    </n-card>
+                  </div>
+                </div>
+
+                <div v-if="endingDistribution" class="ending-section">
+                  <div class="section-title">👥 读者结局分布</div>
+                  
+                  <div class="distribution-tabs">
+                    <n-radio-group v-model:value="distributionView" size="small">
+                      <n-radio value="gender">按性别</n-radio>
+                      <n-radio value="age">按年龄</n-radio>
+                      <n-radio value="region">按地域</n-radio>
+                      <n-radio value="type">按类型</n-radio>
+                    </n-radio-group>
+                  </div>
+
+                  <div v-if="distributionView === 'gender'" class="distribution-content">
+                    <div class="distribution-grid">
+                      <n-card v-for="(endings, gender in endingDistribution.story?.byGender || {}" :key="gender" hoverable class="distribution-card">
+                        <div class="distribution-card-title">
+                          <span class="gender-icon">{{ getGenderLabel(gender) }}</span>
+                        </div>
+                        <div class="distribution-list">
+                          <div 
+                            v-for="ending in endings" 
+                            :key="ending.endingId"
+                            class="distribution-item"
+                          >
+                            <div class="distribution-item-header">
+                              <span class="distribution-item-name">{{ ending.endingTitle }}</span>
+                              <span class="distribution-item-rate">{{ ending.rate }}%</span>
+                            </div>
+                            <div class="distribution-item-bar-wrapper">
+                              <div 
+                                class="distribution-item-bar"
+                                :class="'bar-gender-' + gender"
+                                :style="{ width: ending.rate + '%' }"
+                              ></div>
+                            </div>
+                            <div class="distribution-item-count">{{ ending.count }} 人</div>
+                          </div>
+                        </div>
+                      </n-card>
+                    </div>
+                  </div>
+
+                  <div v-else-if="distributionView === 'age'" class="distribution-content">
+                    <div class="distribution-grid">
+                      <n-card v-for="(endings, ageGroup in endingDistribution.story?.byAgeGroup || {}" :key="ageGroup" hoverable class="distribution-card">
+                        <div class="distribution-card-title">
+                          <span class="age-label">{{ ageGroup }}岁</span>
+                        </div>
+                        <div class="distribution-list">
+                          <div 
+                            v-for="ending in endings" 
+                            :key="ending.endingId"
+                            class="distribution-item"
+                          >
+                            <div class="distribution-item-header">
+                              <span class="distribution-item-name">{{ ending.endingTitle }}</span>
+                              <span class="distribution-item-rate">{{ ending.rate }}%</span>
+                            </div>
+                            <div class="distribution-item-bar-wrapper">
+                              <div 
+                                class="distribution-item-bar bar-age"
+                                :style="{ width: ending.rate + '%' }"
+                              ></div>
+                            </div>
+                            <div class="distribution-item-count">{{ ending.count }} 人</div>
+                          </div>
+                        </div>
+                      </n-card>
+                    </div>
+                  </div>
+
+                  <div v-else-if="distributionView === 'region'" class="distribution-content">
+                    <div class="distribution-grid">
+                      <n-card v-for="(endings, region in endingDistribution.story?.byRegion || {}" :key="region" hoverable class="distribution-card">
+                        <div class="distribution-card-title">
+                          <span class="region-label">{{ region }}</span>
+                        </div>
+                        <div class="distribution-list">
+                          <div 
+                            v-for="ending in endings" 
+                            :key="ending.endingId"
+                            class="distribution-item"
+                          >
+                            <div class="distribution-item-header">
+                              <span class="distribution-item-name">{{ ending.endingTitle }}</span>
+                              <span class="distribution-item-rate">{{ ending.rate }}%</span>
+                            </div>
+                            <div class="distribution-item-bar-wrapper">
+                              <div 
+                                class="distribution-item-bar bar-region"
+                                :style="{ width: ending.rate + '%' }"
+                              ></div>
+                            </div>
+                            <div class="distribution-item-count">{{ ending.count }} 人</div>
+                          </div>
+                        </div>
+                      </n-card>
+                    </div>
+                  </div>
+
+                  <div v-else-if="distributionView === 'type'" class="distribution-content">
+                    <n-card hoverable class="type-distribution-card">
+                      <div class="type-pie-section">
+                        <div class="pie-chart">
+                          <div class="pie-center">
+                            <div class="pie-total">结局类型</div>
+                          </div>
+                          <svg viewBox="0 0 100 100" class="pie-svg">
+                            <circle 
+                              v-for="(type, idx) in endingDistribution.story?.endingTypeDistribution || []"
+                              :key="type.type"
+                              cx="50" cy="50" r="40" 
+                              fill="none" 
+                              :stroke="getEndingTypeColor(type.type)"
+                              :stroke-width="20"
+                              :stroke-dasharray="type.rate * 2.51 + ' ' + 251"
+                              :stroke-dashoffset="getTypeStrokeOffset(idx, endingDistribution.story?.endingTypeDistribution || [])"
+                              transform="rotate(-90 50 50)"
+                            />
+                          </svg>
+                        </div>
+                        <div class="type-legend">
+                          <div 
+                            v-for="type in endingDistribution.story?.endingTypeDistribution || []"
+                            :key="type.type"
+                            class="legend-item"
+                          >
+                            <span class="legend-dot" :style="{ background: getEndingTypeColor(type.type) }"></span>
+                            <span>{{ type.label }}</span>
+                            <span class="legend-value">{{ type.rate }}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </n-card>
+                  </div>
+
+                  <div class="section-title">完读路径分析</div>
+                  <n-card hoverable class="path-analysis-card">
+                    <div class="path-stats">
+                      <div class="path-stat-item">
+                        <span class="path-stat-icon">📏</span>
+                        <div class="path-stat-info">
+                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.avgStepsToEnding || 0 }}</div>
+                          <div class="path-stat-label">平均步长</div>
+                        </div>
+                      </div>
+                      <div class="path-stat-item">
+                        <span class="path-stat-icon">⚡</span>
+                        <div class="path-stat-info">
+                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.fastestPath || '' }}</div>
+                          <div class="path-stat-label">最快路径</div>
+                        </div>
+                      </div>
+                      <div class="path-stat-item">
+                        <span class="path-stat-icon">🔥</span>
+                        <div class="path-stat-info">
+                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.mostPopularPath || '' }}</div>
+                          <div class="path-stat-label">最热门路径</div>
+                        </div>
+                      </div>
+                      <div class="path-stat-item">
+                        <span class="path-stat-icon">🔁</span>
+                        <div class="path-stat-info">
+                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.avgReplayCount || 0 }}</div>
+                          <div class="path-stat-label">平均重玩次数</div>
+                        </div>
+                      </div>
+                    </div>
+                  </n-card>
+
+                  <div class="section-title">💡 数据洞察</div>
+                  <n-card hoverable class="insights-card">
+                    <div class="insights-list">
+                      <div 
+                        v-for="(insight, idx) in endingDistribution.overallInsights || []" 
+                        :key="idx"
+                        class="insight-item"
+                      >
+                        <span class="insight-icon">{{ getInsightIcon(insight.type) }}</span>
+                        <span class="insight-text">{{ insight.insight }}</span>
+                      </div>
+                    </div>
+                  </n-card>
+                </div>
+              </div>
+            </div>
+          </n-tab-pane>
         </n-tabs>
       </div>
     </n-spin>
@@ -480,19 +847,25 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { NCard, NTag, NTabs, NTabPane, NSpin, NSelect } from 'naive-ui'
+import { NCard, NTag, NTabs, NTabPane, NSpin, NSelect, NRadio, NRadioGroup } from 'naive-ui'
 import { analyticsApi } from '../api'
 
 const userId = 'user-1'
 const loading = ref(false)
 const activeTab = ref('performance')
 const selectedStoryId = ref('story-1')
+const selectedEndingStoryId = ref('story-1')
 
 const summary = ref(null)
 const performanceData = ref(null)
 const readerData = ref(null)
 const branchData = ref(null)
 const settingData = ref(null)
+const endingAchievements = ref(null)
+const popularBranches = ref(null)
+const endingDistribution = ref(null)
+const branchSortBy = ref('selectCount')
+const distributionView = ref('gender')
 
 const storyOptions = computed(() => {
   if (!performanceData.value?.stories) return []
@@ -518,7 +891,9 @@ const loadAllData = async () => {
     
     if (perfRes.data?.stories?.length > 0) {
       selectedStoryId.value = perfRes.data.stories[0].id
+      selectedEndingStoryId.value = perfRes.data.stories[0].id
       await loadBranchData(perfRes.data.stories[0].id)
+      await loadEndingData(perfRes.data.stories[0].id)
     }
   } catch (err) {
     console.error('加载看板数据失败:', err)
@@ -537,6 +912,32 @@ const loadBranchData = async (storyId) => {
   }
 }
 
+const loadEndingData = async (storyId) => {
+  if (!storyId) return
+  try {
+    const [achieveRes, branchRes, distRes] = await Promise.all([
+      analyticsApi.getEndingAchievements(storyId),
+      analyticsApi.getPopularBranches(storyId, { sortBy: branchSortBy.value }),
+      analyticsApi.getEndingDistribution(userId, { storyId })
+    ])
+    endingAchievements.value = achieveRes.data
+    popularBranches.value = branchRes.data
+    endingDistribution.value = distRes.data
+  } catch (err) {
+    console.error('加载结局分析数据失败:', err)
+  }
+}
+
+const onBranchSortChange = async (value) => {
+  if (!selectedEndingStoryId.value) return
+  try {
+    const res = await analyticsApi.getPopularBranches(selectedEndingStoryId.value, { sortBy: value })
+    popularBranches.value = res.data
+  } catch (err) {
+    console.error('加载热门分支数据失败:', err)
+  }
+}
+
 const getMaxViews = (trend) => {
   if (!trend || trend.length === 0) return 1
   return Math.max(...trend.map(t => t.views))
@@ -550,6 +951,69 @@ const getMaxReaders = (days) => {
 const getMaxRefs = (trendData) => {
   if (!trendData || trendData.length === 0) return 1
   return Math.max(...trendData.map(t => t.references))
+}
+
+const getMaxNewAchievements = (trend) => {
+  if (!trend || trend.length === 0) return 1
+  return Math.max(...trend.map(t => t.newAchievements))
+}
+
+const getEndingTypeLabel = (type) => {
+  const labels = {
+    happy: '喜剧结局',
+    normal: '普通结局',
+    bittersweet: '苦乐参半',
+    sad: '悲剧结局'
+  }
+  return labels[type] || '未知'
+}
+
+const getEndingTypeTag = (type) => {
+  const tags = {
+    happy: 'success',
+    normal: 'info',
+    bittersweet: 'warning',
+    sad: 'error'
+  }
+  return tags[type] || 'default'
+}
+
+const getEndingTypeColor = (type) => {
+  const colors = {
+    happy: '#52c41a',
+    normal: '#1890ff',
+    bittersweet: '#faad14',
+    sad: '#f5222d'
+  }
+  return colors[type] || '#999'
+}
+
+const getGenderLabel = (gender) => {
+  const labels = {
+    male: '男性读者',
+    female: '女性读者',
+    other: '其他读者'
+  }
+  return labels[gender] || gender
+}
+
+const getTypeStrokeOffset = (idx, list) => {
+  if (idx === 0) return 0
+  let offset = 0
+  for (let i = 0; i < idx; i++) {
+    offset += list[i].rate * 2.51
+  }
+  return -offset
+}
+
+const getInsightIcon = (type) => {
+  const icons = {
+    gender: '👤',
+    age: '🎂',
+    region: '📍',
+    ending: '🎯'
+  }
+  return icons[type] || '💡'
 }
 
 onMounted(() => {
@@ -1450,6 +1914,557 @@ onMounted(() => {
 
 .count-trend.stable {
   color: #faad14;
+}
+
+.ending-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.ending-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.achievement-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.achievement-summary-card {
+  padding: 20px;
+}
+
+.summary-metric {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.summary-metric-icon {
+  font-size: 32px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0e6ff 0%, #e0ccff 100%);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.summary-metric-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.summary-metric-label {
+  font-size: 13px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.trend-card {
+  padding: 20px;
+}
+
+.bar-endings {
+  background: linear-gradient(180deg, #ff6b6b 0%, #ffa8a8 100%);
+}
+
+.endings-detail-card {
+  padding: 16px 20px;
+}
+
+.ending-detail-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ending-detail-item:last-child {
+  border-bottom: none;
+}
+
+.ending-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.ending-detail-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.ending-detail-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ending-detail-title {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.ending-detail-stats {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.ending-detail-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.ending-detail-rate {
+  font-size: 16px;
+  color: #ff6b6b;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.ending-detail-bar-wrapper {
+  height: 10px;
+  background: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.ending-detail-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b 0%, #ffa8a8 100%);
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+.ending-detail-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 12px;
+  color: #999;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+}
+
+.meta-trend.up {
+  color: #52c41a;
+}
+
+.meta-trend.down {
+  color: #f5222d;
+}
+
+.meta-trend.stable {
+  color: #faad14;
+}
+
+.ending-section {
+  margin-top: 8px;
+}
+
+.branch-ranking-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.branch-ranking-card {
+  padding: 16px 20px;
+}
+
+.branch-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.branch-rank-item:last-child {
+  border-bottom: none;
+}
+
+.branch-rank-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.branch-rank-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.branch-rank-node {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.branch-rank-choice {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.choice-label {
+  color: #999;
+  margin-right: 4px;
+}
+
+.choice-text {
+  font-weight: 500;
+}
+
+.branch-rank-bar-wrapper {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.branch-rank-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #fa8c16 0%, #ffc069 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.branch-rank-stats {
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.branch-rank-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.branch-rank-rate {
+  font-size: 13px;
+  color: #fa8c16;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.branch-rank-tag {
+  margin-top: 4px;
+}
+
+.key-branch-points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.key-point-card {
+  padding: 20px;
+}
+
+.key-point-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.key-point-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.key-point-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.key-point-stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.distribution-tabs {
+  margin-bottom: 16px;
+}
+
+.distribution-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.distribution-card {
+  padding: 20px;
+}
+
+.distribution-card-title {
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.gender-icon,
+.age-label,
+.region-label {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #f0e6ff 0%, #e0ccff 100%);
+  border-radius: 16px;
+  color: #7b2cbf;
+  font-size: 13px;
+}
+
+.distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.distribution-item {
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.distribution-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.distribution-item-name {
+  font-size: 13px;
+  color: #333;
+}
+
+.distribution-item-rate {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9d4edd;
+}
+
+.distribution-item-bar-wrapper {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.distribution-item-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.bar-gender-male {
+  background: linear-gradient(90deg, #e74c3c 0%, #ec7063 100%);
+}
+
+.bar-gender-female {
+  background: linear-gradient(90deg, #9b59b6 0%, #bb8fce 100%);
+}
+
+.bar-gender-other {
+  background: linear-gradient(90deg, #3498db 0%, #85c1e9 100%);
+}
+
+.bar-region {
+  background: linear-gradient(90deg, #52c41a 0%, #95de64 100%);
+}
+
+.distribution-item-count {
+  font-size: 12px;
+  color: #999;
+}
+
+.type-distribution-card {
+  padding: 24px;
+}
+
+.type-pie-section {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  justify-content: center;
+}
+
+.type-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-value {
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.path-analysis-card {
+  padding: 20px;
+}
+
+.path-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.path-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.path-stat-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.path-stat-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.path-stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-stat-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.insights-card {
+  padding: 20px;
+}
+
+.insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  border-radius: 8px;
+}
+
+.insight-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.insight-text {
+  font-size: 14px;
+  color: #333;
+  flex: 1;
+}
+
+@media (max-width: 1024px) {
+  .achievement-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .key-branch-points {
+    grid-template-columns: 1fr;
+  }
+
+  .distribution-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .path-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .achievement-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .ending-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .path-stats {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1024px) {
