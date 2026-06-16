@@ -154,12 +154,15 @@
                 v-for="draft in drafts" 
                 :key="draft.id"
                 class="draft-item"
-                :class="{ active: currentDraftId === draft.id }"
+                :class="{ active: currentDraftId === draft.id, 'has-story-link': draft.storyId }"
                 @click="openDraft(draft)"
               >
                 <div class="draft-icon">📝</div>
                 <div class="draft-info">
-                  <div class="draft-title">{{ draft.title || '未命名草稿' }}</div>
+                  <div class="draft-title">
+                    {{ draft.title || '未命名草稿' }}
+                    <span v-if="draft.storyId" class="story-link-tag" title="关联已有故事">🔗 已关联</span>
+                  </div>
                   <div class="draft-meta">
                     <span v-if="draft.autoSaved" class="auto-tag">自动保存</span>
                     <span class="draft-time">{{ draft.lastSavedAt }}</span>
@@ -170,12 +173,21 @@
                 </div>
                 <div class="draft-actions">
                   <n-button 
+                    v-if="draft.storyId"
+                    text 
+                    size="tiny" 
+                    type="success"
+                    @click.stop="saveToOriginalStory(draft)"
+                  >
+                    保存到原故事
+                  </n-button>
+                  <n-button 
                     text 
                     size="tiny" 
                     type="primary"
                     @click.stop="publishDraft(draft)"
                   >
-                    发布
+                    {{ draft.storyId ? '更新原故事' : '发布' }}
                   </n-button>
                   <n-popconfirm @positive-click="deleteDraft(draft)">
                     <template #trigger>
@@ -351,12 +363,15 @@
               v-for="draft in drafts" 
               :key="draft.id"
               class="draft-item mobile-draft-item"
-              :class="{ active: currentDraftId === draft.id }"
+              :class="{ active: currentDraftId === draft.id, 'has-story-link': draft.storyId }"
               @click="openDraft(draft)"
             >
               <div class="draft-icon">📝</div>
               <div class="draft-info">
-                <div class="draft-title">{{ draft.title || '未命名草稿' }}</div>
+                <div class="draft-title">
+                  {{ draft.title || '未命名草稿' }}
+                  <span v-if="draft.storyId" class="story-link-tag">🔗 已关联</span>
+                </div>
                 <div class="draft-meta">
                   <span v-if="draft.autoSaved" class="auto-tag">自动保存</span>
                   <span class="draft-time">{{ draft.lastSavedAt }}</span>
@@ -368,12 +383,21 @@
             </div>
             <div v-for="draft in drafts" :key="'actions-' + draft.id" class="draft-actions-row">
               <n-button 
+                v-if="draft.storyId"
+                size="small" 
+                type="success"
+                @click="saveToOriginalStory(draft)"
+                block
+              >
+                保存到原故事
+              </n-button>
+              <n-button 
                 size="small" 
                 type="primary"
                 @click="publishDraft(draft)"
                 block
               >
-                发布草稿
+                {{ draft.storyId ? '更新原故事' : '发布草稿' }}
               </n-button>
               <n-popconfirm @positive-click="deleteDraft(draft)">
                 <template #trigger>
@@ -1150,18 +1174,38 @@ const openDraft = async (draft) => {
     const res = await storyApi.getDraft(draft.id)
     const draftData = res.data
     
-    story.value = {
-      id: null,
-      title: draftData.title,
-      summary: draftData.summary,
-      cover: draftData.cover,
-      tags: draftData.tags || [],
-      authorId: userId,
-      authorName: userName
+    if (draftData.storyId) {
+      const confirmRes = await storyApi.getStory(draftData.storyId)
+      const originalStory = confirmRes.data
+      
+      story.value = {
+        ...originalStory,
+        title: draftData.title,
+        summary: draftData.summary,
+        cover: draftData.cover,
+        tags: draftData.tags || []
+      }
+      tagsInput.value = (draftData.tags || []).join(', ')
+      nodes.value = draftData.nodes || []
+      currentDraftId.value = draftData.id
+      
+      message.success('已加载草稿，编辑后可选择保存到原故事')
+    } else {
+      story.value = {
+        id: null,
+        title: draftData.title,
+        summary: draftData.summary,
+        cover: draftData.cover,
+        tags: draftData.tags || [],
+        authorId: userId,
+        authorName: userName
+      }
+      tagsInput.value = (draftData.tags || []).join(', ')
+      nodes.value = draftData.nodes || []
+      currentDraftId.value = draftData.id
+      
+      message.success('已加载草稿')
     }
-    tagsInput.value = (draftData.tags || []).join(', ')
-    nodes.value = draftData.nodes || []
-    currentDraftId.value = draftData.id
     
     if (nodes.value.length > 0) {
       selectedNode.value = nodes.value[0]
@@ -1172,8 +1216,6 @@ const openDraft = async (draft) => {
     if (isMobile.value) {
       activeMobileTab.value = 'edit'
     }
-    
-    message.success('已加载草稿')
   } catch (err) {
     console.error('加载草稿失败:', err)
     message.error('加载草稿失败')
@@ -1217,7 +1259,13 @@ const publishDraft = async (draft) => {
       drafts.value.splice(index, 1)
     }
     
-    message.success('草稿已发布')
+    if (res.data.isUpdate) {
+      message.success('已更新原故事')
+    } else {
+      message.success('草稿已发布')
+    }
+    
+    loadVersions()
     
     if (isMobile.value) {
       activeMobileTab.value = 'edit'
@@ -1225,6 +1273,34 @@ const publishDraft = async (draft) => {
   } catch (err) {
     console.error('发布草稿失败:', err)
     message.error('发布草稿失败')
+  }
+}
+
+const saveToOriginalStory = async (draft) => {
+  try {
+    const res = await storyApi.applyDraftToStory(draft.id)
+    
+    story.value = res.data.story
+    nodes.value = res.data.nodes
+    
+    if (nodes.value.length > 0) {
+      selectedNode.value = nodes.value[0]
+    }
+    
+    const draftInList = drafts.value.find(d => d.id === draft.id)
+    if (draftInList) {
+      draftInList.lastSavedAt = new Date().toISOString().replace('T', ' ').slice(0, 16)
+    }
+    
+    message.success('已将草稿内容保存到原故事')
+    loadVersions()
+    
+    if (isMobile.value) {
+      activeMobileTab.value = 'edit'
+    }
+  } catch (err) {
+    console.error('保存到原故事失败:', err)
+    message.error('保存到原故事失败')
   }
 }
 
@@ -2080,6 +2156,30 @@ watch(activeMobileTab, (tab) => {
   background: #e6f7ff;
   color: #1890ff;
   border-radius: 4px;
+}
+
+.story-link-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: #f6ffed;
+  color: #52c41a;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.has-story-link {
+  border-left: 3px solid #52c41a;
+}
+
+.draft-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 0 8px;
+}
+
+.draft-actions-row .n-button {
+  flex: 1;
 }
 
 .draft-time {

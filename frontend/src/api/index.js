@@ -90,6 +90,10 @@ export const storyApi = {
     return api.post('/stories/drafts/' + draftId + '/publish', data)
   },
 
+  applyDraftToStory(draftId) {
+    return api.post('/stories/drafts/' + draftId + '/apply-to-story')
+  },
+
   getStoryVersions(storyId) {
     return api.get('/stories/' + storyId + '/versions')
   },

@@ -463,27 +463,156 @@ router.post('/drafts/:draftId/publish', (req, res) => {
   
   const { userId, authorName } = req.body;
   
-  const newStory = {
-    id: `story-${uuidv4()}`,
-    title: draft.title,
-    summary: draft.summary,
-    cover: draft.cover,
-    authorId: userId || draft.userId,
-    authorName: authorName || '匿名作者',
-    tags: draft.tags,
-    likes: 0,
-    views: 0,
-    createdAt: new Date().toISOString().split('T')[0],
-    updatedAt: new Date().toISOString().split('T')[0],
-    status: 'ongoing',
-    startNodeId: null
-  };
+  if (draft.storyId) {
+    const storyIndex = store.stories.findIndex(s => s.id === draft.storyId);
+    if (storyIndex === -1) {
+      return res.status(404).json({ message: '关联的故事不存在' });
+    }
+    
+    const originalStory = store.stories[storyIndex];
+    originalStory.title = draft.title;
+    originalStory.summary = draft.summary;
+    originalStory.cover = draft.cover;
+    originalStory.tags = draft.tags;
+    originalStory.updatedAt = new Date().toISOString().split('T')[0];
+    
+    const storyNodes = draft.nodes.map(node => ({
+      id: `node-${uuidv4()}`,
+      storyId: draft.storyId,
+      title: node.title,
+      content: node.content,
+      choices: (node.choices || []).map(c => ({
+        id: `choice-${uuidv4()}`,
+        text: c.text,
+        nextNodeId: c.nextNodeId || null
+      })),
+      isEnding: node.isEnding || false,
+      endingType: node.endingType,
+      referencedEntries: node.referencedEntries || []
+    }));
+    
+    const nodeIdMap = {};
+    draft.nodes.forEach((node, index) => {
+      nodeIdMap[node.id] = storyNodes[index].id;
+    });
+    
+    storyNodes.forEach(node => {
+      node.choices.forEach(choice => {
+        if (choice.nextNodeId && nodeIdMap[choice.nextNodeId]) {
+          choice.nextNodeId = nodeIdMap[choice.nextNodeId];
+        }
+      });
+    });
+    
+    store.storyNodes[draft.storyId] = storyNodes;
+    
+    if (storyNodes.length > 0) {
+      originalStory.startNodeId = storyNodes[0].id;
+    }
+    
+    const draftIndex = store.storyDrafts.findIndex(d => d.id === req.params.draftId);
+    if (draftIndex !== -1) {
+      store.storyDrafts.splice(draftIndex, 1);
+    }
+    
+    res.json({ 
+      story: originalStory, 
+      nodes: storyNodes,
+      isUpdate: true,
+      message: '已更新原故事'
+    });
+  } else {
+    const newStory = {
+      id: `story-${uuidv4()}`,
+      title: draft.title,
+      summary: draft.summary,
+      cover: draft.cover,
+      authorId: userId || draft.userId,
+      authorName: authorName || '匿名作者',
+      tags: draft.tags,
+      likes: 0,
+      views: 0,
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+      status: 'ongoing',
+      startNodeId: null
+    };
+    
+    store.stories.unshift(newStory);
+    
+    const storyNodes = draft.nodes.map(node => ({
+      id: `node-${uuidv4()}`,
+      storyId: newStory.id,
+      title: node.title,
+      content: node.content,
+      choices: (node.choices || []).map(c => ({
+        id: `choice-${uuidv4()}`,
+        text: c.text,
+        nextNodeId: c.nextNodeId || null
+      })),
+      isEnding: node.isEnding || false,
+      endingType: node.endingType,
+      referencedEntries: node.referencedEntries || []
+    }));
+    
+    const nodeIdMap = {};
+    draft.nodes.forEach((node, index) => {
+      nodeIdMap[node.id] = storyNodes[index].id;
+    });
+    
+    storyNodes.forEach(node => {
+      node.choices.forEach(choice => {
+        if (choice.nextNodeId && nodeIdMap[choice.nextNodeId]) {
+          choice.nextNodeId = nodeIdMap[choice.nextNodeId];
+        }
+      });
+    });
+    
+    store.storyNodes[newStory.id] = storyNodes;
+    
+    if (storyNodes.length > 0) {
+      newStory.startNodeId = storyNodes[0].id;
+    }
+    
+    const draftIndex = store.storyDrafts.findIndex(d => d.id === req.params.draftId);
+    if (draftIndex !== -1) {
+      store.storyDrafts.splice(draftIndex, 1);
+    }
+    
+    res.status(201).json({ 
+      story: newStory, 
+      nodes: storyNodes,
+      isUpdate: false,
+      message: '已创建新故事'
+    });
+  }
+});
+
+router.post('/drafts/:draftId/apply-to-story', (req, res) => {
+  const draft = store.storyDrafts.find(d => d.id === req.params.draftId);
+  if (!draft) {
+    return res.status(404).json({ message: '草稿不存在' });
+  }
   
-  store.stories.unshift(newStory);
+  if (!draft.storyId) {
+    return res.status(400).json({ message: '该草稿未关联任何故事，请使用发布功能' });
+  }
+  
+  const storyIndex = store.stories.findIndex(s => s.id === draft.storyId);
+  if (storyIndex === -1) {
+    return res.status(404).json({ message: '关联的故事不存在' });
+  }
+  
+  const originalStory = store.stories[storyIndex];
+  originalStory.title = draft.title;
+  originalStory.summary = draft.summary;
+  originalStory.cover = draft.cover;
+  originalStory.tags = draft.tags;
+  originalStory.updatedAt = new Date().toISOString().split('T')[0];
   
   const storyNodes = draft.nodes.map(node => ({
     id: `node-${uuidv4()}`,
-    storyId: newStory.id,
+    storyId: draft.storyId,
     title: node.title,
     content: node.content,
     choices: (node.choices || []).map(c => ({
@@ -509,18 +638,19 @@ router.post('/drafts/:draftId/publish', (req, res) => {
     });
   });
   
-  store.storyNodes[newStory.id] = storyNodes;
+  store.storyNodes[draft.storyId] = storyNodes;
   
   if (storyNodes.length > 0) {
-    newStory.startNodeId = storyNodes[0].id;
+    originalStory.startNodeId = storyNodes[0].id;
   }
   
-  const draftIndex = store.storyDrafts.findIndex(d => d.id === req.params.draftId);
-  if (draftIndex !== -1) {
-    store.storyDrafts.splice(draftIndex, 1);
-  }
+  draft.lastSavedAt = new Date().toISOString().replace('T', ' ').slice(0, 16);
   
-  res.status(201).json({ story: newStory, nodes: storyNodes });
+  res.json({ 
+    story: originalStory, 
+    nodes: storyNodes,
+    message: '已将草稿内容保存到原故事'
+  });
 });
 
 router.get('/:id/versions', (req, res) => {
