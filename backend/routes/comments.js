@@ -46,19 +46,11 @@ const buildReplyTree = (comments) => {
   return roots;
 };
 
-const filterAvailableComments = (comments) => {
-  return comments.filter(c => !c.takenDown && c.auditStatus !== 'rejected');
-};
-
 router.get('/story/:storyId', (req, res) => {
   const { storyId } = req.params;
-  const { nodeId, sort = 'newest', scope = 'current', includeTakenDown = false } = req.query;
+  const { nodeId, sort = 'newest', scope = 'current' } = req.query;
   
   let storyComments = commentsData[storyId] || [];
-  
-  if (includeTakenDown !== 'true') {
-    storyComments = filterAvailableComments(storyComments);
-  }
   
   if (scope === 'current' && nodeId) {
     storyComments = storyComments.filter(c => c.nodeId === nodeId);

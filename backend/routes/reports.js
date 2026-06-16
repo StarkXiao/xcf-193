@@ -5,227 +5,134 @@ const store = require('../data/store');
 const { createNotification } = require('./notifications');
 
 let reportsData = store.reports;
-let reportStatsData = store.reportStats;
 let storiesData = store.stories;
 let worldSettingsData = store.worldSettings;
 let commentsData = store.comments;
-let auditLogsData = store.auditLogs;
-let REPORT_REASONS = store.REPORT_REASONS;
+let storyNodesData = store.storyNodes;
 
-const REPORT_STATUSES = ['pending', 'processing', 'resolved', 'rejected'];
-const HANDLE_RESULTS = ['take_down', 'dismiss'];
+const REPORT_REASONS = [
+  { value: 'spam', label: '垃圾信息/广告' },
+  { value: 'inappropriate', label: '不当内容' },
+  { value: 'harassment', label: '骚扰/霸凌' },
+  { value: 'violence', label: '暴力/血腥' },
+  { value: 'hate', label: '仇恨言论' },
+  { value: 'copyright', label: '侵权/抄袭' },
+  { value: 'misinformation', label: '虚假信息' },
+  { value: 'other', label: '其他' }
+];
+
+const TARGET_TYPES = ['story', 'comment', 'world_entry'];
 
 const getTargetInfo = (targetType, targetId) => {
   switch (targetType) {
     case 'story': {
       const story = storiesData.find(s => s.id === targetId);
+      if (!story) return null;
       return {
-        exists: !!story,
-        title: story ? story.title : '未知',
-        authorId: story ? story.authorId : null,
-        authorName: story ? story.authorName : null,
-        cover: story ? story.cover : null,
-        summary: story ? story.summary : null
+        title: story.title,
+        authorId: story.authorId,
+        authorName: story.authorName,
+        cover: story.cover
       };
     }
     case 'comment': {
       for (const storyId in commentsData) {
         const comment = commentsData[storyId].find(c => c.id === targetId);
         if (comment) {
-          const shortContent = comment.content.length > 20
-            ? comment.content.substring(0, 20) + '...'
-            : comment.content;
+          const story = storiesData.find(s => s.id === storyId);
           return {
-            exists: true,
-            title: `评论-${shortContent}`,
+            title: comment.content.length > 40 ? comment.content.substring(0, 40) + '...' : comment.content,
             authorId: comment.userId,
             authorName: comment.username,
-            avatar: comment.avatar,
-            content: comment.content,
-            storyId
+            cover: comment.avatar,
+            storyId,
+            storyTitle: story ? story.title : '未知'
           };
         }
       }
-      return { exists: false, title: '未知评论' };
+      return null;
     }
     case 'world_entry': {
       for (const world of worldSettingsData) {
         const entry = world.entries?.find(e => e.id === targetId);
         if (entry) {
           return {
-            exists: true,
             title: entry.title,
             authorId: world.authorId,
             authorName: world.authorName,
+            cover: world.cover,
             worldId: world.id,
-            worldName: world.name,
-            category: entry.category,
-            content: entry.content
+            worldName: world.name
           };
         }
       }
-      return { exists: false, title: '未知条目' };
+      return null;
     }
     default:
-      return { exists: false, title: '未知' };
+      return null;
   }
-};
-
-const takeDownContent = (targetType, targetId, reason, handlerId, handlerName) => {
-  let target = null;
-
-  switch (targetType) {
-    case 'story': {
-      const story = storiesData.find(s => s.id === targetId);
-      if (story) {
-        story.auditStatus = 'rejected';
-        story.rejectReason = reason;
-        story.takenDown = true;
-        story.takenDownAt = new Date().toLocaleString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }).replace(/\//g, '-');
-        target = story;
-      }
-      break;
-    }
-    case 'comment': {
-      for (const storyId in commentsData) {
-        const comment = commentsData[storyId].find(c => c.id === targetId);
-        if (comment) {
-          comment.auditStatus = 'rejected';
-          comment.rejectReason = reason;
-          comment.takenDown = true;
-          comment.takenDownAt = new Date().toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          }).replace(/\//g, '-');
-          target = comment;
-          break;
-        }
-      }
-      break;
-    }
-    case 'world_entry': {
-      for (const world of worldSettingsData) {
-        const entryIndex = world.entries?.findIndex(e => e.id === targetId);
-        if (entryIndex !== -1 && entryIndex !== undefined) {
-          const entry = world.entries[entryIndex];
-          entry.auditStatus = 'rejected';
-          entry.rejectReason = reason;
-          entry.takenDown = true;
-          entry.takenDownAt = new Date().toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          }).replace(/\//g, '-');
-          target = entry;
-          break;
-        }
-      }
-      break;
-    }
-  }
-
-  if (target) {
-    const log = {
-      id: `audit-log-${uuidv4()}`,
-      targetType,
-      targetId,
-      targetTitle: getTargetInfo(targetType, targetId).title,
-      action: 'take_down',
-      auditLevel: null,
-      auditorId: handlerId || 'admin-1',
-      auditorName: handlerName || '管理员',
-      remark: reason,
-      createdAt: new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      }).replace(/\//g, '-')
-    };
-    auditLogsData.unshift(log);
-  }
-
-  return target;
-};
-
-const updateReportStats = () => {
-  const stats = {
-    total: reportsData.length,
-    pending: 0,
-    processing: 0,
-    resolved: 0,
-    rejected: 0,
-    byType: {
-      story: 0,
-      comment: 0,
-      world_entry: 0
-    },
-    byReason: {
-      spam: 0,
-      pornography: 0,
-      violence: 0,
-      illegal: 0,
-      plagiarism: 0,
-      harassment: 0,
-      rumor: 0,
-      other: 0
-    }
-  };
-
-  reportsData.forEach(report => {
-    if (stats.byType[report.targetType] !== undefined) {
-      stats.byType[report.targetType]++;
-    }
-    if (stats.byReason[report.reason] !== undefined) {
-      stats.byReason[report.reason]++;
-    }
-
-    switch (report.status) {
-      case 'pending':
-        stats.pending++;
-        break;
-      case 'processing':
-        stats.processing++;
-        break;
-      case 'resolved':
-        stats.resolved++;
-        break;
-      case 'rejected':
-        stats.rejected++;
-        break;
-    }
-  });
-
-  Object.assign(reportStatsData, stats);
 };
 
 router.get('/reasons', (req, res) => {
   res.json({ reasons: REPORT_REASONS });
 });
 
-router.get('/stats', (req, res) => {
-  updateReportStats();
-  res.json(reportStatsData);
+router.post('/', (req, res) => {
+  const { targetType, targetId, reason, description, reporterId, reporterName, reporterAvatar } = req.body;
+
+  if (!TARGET_TYPES.includes(targetType)) {
+    return res.status(400).json({ message: '无效的举报目标类型' });
+  }
+  if (!REPORT_REASONS.some(r => r.value === reason)) {
+    return res.status(400).json({ message: '无效的举报原因' });
+  }
+
+  const targetInfo = getTargetInfo(targetType, targetId);
+  if (!targetInfo) {
+    return res.status(404).json({ message: '举报目标不存在' });
+  }
+
+  const existingReport = reportsData.find(
+    r => r.targetType === targetType && r.targetId === targetId && r.reporterId === reporterId && r.status === 'pending'
+  );
+  if (existingReport) {
+    return res.status(409).json({ message: '你已经举报过该内容，请等待处理' });
+  }
+
+  const report = {
+    id: `report-${uuidv4()}`,
+    targetType,
+    targetId,
+    targetTitle: targetInfo.title,
+    targetAuthorId: targetInfo.authorId,
+    targetAuthorName: targetInfo.authorName,
+    reason,
+    reasonLabel: REPORT_REASONS.find(r => r.value === reason)?.label || reason,
+    description: description || '',
+    reporterId: reporterId || 'anonymous',
+    reporterName: reporterName || '匿名用户',
+    reporterAvatar: reporterAvatar || '👤',
+    status: 'pending',
+    reviewRemark: '',
+    reviewerId: null,
+    reviewerName: null,
+    reviewedAt: null,
+    createdAt: new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).replace(/\//g, '-')
+  };
+
+  reportsData.unshift(report);
+  res.status(201).json(report);
 });
 
 router.get('/', (req, res) => {
-  const { status, targetType, reason, reporterId, page = 1, limit = 10, sort = 'newest' } = req.query;
+  const { status, targetType, reason, page = 1, limit = 10 } = req.query;
   const pageNum = parseInt(page);
   const limitNum = parseInt(limit);
 
@@ -240,174 +147,107 @@ router.get('/', (req, res) => {
   if (reason) {
     result = result.filter(r => r.reason === reason);
   }
-  if (reporterId) {
-    result = result.filter(r => r.reporterId === reporterId);
-  }
 
-  if (sort === 'newest') {
-    result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } else if (sort === 'oldest') {
-    result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  }
-
+  const total = result.length;
   const start = (pageNum - 1) * limitNum;
-  const end = start + limitNum;
-  const paginated = result.slice(start, end);
+  const paginated = result.slice(start, start + limitNum);
 
-  const itemsWithTarget = paginated.map(report => {
-    const targetInfo = getTargetInfo(report.targetType, report.targetId);
-    return {
-      ...report,
-      targetInfo: {
-        ...targetInfo
-      }
+  res.json({
+    total,
+    page: pageNum,
+    limit: limitNum,
+    reports: paginated
+  });
+});
+
+router.get('/stats', (req, res) => {
+  const stats = {
+    pending: reportsData.filter(r => r.status === 'pending').length,
+    reviewing: reportsData.filter(r => r.status === 'reviewing').length,
+    resolved_dismissed: reportsData.filter(r => r.status === 'dismissed').length,
+    resolved_takedown: reportsData.filter(r => r.status === 'takedown').length,
+    total: reportsData.length
+  };
+
+  const byType = {};
+  TARGET_TYPES.forEach(t => {
+    byType[t] = reportsData.filter(r => r.targetType === t && r.status === 'pending').length;
+  });
+
+  const byReason = {};
+  REPORT_REASONS.forEach(r => {
+    byReason[r.value] = {
+      label: r.label,
+      count: reportsData.filter(rp => rp.reason === r.value).length
     };
   });
 
-  res.json({
-    total: result.length,
-    page: pageNum,
-    limit: limitNum,
-    reports: itemsWithTarget
-  });
+  res.json({ stats, byType, byReason });
 });
 
 router.get('/:id', (req, res) => {
-  const { id } = req.params;
-  const report = reportsData.find(r => r.id === id);
+  const report = reportsData.find(r => r.id === req.params.id);
+  if (!report) {
+    return res.status(404).json({ message: '举报记录不存在' });
+  }
+  res.json(report);
+});
+
+const performTakedown = (targetType, targetId) => {
+  switch (targetType) {
+    case 'story': {
+      const story = storiesData.find(s => s.id === targetId);
+      if (story) {
+        story.auditStatus = 'rejected';
+        story.rejectReason = '因举报被下架';
+        story.isTakenDown = true;
+      }
+      return story;
+    }
+    case 'comment': {
+      for (const storyId in commentsData) {
+        const comment = commentsData[storyId].find(c => c.id === targetId);
+        if (comment) {
+          comment.auditStatus = 'rejected';
+          comment.rejectReason = '因举报被下架';
+          comment.isTakenDown = true;
+          return comment;
+        }
+      }
+      return null;
+    }
+    case 'world_entry': {
+      for (const world of worldSettingsData) {
+        const entry = world.entries?.find(e => e.id === targetId);
+        if (entry) {
+          entry.isTakenDown = true;
+          entry.takedownReason = '因举报被下架';
+          return entry;
+        }
+      }
+      return null;
+    }
+    default:
+      return null;
+  }
+};
+
+router.post('/:id/dismiss', (req, res) => {
+  const { reviewerId, reviewerName, reviewRemark } = req.body;
+  const report = reportsData.find(r => r.id === req.params.id);
 
   if (!report) {
     return res.status(404).json({ message: '举报记录不存在' });
   }
-
-  const targetInfo = getTargetInfo(report.targetType, report.targetId);
-
-  res.json({
-    ...report,
-    targetInfo
-  });
-});
-
-router.post('/', (req, res) => {
-  const { targetType, targetId, reason, description, reporterId, reporterName } = req.body;
-
-  if (!targetType || !targetId || !reason) {
-    return res.status(400).json({ message: '缺少必要参数' });
+  if (report.status !== 'pending' && report.status !== 'reviewing') {
+    return res.status(400).json({ message: '该举报已处理' });
   }
 
-  const validTypes = ['story', 'comment', 'world_entry'];
-  if (!validTypes.includes(targetType)) {
-    return res.status(400).json({ message: '无效的举报类型' });
-  }
-
-  const validReasons = REPORT_REASONS.map(r => r.value);
-  if (!validReasons.includes(reason)) {
-    return res.status(400).json({ message: '无效的举报原因' });
-  }
-
-  const targetInfo = getTargetInfo(targetType, targetId);
-  if (!targetInfo.exists) {
-    return res.status(404).json({ message: '举报目标不存在' });
-  }
-
-  const reasonObj = REPORT_REASONS.find(r => r.value === reason);
-
-  const newReport = {
-    id: `report-${uuidv4()}`,
-    targetType,
-    targetId,
-    targetTitle: targetInfo.title,
-    reporterId: reporterId || 'anonymous',
-    reporterName: reporterName || '匿名用户',
-    reason,
-    reasonLabel: reasonObj ? reasonObj.label : reason,
-    description: description || '',
-    status: 'pending',
-    createdAt: new Date().toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).replace(/\//g, '-'),
-    handledAt: null,
-    handlerId: null,
-    handlerName: null,
-    handleResult: null,
-    handleRemark: null
-  };
-
-  if (targetType === 'world_entry' && targetInfo.worldId) {
-    newReport.worldId = targetInfo.worldId;
-  }
-
-  reportsData.unshift(newReport);
-  updateReportStats();
-
-  res.status(201).json({
-    success: true,
-    report: newReport,
-    message: '举报已提交，我们会尽快处理'
-  });
-});
-
-router.put('/:id/status', (req, res) => {
-  const { id } = req.params;
-  const { status, handlerId, handlerName, remark } = req.body;
-
-  if (!REPORT_STATUSES.includes(status)) {
-    return res.status(400).json({ message: '无效的状态' });
-  }
-
-  const report = reportsData.find(r => r.id === id);
-  if (!report) {
-    return res.status(404).json({ message: '举报记录不存在' });
-  }
-
-  report.status = status;
-  if (status !== 'pending') {
-    report.handledAt = new Date().toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).replace(/\//g, '-');
-    report.handlerId = handlerId || 'admin-1';
-    report.handlerName = handlerName || '管理员';
-  }
-  if (remark) {
-    report.handleRemark = remark;
-  }
-
-  updateReportStats();
-
-  res.json({
-    success: true,
-    report
-  });
-});
-
-router.post('/:id/handle', (req, res) => {
-  const { id } = req.params;
-  const { result, remark, handlerId, handlerName } = req.body;
-
-  if (!HANDLE_RESULTS.includes(result)) {
-    return res.status(400).json({ message: '无效的处理结果' });
-  }
-
-  const report = reportsData.find(r => r.id === id);
-  if (!report) {
-    return res.status(404).json({ message: '举报记录不存在' });
-  }
-
-  if (report.status === 'resolved' || report.status === 'rejected') {
-    return res.status(400).json({ message: '该举报已处理，无法重复操作' });
-  }
-
-  const now = new Date().toLocaleString('zh-CN', {
+  report.status = 'dismissed';
+  report.reviewerId = reviewerId || 'admin-1';
+  report.reviewerName = reviewerName || '管理员';
+  report.reviewRemark = reviewRemark || '举报不成立，驳回处理';
+  report.reviewedAt = new Date().toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -416,101 +256,103 @@ router.post('/:id/handle', (req, res) => {
     second: '2-digit'
   }).replace(/\//g, '-');
 
-  if (result === 'take_down') {
-    const target = takeDownContent(
-      report.targetType,
-      report.targetId,
-      remark || '违反社区规范',
-      handlerId || 'admin-1',
-      handlerName || '管理员'
-    );
-
-    if (!target) {
-      return res.status(404).json({ message: '下架目标不存在' });
-    }
-
-    const targetInfo = getTargetInfo(report.targetType, report.targetId);
-    if (targetInfo.authorId) {
-      const typeLabel = report.targetType === 'story' ? '故事'
-        : report.targetType === 'comment' ? '评论' : '世界设定条目';
-      createNotification({
-        userId: targetInfo.authorId,
-        type: 'content_taken_down',
-        content: `你的${typeLabel}《${report.targetTitle}》因「${remark || '违反社区规范'}」已被下架`,
-        relatedId: report.targetId,
-        relatedType: report.targetType,
-        relatedTitle: report.targetTitle,
-        extra: {
-          reason: remark || '违反社区规范',
-          reportId: id,
-          handlerName: handlerName || '管理员'
-        }
-      });
-    }
-
-    report.status = 'resolved';
-    report.handleResult = 'take_down';
-    report.handleRemark = remark || '违反社区规范';
-    report.handledAt = now;
-    report.handlerId = handlerId || 'admin-1';
-    report.handlerName = handlerName || '管理员';
-  } else if (result === 'dismiss') {
-    report.status = 'rejected';
-    report.handleResult = 'dismiss';
-    report.handleRemark = remark || '举报不成立';
-    report.handledAt = now;
-    report.handlerId = handlerId || 'admin-1';
-    report.handlerName = handlerName || '管理员';
-  }
-
   if (report.reporterId && report.reporterId !== 'anonymous') {
+    const typeLabel = report.targetType === 'story' ? '故事' : report.targetType === 'comment' ? '评论' : '世界设定条目';
     createNotification({
       userId: report.reporterId,
-      type: 'report_result',
-      content: `你举报的内容《${report.targetTitle}》已处理：${result === 'take_down' ? '已下架' : '举报不成立'}`,
-      relatedId: id,
+      type: 'system',
+      content: `你举报的${typeLabel}「${report.targetTitle}」经审核未构成违规，举报已驳回`,
+      relatedId: report.id,
       relatedType: 'report',
       relatedTitle: report.targetTitle,
       extra: {
-        result,
-        remark: remark || '',
-        handlerName: handlerName || '管理员'
+        reportId: report.id,
+        action: 'dismissed'
       }
     });
   }
 
-  updateReportStats();
+  res.json({ success: true, report });
+});
+
+router.post('/:id/takedown', (req, res) => {
+  const { reviewerId, reviewerName, reviewRemark } = req.body;
+  const report = reportsData.find(r => r.id === req.params.id);
+
+  if (!report) {
+    return res.status(404).json({ message: '举报记录不存在' });
+  }
+  if (report.status !== 'pending' && report.status !== 'reviewing') {
+    return res.status(400).json({ message: '该举报已处理' });
+  }
+
+  const target = performTakedown(report.targetType, report.targetId);
+  if (!target) {
+    return res.status(404).json({ message: '举报目标已不存在' });
+  }
+
+  report.status = 'takedown';
+  report.reviewerId = reviewerId || 'admin-1';
+  report.reviewerName = reviewerName || '管理员';
+  report.reviewRemark = reviewRemark || '举报成立，内容已下架';
+  report.reviewedAt = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).replace(/\//g, '-');
+
+  const relatedReports = reportsData.filter(
+    r => r.targetType === report.targetType && r.targetId === report.targetId && r.id !== report.id && (r.status === 'pending' || r.status === 'reviewing')
+  );
+  relatedReports.forEach(r => {
+    r.status = 'takedown';
+    r.reviewerId = reviewerId || 'admin-1';
+    r.reviewerName = reviewerName || '管理员';
+    r.reviewRemark = '关联内容已下架';
+    r.reviewedAt = report.reviewedAt;
+  });
+
+  if (report.targetAuthorId) {
+    const typeLabel = report.targetType === 'story' ? '故事' : report.targetType === 'comment' ? '评论' : '世界设定条目';
+    createNotification({
+      userId: report.targetAuthorId,
+      type: 'system',
+      content: `你的${typeLabel}「${report.targetTitle}」因收到举报并经审核确认违规，已被下架`,
+      relatedId: report.targetId,
+      relatedType: report.targetType,
+      relatedTitle: report.targetTitle,
+      extra: {
+        reportId: report.id,
+        action: 'takedown',
+        reason: report.reasonLabel,
+        reviewRemark: report.reviewRemark
+      }
+    });
+  }
+
+  if (report.reporterId && report.reporterId !== 'anonymous') {
+    const typeLabel = report.targetType === 'story' ? '故事' : report.targetType === 'comment' ? '评论' : '世界设定条目';
+    createNotification({
+      userId: report.reporterId,
+      type: 'system',
+      content: `你举报的${typeLabel}「${report.targetTitle}」经审核确认违规，内容已下架`,
+      relatedId: report.id,
+      relatedType: 'report',
+      relatedTitle: report.targetTitle,
+      extra: {
+        reportId: report.id,
+        action: 'takedown'
+      }
+    });
+  }
 
   res.json({
     success: true,
     report,
-    message: result === 'take_down' ? '内容已下架' : '举报已驳回'
-  });
-});
-
-router.get('/user/:userId', (req, res) => {
-  const { userId } = req.params;
-  const { page = 1, limit = 10, status } = req.query;
-  const pageNum = parseInt(page);
-  const limitNum = parseInt(limit);
-
-  let result = reportsData.filter(r => r.reporterId === userId);
-
-  if (status) {
-    result = result.filter(r => r.status === status);
-  }
-
-  result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  const start = (pageNum - 1) * limitNum;
-  const end = start + limitNum;
-  const paginated = result.slice(start, end);
-
-  res.json({
-    total: result.length,
-    page: pageNum,
-    limit: limitNum,
-    reports: paginated
+    relatedResolvedCount: relatedReports.length
   });
 });
 

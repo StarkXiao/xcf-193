@@ -83,6 +83,10 @@
                 <template #icon>🤝</template>
                 共创管理
               </n-button>
+              <n-button @click="showEntryReportDialog">
+                <template #icon>🚨</template>
+                举报
+              </n-button>
             </div>
           </div>
         </div>
@@ -142,12 +146,17 @@
               @click="selectedEntry = entry"
             >
               <div class="entry-card-header">
-                <n-tag size="small" type="primary" class="entry-category">
-                  {{ entry.category }}
-                </n-tag>
-                <n-tag v-if="entry.referencedStories?.length > 0" size="small" type="info" class="entry-ref-count">
-                  🔗 {{ entry.referencedStories.length }}
-                </n-tag>
+                <div class="entry-card-header-left">
+                  <n-tag size="small" type="primary" class="entry-category">
+                    {{ entry.category }}
+                  </n-tag>
+                  <n-tag v-if="entry.referencedStories?.length > 0" size="small" type="info" class="entry-ref-count">
+                    🔗 {{ entry.referencedStories.length }}
+                  </n-tag>
+                </div>
+                <n-button text size="tiny" @click.stop="showSingleEntryReportDialog(entry)" class="entry-report-btn">
+                  🚨
+                </n-button>
               </div>
               <h3 class="entry-title" :title="entry.title">{{ entry.title }}</h3>
               <p class="entry-content-preview">{{ entry.content }}</p>
@@ -222,6 +231,31 @@
         </div>
       </div>
     </n-modal>
+
+    <n-modal 
+      v-model:show="entryReportVisible" 
+      preset="dialog"
+      :title="'🚨 举报：' + entryReportTargetTitle"
+      :positive-text="'提交举报'"
+      :negative-text="'取消'"
+      @positive-click="submitEntryReport"
+    >
+      <div style="padding: 8px 0;">
+        <p style="color: #888; font-size: 14px; margin: 0 0 12px 0;">请选择举报原因，我们将尽快审核处理</p>
+        <n-select
+          v-model:value="selectedEntryReportReason"
+          :options="entryReportReasons.map(r => ({ label: r.label, value: r.value }))"
+          placeholder="选择举报原因"
+          style="margin-bottom: 12px;"
+        />
+        <n-input
+          v-model:value="entryReportDescription"
+          type="textarea"
+          placeholder="补充说明（可选）..."
+          :rows="3"
+        />
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -240,7 +274,7 @@ import {
   NSelect,
   useMessage
 } from 'naive-ui'
-import { worldApi, userApi } from '../api'
+import { worldApi, userApi, reportApi } from '../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -416,6 +450,66 @@ const toggleLike = async () => {
 
 const goBack = () => {
   router.push('/worlds')
+}
+
+const entryReportVisible = ref(false)
+const entryReportReasons = ref([])
+const selectedEntryReportReason = ref('')
+const entryReportDescription = ref('')
+const entryReportTargetId = ref(null)
+const entryReportTargetTitle = ref('')
+
+const showEntryReportDialog = async () => {
+  if (!world.value) return
+  selectedEntryReportReason.value = ''
+  entryReportDescription.value = ''
+  entryReportTargetId.value = world.value.id
+  entryReportTargetTitle.value = world.value.name
+  entryReportVisible.value = true
+  try {
+    const res = await reportApi.getReasons()
+    entryReportReasons.value = res.data.reasons
+  } catch (err) {
+    console.error('加载举报原因失败:', err)
+  }
+}
+
+const showSingleEntryReportDialog = async (entry) => {
+  selectedEntryReportReason.value = ''
+  entryReportDescription.value = ''
+  entryReportTargetId.value = entry.id
+  entryReportTargetTitle.value = entry.title
+  entryReportVisible.value = true
+  try {
+    const res = await reportApi.getReasons()
+    entryReportReasons.value = res.data.reasons
+  } catch (err) {
+    console.error('加载举报原因失败:', err)
+  }
+}
+
+const submitEntryReport = async () => {
+  if (!selectedEntryReportReason.value) {
+    message.warning('请选择举报原因')
+    return false
+  }
+  try {
+    await reportApi.submitReport({
+      targetType: 'world_entry',
+      targetId: entryReportTargetId.value,
+      reason: selectedEntryReportReason.value,
+      description: entryReportDescription.value,
+      reporterId: 'user-1',
+      reporterName: '月下独酌',
+      reporterAvatar: '🌸'
+    })
+    message.success('举报已提交，我们会尽快处理')
+    entryReportVisible.value = false
+    return true
+  } catch (err) {
+    message.error(err.response?.data?.message || '举报提交失败')
+    return false
+  }
 }
 
 const goToEditor = () => {
@@ -623,6 +717,21 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+}
+
+.entry-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.entry-report-btn {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.entry-card:hover .entry-report-btn {
+  opacity: 1;
 }
 
 .entry-category {

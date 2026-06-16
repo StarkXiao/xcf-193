@@ -9,21 +9,9 @@ let favoritesData = store.favorites;
 let storiesData = store.stories;
 let storyNodesData = store.storyNodes;
 
-const filterAvailableWorlds = (worlds) => {
-  return worlds.filter(w => !w.takenDown && w.auditStatus !== 'rejected');
-};
-
-const filterAvailableEntries = (entries) => {
-  return entries.filter(e => !e.takenDown && e.auditStatus !== 'rejected');
-};
-
 router.get('/', (req, res) => {
-  const { sort, page = 1, limit = 10, keyword, category, authorId, includeTakenDown = false } = req.query;
+  const { sort, page = 1, limit = 10, keyword, category, authorId } = req.query;
   let result = [...worldSettingsData];
-
-  if (includeTakenDown !== 'true') {
-    result = filterAvailableWorlds(result);
-  }
 
   if (keyword) {
     const kw = keyword.toLowerCase();
@@ -92,7 +80,7 @@ router.get('/:id', (req, res) => {
 
 router.get('/:id/entries', (req, res) => {
   const { id } = req.params;
-  const { keyword, category, sort, includeTakenDown = false } = req.query;
+  const { keyword, category, sort } = req.query;
   const world = worldSettingsData.find(w => w.id === id);
   
   if (!world) {
@@ -100,10 +88,6 @@ router.get('/:id/entries', (req, res) => {
   }
 
   let entries = [...(world.entries || [])];
-
-  if (includeTakenDown !== 'true') {
-    entries = filterAvailableEntries(entries);
-  }
 
   if (keyword) {
     const kw = keyword.toLowerCase();

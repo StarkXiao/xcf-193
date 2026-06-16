@@ -55,6 +55,7 @@
           @like="handleLike"
           @pin="handlePin"
           @delete="handleDelete"
+          @report="handleReport"
         />
       </div>
       <n-divider v-if="!isMobile" style="margin: 16px 0;" />
@@ -130,16 +131,42 @@
           @like="handleLike"
           @pin="handlePin"
           @delete="handleDelete"
+          @report="handleReport"
         />
       </div>
     </div>
+
+    <n-modal 
+      v-model:show="reportModalVisible" 
+      preset="dialog"
+      title="🚨 举报评论"
+      :positive-text="'提交举报'"
+      :negative-text="'取消'"
+      @positive-click="submitReport"
+    >
+      <div class="report-form">
+        <p class="report-hint">请选择举报原因，我们将尽快审核处理</p>
+        <n-select
+          v-model:value="selectedReportReason"
+          :options="reportReasons.map(r => ({ label: r.label, value: r.value }))"
+          placeholder="选择举报原因"
+          style="margin-bottom: 12px;"
+        />
+        <n-input
+          v-model:value="reportDescription"
+          type="textarea"
+          placeholder="补充说明（可选）..."
+          :rows="3"
+        />
+      </div>
+    </n-modal>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick, defineComponent, h } from 'vue'
-import { NAvatar, NInput, NButton, NDivider, NSpace, NSpin, NTag, useMessage, NPopconfirm, NDropdown, NButtonGroup } from 'naive-ui'
-import { commentApi, storyApi } from '../api'
+import { NAvatar, NInput, NButton, NDivider, NSpace, NSpin, NTag, useMessage, NPopconfirm, NDropdown, NButtonGroup, NModal, NSelect } from 'naive-ui'
+import { commentApi, storyApi, reportApi } from '../api'
 import { useResponsive } from '../composables/useResponsive'
 
 const props = defineProps({
@@ -186,6 +213,13 @@ const replyingTo = ref(null)
 const currentSort = ref('newest')
 const currentScope = ref('current')
 const commentStats = ref({ total: 0, pinnedCount: 0 })
+
+const reportModalVisible = ref(false)
+const reportTargetComment = ref(null)
+const reportReasons = ref([])
+const selectedReportReason = ref('')
+const reportDescription = ref('')
+const reportSubmitting = ref(false)
 
 const isStoryAuthor = computed(() => {
   return props.authorId === currentUser.value.id
@@ -420,6 +454,51 @@ const cancelReply = () => {
   newComment.value = ''
 }
 
+const handleReport = (comment) => {
+  reportTargetComment.value = comment
+  selectedReportReason.value = ''
+  reportDescription.value = ''
+  reportModalVisible.value = true
+  loadReportReasons()
+}
+
+const loadReportReasons = async () => {
+  try {
+    const res = await reportApi.getReasons()
+    reportReasons.value = res.data.reasons
+  } catch (err) {
+    console.error('加载举报原因失败:', err)
+  }
+}
+
+const submitReport = async () => {
+  if (!selectedReportReason.value) {
+    message.warning('请选择举报原因')
+    return
+  }
+  if (!reportTargetComment.value) return
+
+  reportSubmitting.value = true
+  try {
+    await reportApi.submitReport({
+      targetType: 'comment',
+      targetId: reportTargetComment.value.id,
+      reason: selectedReportReason.value,
+      description: reportDescription.value,
+      reporterId: currentUser.value.id,
+      reporterName: currentUser.value.username,
+      reporterAvatar: currentUser.value.avatar
+    })
+    message.success('举报已提交，我们会尽快处理')
+    reportModalVisible.value = false
+  } catch (err) {
+    const errMsg = err.response?.data?.message || '举报提交失败'
+    message.error(errMsg)
+  } finally {
+    reportSubmitting.value = false
+  }
+}
+
 const handleSortChange = (value) => {
   currentSort.value = value
   loadComments()
@@ -447,7 +526,7 @@ const CommentItem = defineComponent({
     isAuthor: { type: Boolean, default: false },
     isMobile: { type: Boolean, default: false }
   },
-  emits: ['reply', 'like', 'pin', 'delete'],
+  emits: ['reply', 'like', 'pin', 'delete', 'report'],
   setup(props, { emit }) {
     const message = useMessage()
     const showAllReplies = ref(false)
@@ -483,6 +562,10 @@ const CommentItem = defineComponent({
     
     const handleDeleteClick = () => {
       emit('delete', props.comment)
+    }
+
+    const handleReportClick = () => {
+      emit('report', props.comment)
     }
     
     const scrollToNode = (nodeId, nodeTitle) => {
@@ -564,6 +647,14 @@ const CommentItem = defineComponent({
                 default: () => props.isMobile ? '🗑️' : '删除'
               }),
               default: () => '确定删除这条评论吗？'
+            }),
+            !canDelete.value && h(NButton, {
+              text: true,
+              size: 'tiny',
+              class: 'report-btn',
+              onClick: handleReportClick
+            }, {
+              default: () => props.isMobile ? '🚨' : '举报'
             })
           ]),
           props.comment.replies && props.comment.replies.length > 0 && h('div', { class: 'replies-container' }, [
@@ -577,7 +668,8 @@ const CommentItem = defineComponent({
               onReply: (rc) => emit('reply', rc),
               onLike: (lc) => emit('like', lc),
               onPin: (pc) => emit('pin', pc),
-              onDelete: (dc) => emit('delete', dc)
+              onDelete: (dc) => emit('delete', dc),
+              onReport: (rc) => emit('report', rc)
             })),
             hiddenRepliesCount.value > 0 && h(NButton, {
               text: true,
@@ -964,6 +1056,20 @@ onMounted(() => {
 
 .delete-btn {
   color: #ff4d4f;
+}
+
+.report-btn {
+  color: #999;
+}
+
+.report-form {
+  padding: 8px 0;
+}
+
+.report-hint {
+  color: #888;
+  font-size: 14px;
+  margin: 0 0 12px 0;
 }
 
 .replies-container {

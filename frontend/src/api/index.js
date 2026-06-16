@@ -526,54 +526,50 @@ export const auditApi = {
     return api.post('/audit/' + type + '/' + id + '/reject', data)
   },
 
-  getAuditLevels() {
-    return api.get('/audit/levels')
+  takedownItem(type, id, data) {
+    return api.post('/audit/' + type + '/' + id + '/takedown', data)
   },
 
-  takeDownContent(type, id, data) {
-    return api.post('/audit/' + type + '/' + id + '/take-down', data)
-  },
-
-  restoreContent(type, id, data) {
+  restoreItem(type, id, data) {
     return api.post('/audit/' + type + '/' + id + '/restore', data)
   },
 
-  getTakenDownItems(params = {}) {
-    return api.get('/audit/taken-down', { params })
+  getTakedownItems(params = {}) {
+    return api.get('/audit/takedown', { params })
+  },
+
+  getAuditLevels() {
+    return api.get('/audit/levels')
   }
 }
 
 export const reportApi = {
-  getReportReasons() {
+  getReasons() {
     return api.get('/reports/reasons')
-  },
-
-  getReportStats() {
-    return api.get('/reports/stats')
-  },
-
-  getReports(params = {}) {
-    return api.get('/reports', { params })
-  },
-
-  getReport(id) {
-    return api.get('/reports/' + id)
   },
 
   submitReport(data) {
     return api.post('/reports', data)
   },
 
-  updateReportStatus(id, data) {
-    return api.put('/reports/' + id + '/status', data)
+  getReports(params = {}) {
+    return api.get('/reports', { params })
   },
 
-  handleReport(id, data) {
-    return api.post('/reports/' + id + '/handle', data)
+  getReportStats() {
+    return api.get('/reports/stats')
   },
 
-  getUserReports(userId, params = {}) {
-    return api.get('/reports/user/' + userId, { params })
+  getReport(id) {
+    return api.get('/reports/' + id)
+  },
+
+  dismissReport(id, data = {}) {
+    return api.post('/reports/' + id + '/dismiss', data)
+  },
+
+  takedownByReport(id, data = {}) {
+    return api.post('/reports/' + id + '/takedown', data)
   }
 }
 

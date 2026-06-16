@@ -28,6 +28,10 @@
           <span v-if="!isMobile">{{ story?.likes || 0 }}</span>
           <span v-else class="mobile-count">{{ story?.likes || 0 }}</span>
         </n-button>
+        <n-button text @click="showStoryReportDialog">
+          <template #icon>🚨</template>
+          <span v-if="!isMobile">举报</span>
+        </n-button>
         <n-button text @click="showBranchPanel = !showBranchPanel" :class="{ 'active-btn': showBranchPanel }">
           <template #icon>🌳</template>
           <span v-if="!isMobile">分支</span>
@@ -326,14 +330,39 @@
         @comments-loaded="handleCommentsLoaded"
       />
     </div>
+
+    <n-modal 
+      v-model:show="storyReportVisible" 
+      preset="dialog"
+      title="🚨 举报故事"
+      :positive-text="'提交举报'"
+      :negative-text="'取消'"
+      @positive-click="submitStoryReport"
+    >
+      <div style="padding: 8px 0;">
+        <p style="color: #888; font-size: 14px; margin: 0 0 12px 0;">请选择举报原因，我们将尽快审核处理</p>
+        <n-select
+          v-model:value="selectedStoryReportReason"
+          :options="storyReportReasons.map(r => ({ label: r.label, value: r.value }))"
+          placeholder="选择举报原因"
+          style="margin-bottom: 12px;"
+        />
+        <n-input
+          v-model:value="storyReportDescription"
+          type="textarea"
+          placeholder="补充说明（可选）..."
+          :rows="3"
+        />
+      </div>
+    </n-modal>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NSpin, NDivider, NTag, useMessage, NSwitch } from 'naive-ui'
-import { storyApi, userApi, commentApi } from '../api'
+import { NButton, NSpin, NDivider, NTag, useMessage, NSwitch, NModal, NSelect, NInput } from 'naive-ui'
+import { storyApi, userApi, commentApi, reportApi } from '../api'
 import CommentSection from '../components/CommentSection.vue'
 import { useResponsive, useTouchGestures } from '../composables/useResponsive'
 
@@ -743,6 +772,47 @@ const trackNodeChoice = (choice) => {
 const goBack = () => {
   saveReadingProgress()
   router.push('/')
+}
+
+const storyReportVisible = ref(false)
+const storyReportReasons = ref([])
+const selectedStoryReportReason = ref('')
+const storyReportDescription = ref('')
+
+const showStoryReportDialog = async () => {
+  selectedStoryReportReason.value = ''
+  storyReportDescription.value = ''
+  storyReportVisible.value = true
+  try {
+    const res = await reportApi.getReasons()
+    storyReportReasons.value = res.data.reasons
+  } catch (err) {
+    console.error('加载举报原因失败:', err)
+  }
+}
+
+const submitStoryReport = async () => {
+  if (!selectedStoryReportReason.value) {
+    message.warning('请选择举报原因')
+    return false
+  }
+  try {
+    await reportApi.submitReport({
+      targetType: 'story',
+      targetId: story.value.id,
+      reason: selectedStoryReportReason.value,
+      description: storyReportDescription.value,
+      reporterId: 'user-1',
+      reporterName: '月下独酌',
+      reporterAvatar: '🌸'
+    })
+    message.success('举报已提交，我们会尽快处理')
+    storyReportVisible.value = false
+    return true
+  } catch (err) {
+    message.error(err.response?.data?.message || '举报提交失败')
+    return false
+  }
 }
 
 const goToWorldEntry = (ref) => {

@@ -39,9 +39,7 @@ const {
   taskRewards,
   featuredTopics,
   nodeReadingEvents,
-  REPORT_REASONS,
-  reports,
-  reportStats
+  reports
 } = require('./mockData');
 
 const store = {
@@ -85,9 +83,7 @@ const store = {
   taskRewards: [...taskRewards],
   featuredTopics: [...featuredTopics],
   nodeReadingEvents: JSON.parse(JSON.stringify(nodeReadingEvents)),
-  REPORT_REASONS: [...REPORT_REASONS],
-  reports: [...reports],
-  reportStats: JSON.parse(JSON.stringify(reportStats))
+  reports: [...reports]
 };
 
 module.exports = store;
