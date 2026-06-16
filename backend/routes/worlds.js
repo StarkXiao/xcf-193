@@ -175,20 +175,103 @@ router.put('/:id/entries/:entryId', (req, res) => {
   res.json(entry);
 });
 
+router.get('/:id/entries/:entryId/references-check', (req, res) => {
+  const { id, entryId } = req.params;
+  
+  const world = worldSettingsData.find(w => w.id === id);
+  if (!world) {
+    return res.status(404).json({ message: '世界设定不存在' });
+  }
+  
+  const entry = world.entries.find(e => e.id === entryId);
+  if (!entry) {
+    return res.status(404).json({ message: '条目不存在' });
+  }
+  
+  const referencedStories = entry.referencedStories || [];
+  
+  const detailedReferences = [];
+  referencedStories.forEach(ref => {
+    const story = storiesData.find(s => s.id === ref.storyId);
+    if (story) {
+      const nodes = storyNodesData[ref.storyId] || [];
+      const node = nodes.find(n => n.id === ref.nodeId);
+      detailedReferences.push({
+        storyId: ref.storyId,
+        storyTitle: story.title || ref.storyTitle,
+        nodeId: ref.nodeId,
+        nodeTitle: node?.title || ref.nodeTitle
+      });
+    }
+  });
+  
+  res.json({
+    entryId,
+    entryTitle: entry.title,
+    hasReferences: detailedReferences.length > 0,
+    referenceCount: detailedReferences.length,
+    references: detailedReferences
+  });
+});
+
 router.delete('/:id/entries/:entryId', (req, res) => {
-  const world = worldSettingsData.find(w => w.id === req.params.id);
+  const { id, entryId } = req.params;
+  const { force = false, cleanReferences = true } = req.body;
+  
+  const world = worldSettingsData.find(w => w.id === id);
   
   if (!world) {
     return res.status(404).json({ message: '世界设定不存在' });
   }
 
-  const entryIndex = world.entries.findIndex(e => e.id === req.params.entryId);
+  const entryIndex = world.entries.findIndex(e => e.id === entryId);
   if (entryIndex === -1) {
     return res.status(404).json({ message: '条目不存在' });
   }
 
+  const entry = world.entries[entryIndex];
+  const referencedStories = entry.referencedStories || [];
+  
+  if (!force && referencedStories.length > 0) {
+    const detailedReferences = [];
+    referencedStories.forEach(ref => {
+      const story = storiesData.find(s => s.id === ref.storyId);
+      if (story) {
+        const nodes = storyNodesData[ref.storyId] || [];
+        const node = nodes.find(n => n.id === ref.nodeId);
+        detailedReferences.push({
+          storyId: ref.storyId,
+          storyTitle: story.title || ref.storyTitle,
+          nodeId: ref.nodeId,
+          nodeTitle: node?.title || ref.nodeTitle
+        });
+      }
+    });
+    
+    return res.status(409).json({
+      message: '该条目仍被故事节点引用，无法删除',
+      referenceCount: detailedReferences.length,
+      references: detailedReferences
+    });
+  }
+  
+  if (cleanReferences && referencedStories.length > 0) {
+    referencedStories.forEach(ref => {
+      const nodes = storyNodesData[ref.storyId];
+      if (nodes) {
+        const node = nodes.find(n => n.id === ref.nodeId);
+        if (node && node.referencedEntries) {
+          node.referencedEntries = node.referencedEntries.filter(e => e.entryId !== entryId);
+        }
+      }
+    });
+  }
+
   world.entries.splice(entryIndex, 1);
-  res.json({ message: '条目已删除' });
+  res.json({ 
+    message: '条目已删除',
+    cleanedReferences: cleanReferences ? referencedStories.length : 0
+  });
 });
 
 router.post('/:id/like', (req, res) => {

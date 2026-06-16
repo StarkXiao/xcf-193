@@ -392,6 +392,75 @@ router.get('/:id/references', (req, res) => {
   });
 });
 
+router.get('/:id/references/validate', (req, res) => {
+  const { id } = req.params;
+  
+  const story = storiesData.find(s => s.id === id);
+  if (!story) {
+    return res.status(404).json({ message: '故事不存在' });
+  }
+  
+  const nodes = storyNodesData[id];
+  if (!nodes) {
+    return res.status(404).json({ message: '故事节点不存在' });
+  }
+  
+  const validReferences = [];
+  const invalidReferences = [];
+  const nodeReferenceStatus = {};
+  
+  nodes.forEach(node => {
+    nodeReferenceStatus[node.id] = {
+      nodeId: node.id,
+      nodeTitle: node.title,
+      valid: [],
+      invalid: []
+    };
+    
+    if (node.referencedEntries && node.referencedEntries.length > 0) {
+      node.referencedEntries.forEach(ref => {
+        const world = worldSettingsData.find(w => w.id === ref.worldId);
+        const entry = world?.entries?.find(e => e.id === ref.entryId);
+        
+        if (world && entry) {
+          const validRef = {
+            ...ref,
+            worldExists: true,
+            entryExists: true
+          };
+          validReferences.push(validRef);
+          nodeReferenceStatus[node.id].valid.push(validRef);
+        } else {
+          const invalidRef = {
+            ...ref,
+            worldExists: !!world,
+            entryExists: false,
+            invalidReason: !world ? '世界设定已删除' : '设定条目已删除'
+          };
+          invalidReferences.push(invalidRef);
+          nodeReferenceStatus[node.id].invalid.push(invalidRef);
+        }
+      });
+    }
+  });
+  
+  const nodesWithInvalidRefs = Object.values(nodeReferenceStatus).filter(
+    n => n.invalid.length > 0
+  );
+  
+  res.json({
+    storyId: id,
+    storyTitle: story.title,
+    totalReferences: validReferences.length + invalidReferences.length,
+    validCount: validReferences.length,
+    invalidCount: invalidReferences.length,
+    hasInvalid: invalidReferences.length > 0,
+    invalidReferences,
+    nodesWithInvalidRefs,
+    nodeReferenceStatus
+  });
+});
+
 router.get('/drafts/user/:userId', (req, res) => {
   const { userId } = req.params;
   const drafts = store.storyDrafts.filter(d => d.userId === userId);

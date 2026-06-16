@@ -210,6 +210,46 @@
         </div>
       </template>
     </n-modal>
+
+    <n-modal 
+      v-model:show="showDeleteConfirmModal" 
+      preset="dialog"
+      title="确认删除"
+      :mask-closable="false"
+      :positive-text="deleteHasReferences ? '强制删除' : '确认删除'"
+      :negative-text="'取消'"
+      @positive-click="confirmDelete"
+      @negative-click="showDeleteConfirmModal = false"
+    >
+      <div v-if="deleteChecking" class="delete-checking">
+        <n-spin size="small" />
+        <span style="margin-left: 8px;">正在检查引用关系...</span>
+      </div>
+      <div v-else-if="deleteHasReferences" class="delete-warning">
+        <n-alert type="warning" :show-icon="true">
+          该条目仍被 <strong>{{ deleteReferenceCount }}</strong> 个章节节点引用，删除后这些引用将失效。
+        </n-alert>
+        <div class="reference-list">
+          <div class="reference-list-title">引用该条目的章节：</div>
+          <div 
+            v-for="ref in deleteReferences" 
+            :key="ref.storyId + '-' + ref.nodeId"
+            class="reference-item"
+          >
+            <span class="ref-story">📖 {{ ref.storyTitle }}</span>
+            <span class="ref-arrow">→</span>
+            <span class="ref-node">📄 {{ ref.nodeTitle }}</span>
+          </div>
+        </div>
+        <n-checkbox v-model:value="deleteCleanReferences" style="margin-top: 12px;">
+          同时清理所有章节中的无效引用
+        </n-checkbox>
+      </div>
+      <div v-else>
+        <p>确定要删除条目「{{ deletingEntry?.title }}」吗？</p>
+        <p class="delete-hint">此操作不可撤销</p>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -227,7 +267,8 @@ import {
   NTag,
   NSpin,
   NModal,
-  NAlert
+  NAlert,
+  NCheckbox
 } from 'naive-ui'
 import { worldApi, collaborationApi } from '../api'
 
@@ -259,6 +300,14 @@ const changeSummary = ref('')
 const collabRole = ref(null)
 const assignedCategories = ref([])
 const originalEntry = ref(null)
+
+const showDeleteConfirmModal = ref(false)
+const deletingEntry = ref(null)
+const deleteChecking = ref(false)
+const deleteHasReferences = ref(false)
+const deleteReferenceCount = ref(0)
+const deleteReferences = ref([])
+const deleteCleanReferences = ref(true)
 
 const isEditing = computed(() => !!route.params.id)
 
@@ -493,16 +542,47 @@ const saveEntry = async () => {
 }
 
 const deleteEntry = async (entry) => {
+  deletingEntry.value = entry
+  deleteChecking.value = true
+  deleteHasReferences.value = false
+  deleteReferenceCount.value = 0
+  deleteReferences.value = []
+  deleteCleanReferences.value = true
+  showDeleteConfirmModal.value = true
+  
   try {
-    await worldApi.deleteEntry(world.value.id, entry.id)
-    const index = world.value.entries.findIndex(e => e.id === entry.id)
+    const res = await worldApi.checkEntryReferences(world.value.id, entry.id)
+    deleteHasReferences.value = res.data.hasReferences
+    deleteReferenceCount.value = res.data.referenceCount
+    deleteReferences.value = res.data.references || []
+  } catch (err) {
+    console.error('检查引用失败:', err)
+  } finally {
+    deleteChecking.value = false
+  }
+}
+
+const confirmDelete = async () => {
+  if (!deletingEntry.value) return
+  
+  try {
+    await worldApi.deleteEntry(world.value.id, deletingEntry.value.id, {
+      force: deleteHasReferences.value,
+      cleanReferences: deleteCleanReferences.value
+    })
+    const index = world.value.entries.findIndex(e => e.id === deletingEntry.value.id)
     if (index !== -1) {
       world.value.entries.splice(index, 1)
     }
     message.success('已删除')
+    showDeleteConfirmModal.value = false
   } catch (err) {
     console.error('删除失败:', err)
-    message.error('删除失败')
+    if (err.response?.status === 409) {
+      message.error(err.response.data.message || '删除失败，该条目仍被引用')
+    } else {
+      message.error('删除失败')
+    }
   }
 }
 
@@ -760,5 +840,61 @@ onMounted(async () => {
 
 .entry-form {
   padding: 10px 0;
+}
+
+.delete-checking {
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.delete-warning {
+  margin-top: 8px;
+}
+
+.reference-list {
+  margin-top: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.reference-list-title {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.reference-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+  font-size: 13px;
+}
+
+.reference-item:last-child {
+  border-bottom: none;
+}
+
+.ref-story {
+  color: #333;
+}
+
+.ref-arrow {
+  color: #ccc;
+}
+
+.ref-node {
+  color: #666;
+}
+
+.delete-hint {
+  color: #999;
+  font-size: 13px;
+  margin-top: 8px;
 }
 </style>

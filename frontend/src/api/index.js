@@ -66,6 +66,10 @@ export const storyApi = {
     return api.get('/stories/' + storyId + '/references')
   },
 
+  validateStoryReferences(storyId) {
+    return api.get('/stories/' + storyId + '/references/validate')
+  },
+
   trackNodeEvent(storyId, nodeId, data) {
     return api.post('/stories/' + storyId + '/nodes/' + nodeId + '/track', data)
   },
@@ -188,8 +192,12 @@ export const worldApi = {
     return api.put('/worlds/' + worldId + '/entries/' + entryId, data)
   },
   
-  deleteEntry(worldId, entryId) {
-    return api.delete('/worlds/' + worldId + '/entries/' + entryId)
+  deleteEntry(worldId, entryId, options = {}) {
+    return api.delete('/worlds/' + worldId + '/entries/' + entryId, { data: options })
+  },
+
+  checkEntryReferences(worldId, entryId) {
+    return api.get('/worlds/' + worldId + '/entries/' + entryId + '/references-check')
   },
   
   likeWorld(id, data) {

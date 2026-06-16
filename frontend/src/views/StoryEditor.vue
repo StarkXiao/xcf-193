@@ -899,24 +899,44 @@
             <div class="references-editor">
               <div class="references-header">
                 <span class="editor-label">🌍 关联设定条目</span>
-                <n-button size="small" type="primary" @click="openWorldPicker">
-                  <template #icon>+</template>
-                  关联设定
-                </n-button>
+                <div class="references-actions">
+                  <n-button 
+                    v-if="hasInvalidReferences" 
+                    size="small" 
+                    type="warning" 
+                    ghost
+                    @click="cleanInvalidReferences"
+                  >
+                    <template #icon>🧹</template>
+                    清理失效引用
+                  </n-button>
+                  <n-button size="small" type="primary" @click="openWorldPicker">
+                    <template #icon>+</template>
+                    关联设定
+                  </n-button>
+                </div>
               </div>
               <div v-if="selectedNode.referencedEntries?.length > 0" class="references-list">
                 <div 
                   v-for="ref in selectedNode.referencedEntries" 
                   :key="ref.entryId"
                   class="reference-card"
+                  :class="{ 'invalid-ref': isReferenceInvalid(ref) }"
                 >
-                  <div class="ref-icon">📚</div>
+                  <div class="ref-icon">{{ isReferenceInvalid(ref) ? '⚠️' : '📚' }}</div>
                   <div class="ref-info">
                     <div class="ref-world" :title="ref.worldName">
                       {{ ref.worldName }}
+                      <span v-if="isReferenceInvalid(ref)" class="invalid-badge">
+                        {{ getInvalidReason(ref) }}
+                      </span>
                     </div>
                     <div class="ref-entry">
-                      <n-tag size="small" type="primary" style="margin-right: 6px;">
+                      <n-tag 
+                        size="small" 
+                        :type="isReferenceInvalid(ref) ? 'warning' : 'primary'" 
+                        style="margin-right: 6px;"
+                      >
                         {{ ref.entryCategory }}
                       </n-tag>
                       {{ ref.entryTitle }}
@@ -1116,6 +1136,16 @@ const expandedFeedbackNodeId = ref(null)
 const loadingWorlds = ref(false)
 const pickerSelectedEntries = ref([])
 
+const invalidReferenceMap = ref({})
+const validatingReferences = ref(false)
+
+const hasInvalidReferences = computed(() => {
+  if (!selectedNode.value?.referencedEntries) return false
+  return selectedNode.value.referencedEntries.some(ref => 
+    invalidReferenceMap.value[ref.entryId]
+  )
+})
+
 const worldOptions = computed(() => {
   return allWorlds.value.map(w => ({
     label: `${w.cover || '🌍'} ${w.name}`,
@@ -1157,6 +1187,7 @@ const loadStory = async () => {
       }
     }
     loadNodeFeedback()
+    validateReferences()
   } catch (err) {
     console.error('加载故事失败:', err)
     message.error('加载故事失败')
@@ -1400,17 +1431,92 @@ const removeReference = async (ref) => {
   
   try {
     await storyApi.removeNodeReference(story.value.id, selectedNode.value.id, {
-      entryId: ref.entryId
+      entryId: ref.entryId,
+      worldId: ref.worldId
     })
     
     const idx = selectedNode.value.referencedEntries.findIndex(r => r.entryId === ref.entryId)
     if (idx >= 0) {
       selectedNode.value.referencedEntries.splice(idx, 1)
     }
+    delete invalidReferenceMap.value[ref.entryId]
     message.success('已取消关联')
   } catch (e) {
     console.error('取消关联失败:', e)
     message.error('取消关联失败')
+  }
+}
+
+const isReferenceInvalid = (ref) => {
+  return !!invalidReferenceMap.value[ref.entryId]
+}
+
+const getInvalidReason = (ref) => {
+  return invalidReferenceMap.value[ref.entryId] || ''
+}
+
+const validateReferences = async () => {
+  if (!story.value.id) return
+  
+  validatingReferences.value = true
+  try {
+    const res = await storyApi.validateStoryReferences(story.value.id)
+    const data = res.data
+    
+    invalidReferenceMap.value = {}
+    
+    if (data.hasInvalid) {
+      data.invalidReferences.forEach(ref => {
+        invalidReferenceMap.value[ref.entryId] = ref.invalidReason
+      })
+    }
+    
+    if (data.hasInvalid) {
+      message.warning(`发现 ${data.invalidCount} 个失效的设定引用，请及时清理`)
+    }
+  } catch (e) {
+    console.error('验证引用失败:', e)
+  } finally {
+    validatingReferences.value = false
+  }
+}
+
+const cleanInvalidReferences = async () => {
+  if (!selectedNode.value || !selectedNode.value.referencedEntries) return
+  
+  const invalidRefs = selectedNode.value.referencedEntries.filter(
+    ref => invalidReferenceMap.value[ref.entryId]
+  )
+  
+  if (invalidRefs.length === 0) {
+    message.info('没有失效的引用')
+    return
+  }
+  
+  try {
+    for (const ref of invalidRefs) {
+      try {
+        await storyApi.removeNodeReference(story.value.id, selectedNode.value.id, {
+          entryId: ref.entryId,
+          worldId: ref.worldId
+        })
+      } catch (e) {
+        console.error('移除失效引用失败:', e)
+      }
+    }
+    
+    selectedNode.value.referencedEntries = selectedNode.value.referencedEntries.filter(
+      ref => !invalidReferenceMap.value[ref.entryId]
+    )
+    
+    invalidRefs.forEach(ref => {
+      delete invalidReferenceMap.value[ref.entryId]
+    })
+    
+    message.success(`已清理 ${invalidRefs.length} 个失效引用`)
+  } catch (e) {
+    console.error('清理失效引用失败:', e)
+    message.error('清理失败')
   }
 }
 
@@ -2320,6 +2426,31 @@ watch(activeMobileTab, (tab) => {
   color: #333;
   display: flex;
   align-items: center;
+}
+
+.reference-card.invalid-ref {
+  background: linear-gradient(135deg, #fff7e6 0%, #fff1f0 100%);
+  border-color: #ffd591;
+  opacity: 0.85;
+}
+
+.reference-card.invalid-ref .ref-icon {
+  background: #fff1f0;
+}
+
+.invalid-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 6px;
+  background: #fff1f0;
+  color: #f5222d;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.references-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .empty-references {
