@@ -11,9 +11,23 @@
         </h1>
       </div>
       <div class="header-actions" :class="{ 'mobile-actions': isMobile }">
-        <span v-if="lastSavedTime" class="save-status">
+        <span v-if="autoSaveStatus === 'saving'" class="save-status auto-saving">
+          自动保存中...
+        </span>
+        <span v-else-if="autoSaveStatus === 'saved'" class="save-status auto-saved">
+          已自动保存 {{ lastAutoSaveTime }}
+        </span>
+        <span v-else-if="lastSavedTime" class="save-status">
           {{ lastSavedTime }}
         </span>
+        <n-button :size="isMobile ? 'small' : 'default'" @click="saveCurrentAsDraft">
+          <template #icon>📝</template>
+          <span v-if="!isMobile">存草稿</span>
+        </n-button>
+        <n-button :size="isMobile ? 'small' : 'default'" @click="showVersionPanel = !showVersionPanel" :disabled="!story.id">
+          <template #icon>📜</template>
+          <span v-if="!isMobile">版本历史</span>
+        </n-button>
         <n-button :size="isMobile ? 'small' : 'default'" @click="previewStory" :disabled="!story.id">
           <template #icon>👁️</template>
           <span v-if="!isMobile">预览</span>
@@ -123,6 +137,108 @@
             </div>
           </div>
         </n-card>
+
+        <n-card title="📝 草稿箱" class="drafts-card">
+          <template #header-extra>
+            <n-button size="small" text @click="loadDrafts">
+              刷新
+            </n-button>
+          </template>
+          <div class="drafts-list">
+            <n-spin :show="loadingDrafts" size="small">
+              <div v-if="drafts.length === 0" class="empty-drafts">
+                <p>暂无草稿</p>
+                <p class="hint">自动保存的内容会在这里</p>
+              </div>
+              <div 
+                v-for="draft in drafts" 
+                :key="draft.id"
+                class="draft-item"
+                :class="{ active: currentDraftId === draft.id }"
+                @click="openDraft(draft)"
+              >
+                <div class="draft-icon">📝</div>
+                <div class="draft-info">
+                  <div class="draft-title">{{ draft.title || '未命名草稿' }}</div>
+                  <div class="draft-meta">
+                    <span v-if="draft.autoSaved" class="auto-tag">自动保存</span>
+                    <span class="draft-time">{{ draft.lastSavedAt }}</span>
+                  </div>
+                  <div v-if="draft.nodes?.length > 0" class="draft-nodes">
+                    {{ draft.nodes.length }} 个章节
+                  </div>
+                </div>
+                <div class="draft-actions">
+                  <n-button 
+                    text 
+                    size="tiny" 
+                    type="primary"
+                    @click.stop="publishDraft(draft)"
+                  >
+                    发布
+                  </n-button>
+                  <n-popconfirm @positive-click="deleteDraft(draft)">
+                    <template #trigger>
+                      <n-button text size="tiny" type="error">
+                        <template #icon>🗑️</template>
+                      </n-button>
+                    </template>
+                    确定删除这个草稿吗？
+                  </n-popconfirm>
+                </div>
+              </div>
+            </n-spin>
+          </div>
+        </n-card>
+
+        <n-card title="📜 版本历史" class="versions-card" v-if="story.id">
+          <template #header-extra>
+            <n-button size="small" type="primary" @click="saveVersion" :loading="savingVersion">
+              <template #icon>💾</template>
+              保存版本
+            </n-button>
+          </template>
+          <div class="versions-list">
+            <n-spin :show="loadingVersions" size="small">
+              <div v-if="versions.length === 0" class="empty-versions">
+                <p>暂无版本记录</p>
+                <p class="hint">点击"保存版本"记录当前状态</p>
+              </div>
+              <div 
+                v-for="version in versions" 
+                :key="version.id"
+                class="version-item"
+              >
+                <div class="version-info">
+                  <div class="version-title">v{{ version.version }}</div>
+                  <div class="version-desc">{{ version.changeSummary }}</div>
+                  <div class="version-meta">
+                    <span class="version-time">{{ version.createdAt }}</span>
+                    <span class="version-author">{{ version.savedByName }}</span>
+                  </div>
+                </div>
+                <div class="version-actions">
+                  <n-button 
+                    text 
+                    size="tiny" 
+                    type="primary"
+                    @click="restoreVersion(version)"
+                  >
+                    恢复
+                  </n-button>
+                  <n-popconfirm @positive-click="deleteVersion(version)">
+                    <template #trigger>
+                      <n-button text size="tiny" type="error">
+                        <template #icon>🗑️</template>
+                      </n-button>
+                    </template>
+                    确定删除这个版本吗？
+                  </n-popconfirm>
+                </div>
+              </div>
+            </n-spin>
+          </div>
+        </n-card>
       </div>
 
       <div v-else-if="activeMobileTab === 'info'" class="mobile-panel">
@@ -216,6 +332,120 @@
             </n-button>
           </div>
         </div>
+      </div>
+
+      <div v-else-if="activeMobileTab === 'drafts'" class="mobile-panel">
+        <div class="mobile-panel-header">
+          <span class="mobile-panel-title">📝 草稿箱</span>
+          <n-button size="small" text @click="loadDrafts">
+            刷新
+          </n-button>
+        </div>
+        <n-spin :show="loadingDrafts">
+          <div v-if="drafts.length === 0" class="empty-drafts">
+            <p>暂无草稿</p>
+            <p class="hint">自动保存的内容会在这里</p>
+          </div>
+          <div v-else class="drafts-list">
+            <div 
+              v-for="draft in drafts" 
+              :key="draft.id"
+              class="draft-item mobile-draft-item"
+              :class="{ active: currentDraftId === draft.id }"
+              @click="openDraft(draft)"
+            >
+              <div class="draft-icon">📝</div>
+              <div class="draft-info">
+                <div class="draft-title">{{ draft.title || '未命名草稿' }}</div>
+                <div class="draft-meta">
+                  <span v-if="draft.autoSaved" class="auto-tag">自动保存</span>
+                  <span class="draft-time">{{ draft.lastSavedAt }}</span>
+                </div>
+                <div v-if="draft.nodes?.length > 0" class="draft-nodes">
+                  {{ draft.nodes.length }} 个章节
+                </div>
+              </div>
+            </div>
+            <div v-for="draft in drafts" :key="'actions-' + draft.id" class="draft-actions-row">
+              <n-button 
+                size="small" 
+                type="primary"
+                @click="publishDraft(draft)"
+                block
+              >
+                发布草稿
+              </n-button>
+              <n-popconfirm @positive-click="deleteDraft(draft)">
+                <template #trigger>
+                  <n-button size="small" type="error" ghost>
+                    删除
+                  </n-button>
+                </template>
+                确定删除这个草稿吗？
+              </n-popconfirm>
+            </div>
+          </div>
+        </n-spin>
+      </div>
+
+      <div v-else-if="activeMobileTab === 'versions'" class="mobile-panel">
+        <div class="mobile-panel-header">
+          <span class="mobile-panel-title">📜 版本历史</span>
+          <n-button 
+            size="small" 
+            type="primary" 
+            @click="saveVersion" 
+            :loading="savingVersion"
+            :disabled="!story.id"
+          >
+            <template #icon>💾</template>
+            保存版本
+          </n-button>
+        </div>
+        <n-spin :show="loadingVersions">
+          <div v-if="!story.id" class="empty-versions">
+            <p>请先保存故事</p>
+            <p class="hint">保存后才能使用版本历史功能</p>
+          </div>
+          <div v-else-if="versions.length === 0" class="empty-versions">
+            <p>暂无版本记录</p>
+            <p class="hint">点击"保存版本"记录当前状态</p>
+          </div>
+          <div v-else class="versions-list">
+            <div 
+              v-for="version in versions" 
+              :key="version.id"
+              class="version-item mobile-version-item"
+            >
+              <div class="version-info">
+                <div class="version-title">v{{ version.version }}</div>
+                <div class="version-desc">{{ version.changeSummary }}</div>
+                <div class="version-meta">
+                  <span class="version-time">{{ version.createdAt }}</span>
+                  <span class="version-author">{{ version.savedByName }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-for="version in versions" :key="'v-actions-' + version.id" class="version-actions-row">
+              <n-button 
+                size="small" 
+                type="primary"
+                @click="restoreVersion(version)"
+                block
+              >
+                恢复此版本
+              </n-button>
+              <n-popconfirm @positive-click="deleteVersion(version)">
+                <template #trigger>
+                  <n-button size="small" type="error" ghost>
+                    删除
+                  </n-button>
+                </template>
+                确定删除这个版本吗？
+              </n-popconfirm>
+            </div>
+          </div>
+        </n-spin>
       </div>
 
       <div class="main-editor" :class="{ 'mobile-main-editor': isMobile, 'mobile-panel': isMobile && activeMobileTab === 'edit' }">
@@ -449,7 +679,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   NButton,
@@ -466,7 +696,10 @@ import {
   NModal,
   NAlert,
   NEmpty,
-  useMessage
+  NPopconfirm,
+  NDivider,
+  useMessage,
+  useDialog
 } from 'naive-ui'
 import { storyApi, worldApi } from '../api'
 import { useResponsive } from '../composables/useResponsive'
@@ -474,14 +707,21 @@ import { useResponsive } from '../composables/useResponsive'
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
+const dialog = useDialog()
 const { isMobile } = useResponsive()
+
+const userId = 'user-1'
+const userName = '月下独酌'
+const userAvatar = '🌸'
 
 const coverIcons = ['📖', '🏰', '🦊', '🚀', '🌙', '⭐', '🌸', '💫', '🎭', '🌹']
 
 const mobileTabs = [
   { key: 'info', label: '信息', icon: '📋' },
   { key: 'nodes', label: '章节', icon: '📚' },
-  { key: 'edit', label: '编辑', icon: '✏️' }
+  { key: 'edit', label: '编辑', icon: '✏️' },
+  { key: 'drafts', label: '草稿', icon: '📝' },
+  { key: 'versions', label: '版本', icon: '📜' }
 ]
 
 const story = ref({
@@ -502,6 +742,22 @@ const saving = ref(false)
 const isEditing = computed(() => !!route.params.id)
 const lastSavedTime = ref('')
 const activeMobileTab = ref('info')
+
+const autoSaveEnabled = ref(true)
+const autoSaveInterval = ref(null)
+const autoSaveStatus = ref('')
+const lastAutoSaveTime = ref('')
+const currentDraftId = ref(null)
+const isDraftMode = computed(() => !!currentDraftId.value && !story.value.id)
+
+const drafts = ref([])
+const loadingDrafts = ref(false)
+
+const versions = ref([])
+const loadingVersions = ref(false)
+const savingVersion = ref(false)
+const showVersionPanel = ref(false)
+const selectedVersion = ref(null)
 
 const showWorldPicker = ref(false)
 const pickerWorldId = ref(null)
@@ -817,8 +1073,305 @@ const previewStory = () => {
   }
 }
 
+const startAutoSave = () => {
+  if (autoSaveInterval.value) {
+    clearInterval(autoSaveInterval.value)
+  }
+  if (autoSaveEnabled.value) {
+    autoSaveInterval.value = setInterval(() => {
+      autoSaveDraft()
+    }, 30000)
+  }
+}
+
+const stopAutoSave = () => {
+  if (autoSaveInterval.value) {
+    clearInterval(autoSaveInterval.value)
+    autoSaveInterval.value = null
+  }
+}
+
+const autoSaveDraft = async () => {
+  if (!autoSaveEnabled.value) return
+  
+  try {
+    autoSaveStatus.value = 'saving'
+    
+    const draftData = {
+      userId,
+      storyId: story.value.id || null,
+      title: story.value.title || '未命名草稿',
+      summary: story.value.summary || '',
+      cover: story.value.cover || '📖',
+      tags: story.value.tags || [],
+      nodes: nodes.value || [],
+      autoSaved: true
+    }
+    
+    if (currentDraftId.value) {
+      await storyApi.updateDraft(currentDraftId.value, draftData)
+    } else {
+      const res = await storyApi.createDraft(draftData)
+      currentDraftId.value = res.data.id
+    }
+    
+    const now = new Date()
+    const h = String(now.getHours()).padStart(2, '0')
+    const m = String(now.getMinutes()).padStart(2, '0')
+    lastAutoSaveTime.value = `${h}:${m}`
+    autoSaveStatus.value = 'saved'
+    
+    setTimeout(() => {
+      if (autoSaveStatus.value === 'saved') {
+        autoSaveStatus.value = ''
+      }
+    }, 2000)
+  } catch (err) {
+    console.error('自动保存失败:', err)
+    autoSaveStatus.value = 'error'
+  }
+}
+
+const loadDrafts = async () => {
+  loadingDrafts.value = true
+  try {
+    const res = await storyApi.getDrafts(userId)
+    drafts.value = res.data.drafts || []
+  } catch (err) {
+    console.error('加载草稿失败:', err)
+    message.error('加载草稿失败')
+  } finally {
+    loadingDrafts.value = false
+  }
+}
+
+const openDraft = async (draft) => {
+  try {
+    const res = await storyApi.getDraft(draft.id)
+    const draftData = res.data
+    
+    story.value = {
+      id: null,
+      title: draftData.title,
+      summary: draftData.summary,
+      cover: draftData.cover,
+      tags: draftData.tags || [],
+      authorId: userId,
+      authorName: userName
+    }
+    tagsInput.value = (draftData.tags || []).join(', ')
+    nodes.value = draftData.nodes || []
+    currentDraftId.value = draftData.id
+    
+    if (nodes.value.length > 0) {
+      selectedNode.value = nodes.value[0]
+    } else {
+      selectedNode.value = null
+    }
+    
+    if (isMobile.value) {
+      activeMobileTab.value = 'edit'
+    }
+    
+    message.success('已加载草稿')
+  } catch (err) {
+    console.error('加载草稿失败:', err)
+    message.error('加载草稿失败')
+  }
+}
+
+const deleteDraft = async (draft) => {
+  try {
+    await storyApi.deleteDraft(draft.id)
+    const index = drafts.value.findIndex(d => d.id === draft.id)
+    if (index !== -1) {
+      drafts.value.splice(index, 1)
+    }
+    if (currentDraftId.value === draft.id) {
+      currentDraftId.value = null
+    }
+    message.success('草稿已删除')
+  } catch (err) {
+    console.error('删除草稿失败:', err)
+    message.error('删除草稿失败')
+  }
+}
+
+const publishDraft = async (draft) => {
+  try {
+    const res = await storyApi.publishDraft(draft.id, {
+      userId,
+      authorName: userName
+    })
+    
+    story.value = res.data.story
+    nodes.value = res.data.nodes
+    currentDraftId.value = null
+    
+    if (nodes.value.length > 0) {
+      selectedNode.value = nodes.value[0]
+    }
+    
+    const index = drafts.value.findIndex(d => d.id === draft.id)
+    if (index !== -1) {
+      drafts.value.splice(index, 1)
+    }
+    
+    message.success('草稿已发布')
+    
+    if (isMobile.value) {
+      activeMobileTab.value = 'edit'
+    }
+  } catch (err) {
+    console.error('发布草稿失败:', err)
+    message.error('发布草稿失败')
+  }
+}
+
+const saveCurrentAsDraft = async () => {
+  try {
+    const draftData = {
+      userId,
+      storyId: story.value.id || null,
+      title: story.value.title || '未命名草稿',
+      summary: story.value.summary || '',
+      cover: story.value.cover || '📖',
+      tags: story.value.tags || [],
+      nodes: nodes.value || [],
+      autoSaved: false
+    }
+    
+    if (currentDraftId.value) {
+      await storyApi.updateDraft(currentDraftId.value, draftData)
+      message.success('草稿已更新')
+    } else {
+      const res = await storyApi.createDraft(draftData)
+      currentDraftId.value = res.data.id
+      message.success('已保存到草稿箱')
+    }
+    
+    loadDrafts()
+  } catch (err) {
+    console.error('保存草稿失败:', err)
+    message.error('保存草稿失败')
+  }
+}
+
+const loadVersions = async () => {
+  if (!story.value.id) return
+  
+  loadingVersions.value = true
+  try {
+    const res = await storyApi.getStoryVersions(story.value.id)
+    versions.value = res.data.versions || []
+  } catch (err) {
+    console.error('加载版本历史失败:', err)
+    message.error('加载版本历史失败')
+  } finally {
+    loadingVersions.value = false
+  }
+}
+
+const saveVersion = async () => {
+  if (!story.value.id) {
+    message.warning('请先保存故事')
+    return
+  }
+  
+  savingVersion.value = true
+  try {
+    await saveCurrentNode()
+    
+    const res = await storyApi.createStoryVersion(story.value.id, {
+      changeSummary: `手动保存版本 - ${new Date().toLocaleString()}`,
+      savedBy: userId,
+      savedByName: userName,
+      savedByAvatar: userAvatar
+    })
+    
+    versions.value.unshift(res.data)
+    message.success('版本已保存')
+  } catch (err) {
+    console.error('保存版本失败:', err)
+    message.error('保存版本失败')
+  } finally {
+    savingVersion.value = false
+  }
+}
+
+const restoreVersion = async (version) => {
+  if (!story.value.id) return
+  
+  dialog.warning({
+    title: '确认恢复版本',
+    content: `确定要恢复到版本 v${version.version} 吗？当前未保存的修改将会丢失。`,
+    positiveText: '确认恢复',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        const res = await storyApi.restoreStoryVersion(story.value.id, version.id)
+        
+        story.value = res.data.story
+        tagsInput.value = (res.data.story.tags || []).join(', ')
+        nodes.value = res.data.nodes || []
+        
+        if (nodes.value.length > 0) {
+          selectedNode.value = nodes.value[0]
+        } else {
+          selectedNode.value = null
+        }
+        
+        message.success('已恢复到该版本')
+        loadVersions()
+      } catch (err) {
+        console.error('恢复版本失败:', err)
+        message.error('恢复版本失败')
+      }
+    }
+  })
+}
+
+const deleteVersion = async (version) => {
+  if (!story.value.id) return
+  
+  try {
+    await storyApi.deleteStoryVersion(story.value.id, version.id)
+    const index = versions.value.findIndex(v => v.id === version.id)
+    if (index !== -1) {
+      versions.value.splice(index, 1)
+    }
+    message.success('版本已删除')
+  } catch (err) {
+    console.error('删除版本失败:', err)
+    message.error('删除版本失败')
+  }
+}
+
 onMounted(() => {
   loadStory()
+  loadDrafts()
+  if (story.value.id) {
+    loadVersions()
+  }
+  startAutoSave()
+})
+
+onUnmounted(() => {
+  stopAutoSave()
+})
+
+watch(() => story.value.id, (newId) => {
+  if (newId) {
+    loadVersions()
+  }
+})
+
+watch(activeMobileTab, (tab) => {
+  if (tab === 'drafts') {
+    loadDrafts()
+  } else if (tab === 'versions') {
+    loadVersions()
+  }
 })
 </script>
 
@@ -1436,5 +1989,194 @@ onMounted(() => {
   text-align: center;
   padding: 40px;
   color: #bbb;
+}
+
+.save-status.auto-saving {
+  color: #1890ff;
+}
+
+.save-status.auto-saved {
+  color: #52c41a;
+}
+
+.drafts-card, .versions-card {
+  border-radius: 12px;
+}
+
+.drafts-list, .versions-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.empty-drafts, .empty-versions {
+  text-align: center;
+  padding: 24px 10px;
+  color: #999;
+}
+
+.empty-drafts p, .empty-versions p {
+  margin: 4px 0;
+}
+
+.empty-drafts .hint, .empty-versions .hint {
+  font-size: 12px;
+  color: #bbb;
+}
+
+.draft-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+  background: #fafafa;
+  border: 1px solid transparent;
+}
+
+.draft-item:hover {
+  background: #f0f5ff;
+  border-color: #bae7ff;
+}
+
+.draft-item.active {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border-color: #1890ff;
+}
+
+.draft-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.draft-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.draft-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draft-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.auto-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: #e6f7ff;
+  color: #1890ff;
+  border-radius: 4px;
+}
+
+.draft-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.draft-nodes {
+  font-size: 12px;
+  color: #666;
+}
+
+.draft-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mobile-draft-item {
+  margin-bottom: 0;
+}
+
+.draft-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.draft-actions-row .n-button {
+  flex: 1;
+}
+
+.version-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+}
+
+.version-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.version-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #9d4edd;
+  margin-bottom: 4px;
+}
+
+.version-desc {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.version-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.version-time, .version-author {
+  font-size: 11px;
+  color: #999;
+}
+
+.version-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mobile-version-item {
+  margin-bottom: 0;
+}
+
+.version-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.version-actions-row .n-button {
+  flex: 1;
 }
 </style>

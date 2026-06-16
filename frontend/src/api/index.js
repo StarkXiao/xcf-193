@@ -64,6 +64,50 @@ export const storyApi = {
   
   getStoryReferences(storyId) {
     return api.get('/stories/' + storyId + '/references')
+  },
+
+  getDrafts(userId) {
+    return api.get('/stories/drafts/user/' + userId)
+  },
+
+  getDraft(draftId) {
+    return api.get('/stories/drafts/' + draftId)
+  },
+
+  createDraft(data) {
+    return api.post('/stories/drafts', data)
+  },
+
+  updateDraft(draftId, data) {
+    return api.put('/stories/drafts/' + draftId, data)
+  },
+
+  deleteDraft(draftId) {
+    return api.delete('/stories/drafts/' + draftId)
+  },
+
+  publishDraft(draftId, data) {
+    return api.post('/stories/drafts/' + draftId + '/publish', data)
+  },
+
+  getStoryVersions(storyId) {
+    return api.get('/stories/' + storyId + '/versions')
+  },
+
+  getStoryVersion(storyId, versionId) {
+    return api.get('/stories/' + storyId + '/versions/' + versionId)
+  },
+
+  createStoryVersion(storyId, data) {
+    return api.post('/stories/' + storyId + '/versions', data)
+  },
+
+  restoreStoryVersion(storyId, versionId) {
+    return api.post('/stories/' + storyId + '/versions/' + versionId + '/restore')
+  },
+
+  deleteStoryVersion(storyId, versionId) {
+    return api.delete('/stories/' + storyId + '/versions/' + versionId)
   }
 }
 

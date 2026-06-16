@@ -2374,6 +2374,32 @@ const versionHistory = [
   }
 ];
 
+const storyDrafts = [
+  {
+    id: 'draft-1',
+    storyId: null,
+    userId: 'user-1',
+    title: '未命名草稿',
+    summary: '',
+    cover: '📖',
+    tags: [],
+    nodes: [
+      {
+        id: 'draft-node-1',
+        title: '第一章',
+        content: '这是一个草稿的开头...',
+        choices: [],
+        isEnding: false
+      }
+    ],
+    autoSaved: true,
+    lastSavedAt: '2024-06-15 14:30',
+    createdAt: '2024-06-15 14:00'
+  }
+];
+
+const storyVersions = [];
+
 const activities = [
   {
     id: 'activity-1',
@@ -4257,6 +4283,8 @@ module.exports = {
   invitations,
   changeRequests,
   versionHistory,
+  storyDrafts,
+  storyVersions,
   activities,
   activityRegistrations,
   activitySubmissions,
