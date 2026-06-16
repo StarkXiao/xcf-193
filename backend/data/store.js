@@ -33,7 +33,8 @@ const {
   creationTasks,
   userTaskProgress,
   taskSubmissions,
-  taskRewards
+  taskRewards,
+  featuredTopics
 } = require('./mockData');
 
 const store = {
@@ -71,7 +72,8 @@ const store = {
   creationTasks: [...creationTasks],
   userTaskProgress: [...userTaskProgress],
   taskSubmissions: [...taskSubmissions],
-  taskRewards: [...taskRewards]
+  taskRewards: [...taskRewards],
+  featuredTopics: [...featuredTopics]
 };
 
 module.exports = store;

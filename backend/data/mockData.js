@@ -75,6 +75,210 @@ const stories = [
     startNodeId: 'node-3-1',
     auditStatus: 'pending',
     auditLevel: null
+  },
+  {
+    id: 'story-4',
+    title: '时光邮局',
+    summary: '在城市的角落，有一家能寄信给过去的邮局。一封封信件，串联起跨越时空的温柔...',
+    cover: '✉️',
+    authorId: 'user-2',
+    authorName: '星河漫步者',
+    tags: ['治愈', '奇幻', '恋爱'],
+    likes: 512,
+    views: 2048,
+    createdAt: '2024-01-20',
+    updatedAt: '2024-04-15',
+    status: 'completed',
+    startNodeId: 'node-4-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-5',
+    title: '深海的鲸歌',
+    summary: '海洋生物学家潜入深海，遇见了一只会唱歌的鲸鱼，以及守护海洋的神秘少女...',
+    cover: '🐋',
+    authorId: 'user-1',
+    authorName: '月下独酌',
+    tags: ['奇幻', '治愈', '冒险'],
+    likes: 428,
+    views: 1560,
+    createdAt: '2024-03-05',
+    updatedAt: '2024-05-12',
+    status: 'ongoing',
+    startNodeId: 'node-5-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-6',
+    title: '机甲少女的誓言',
+    summary: '战火纷飞的未来世界，少女驾驶着古老的机甲，守护着最后的和平...',
+    cover: '🤖',
+    authorId: 'user-3',
+    authorName: '梦境织者',
+    tags: ['科幻', '冒险', '战斗'],
+    likes: 678,
+    views: 3200,
+    createdAt: '2024-02-28',
+    updatedAt: '2024-05-08',
+    status: 'ongoing',
+    startNodeId: 'node-6-1',
+    auditStatus: 'approved',
+    auditLevel: 'PG'
+  },
+  {
+    id: 'story-7',
+    title: '咖啡屋的猫咪',
+    summary: '街角的咖啡屋里，每只猫咪都有自己的故事。而店长的秘密，才刚刚揭开...',
+    cover: '🐱',
+    authorId: 'user-2',
+    authorName: '星河漫步者',
+    tags: ['治愈', '日常', '奇幻'],
+    likes: 856,
+    views: 4100,
+    createdAt: '2023-12-10',
+    updatedAt: '2024-03-20',
+    status: 'completed',
+    startNodeId: 'node-7-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-8',
+    title: '剑与蔷薇',
+    summary: '骑士团的女剑士与神秘的蔷薇魔女，在命运的十字路口相遇...',
+    cover: '⚔️',
+    authorId: 'user-1',
+    authorName: '月下独酌',
+    tags: ['奇幻', '冒险', '百合'],
+    likes: 723,
+    views: 2890,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-05-01',
+    status: 'completed',
+    startNodeId: 'node-8-1',
+    auditStatus: 'approved',
+    auditLevel: 'PG'
+  },
+  {
+    id: 'story-9',
+    title: '星图师的旅程',
+    summary: '绘制星图的少年，在旅行中遇见了来自星星的少女，他们的命运从此交错...',
+    cover: '✨',
+    authorId: 'user-3',
+    authorName: '梦境织者',
+    tags: ['奇幻', '冒险', '治愈'],
+    likes: 234,
+    views: 980,
+    createdAt: '2024-04-20',
+    updatedAt: '2024-05-15',
+    status: 'ongoing',
+    startNodeId: 'node-9-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-10',
+    title: '长安月下',
+    summary: '大唐盛世，长安城的夜色下，一位画师与一位狐妖的浪漫邂逅...',
+    cover: '🏮',
+    authorId: 'user-2',
+    authorName: '星河漫步者',
+    tags: ['古风', '恋爱', '奇幻'],
+    likes: 567,
+    views: 2340,
+    createdAt: '2024-02-14',
+    updatedAt: '2024-04-30',
+    status: 'completed',
+    startNodeId: 'node-10-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-11',
+    title: '赛博朋克夜曲',
+    summary: '霓虹闪烁的未来都市，黑客少年与歌姬人偶的禁忌之恋...',
+    cover: '🌃',
+    authorId: 'user-1',
+    authorName: '月下独酌',
+    tags: ['科幻', '恋爱', '赛博朋克'],
+    likes: 892,
+    views: 4560,
+    createdAt: '2023-11-20',
+    updatedAt: '2024-04-10',
+    status: 'completed',
+    startNodeId: 'node-11-1',
+    auditStatus: 'approved',
+    auditLevel: 'PG'
+  },
+  {
+    id: 'story-12',
+    title: '精灵森林的秘密',
+    summary: '误入精灵森林的人类少女，遇见了守护森林的精灵王子，以及古老的秘密...',
+    cover: '🧝',
+    authorId: 'user-3',
+    authorName: '梦境织者',
+    tags: ['奇幻', '冒险', '恋爱'],
+    likes: 345,
+    views: 1450,
+    createdAt: '2024-03-25',
+    updatedAt: '2024-05-18',
+    status: 'ongoing',
+    startNodeId: 'node-12-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-13',
+    title: '幽灵列车',
+    summary: '午夜十二点的站台，一列只有亡灵才能乘坐的列车。她，为什么能看见？',
+    cover: '🚂',
+    authorId: 'user-2',
+    authorName: '星河漫步者',
+    tags: ['奇幻', '悬疑', '治愈'],
+    likes: 612,
+    views: 2780,
+    createdAt: '2024-01-05',
+    updatedAt: '2024-03-28',
+    status: 'completed',
+    startNodeId: 'node-13-1',
+    auditStatus: 'approved',
+    auditLevel: 'PG'
+  },
+  {
+    id: 'story-14',
+    title: '云端上的面包店',
+    summary: '在云层之上的小镇，有一家只在晴天营业的面包店。面包的味道，藏着天空的秘密...',
+    cover: '🥐',
+    authorId: 'user-1',
+    authorName: '月下独酌',
+    tags: ['治愈', '日常', '奇幻'],
+    likes: 445,
+    views: 1890,
+    createdAt: '2024-04-01',
+    updatedAt: '2024-05-20',
+    status: 'ongoing',
+    startNodeId: 'node-14-1',
+    auditStatus: 'approved',
+    auditLevel: 'G'
+  },
+  {
+    id: 'story-15',
+    title: '末世微光',
+    summary: '世界毁灭后的第一百年，少女在废墟中遇见了最后的机器人...',
+    cover: '🌅',
+    authorId: 'user-3',
+    authorName: '梦境织者',
+    tags: ['科幻', '治愈', '冒险'],
+    likes: 756,
+    views: 3450,
+    createdAt: '2023-10-15',
+    updatedAt: '2024-02-20',
+    status: 'completed',
+    startNodeId: 'node-15-1',
+    auditStatus: 'approved',
+    auditLevel: 'PG'
   }
 ];
 
@@ -1204,8 +1408,228 @@ const storyNodes = {
       isEnding: true,
       endingType: 'normal'
     }
+  ],
+  'story-4': [
+    {
+      id: 'node-4-1',
+      storyId: 'story-4',
+      title: '第一章：神秘的邮局',
+      content: '城市的角落，有一家不起眼的邮局。据说，这里可以寄信给过去的自己...',
+      choices: [
+        { id: 'choice-4-1-1', text: '寄一封给过去的信', nextNodeId: null },
+        { id: 'choice-4-1-2', text: '询问邮局的秘密', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-5': [
+    {
+      id: 'node-5-1',
+      storyId: 'story-5',
+      title: '序章：深海的呼唤',
+      content: '海洋生物学家林深，在一次深海考察中，听到了奇异的鲸歌...',
+      choices: [
+        { id: 'choice-5-1-1', text: '追寻鲸歌的来源', nextNodeId: null },
+        { id: 'choice-5-1-2', text: '返回船上报告发现', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-6': [
+    {
+      id: 'node-6-1',
+      storyId: 'story-6',
+      title: '第一章：废弃的机甲',
+      content: '战火纷飞的年代，少女艾拉在废墟中发现了一台古老的机甲...',
+      choices: [
+        { id: 'choice-6-1-1', text: '尝试启动机甲', nextNodeId: null },
+        { id: 'choice-6-1-2', text: '寻找机甲的钥匙', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-7': [
+    {
+      id: 'node-7-1',
+      storyId: 'story-7',
+      title: '第一章：咖啡屋的新店员',
+      content: '街角的「喵语咖啡屋」正在招新，我推开了那扇挂着铃铛的门...',
+      choices: [
+        { id: 'choice-7-1-1', text: '和橘猫打招呼', nextNodeId: null },
+        { id: 'choice-7-1-2', text: '询问店长招聘详情', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-8': [
+    {
+      id: 'node-8-1',
+      storyId: 'story-8',
+      title: '第一章：蔷薇丛中的少女',
+      content: '骑士艾莉娅在执行任务时，误入了一片神秘的蔷薇园...',
+      choices: [
+        { id: 'choice-8-1-1', text: '上前搭话', nextNodeId: null },
+        { id: 'choice-8-1-2', text: '暗中观察', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-9': [
+    {
+      id: 'node-9-1',
+      storyId: 'story-9',
+      title: '第一章：星空下的相遇',
+      content: '星图师少年在山顶绘制星图时，一颗流星落在了不远处...',
+      choices: [
+        { id: 'choice-9-1-1', text: '前往流星坠落处', nextNodeId: null },
+        { id: 'choice-9-1-2', text: '继续观察星象', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-10': [
+    {
+      id: 'node-10-1',
+      storyId: 'story-10',
+      title: '第一章：上元夜',
+      content: '大唐长安，上元灯会。画师柳言在人群中，看见了一只九尾狐...',
+      choices: [
+        { id: 'choice-10-1-1', text: '追上去看个究竟', nextNodeId: null },
+        { id: 'choice-10-1-2', text: '回到画摊继续作画', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-11': [
+    {
+      id: 'node-11-1',
+      storyId: 'story-11',
+      title: '第一章：霓虹下的邂逅',
+      content: '2099年，新东京。黑客少年在数据海洋中，遇见了一个神秘的AI歌姬...',
+      choices: [
+        { id: 'choice-11-1-1', text: '追踪这个AI', nextNodeId: null },
+        { id: 'choice-11-1-2', text: '切断连接保持安全', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-12': [
+    {
+      id: 'node-12-1',
+      storyId: 'story-12',
+      title: '第一章：误入森林',
+      content: '迷路的少女艾米，在精灵森林深处遇见了一位银发精灵...',
+      choices: [
+        { id: 'choice-12-1-1', text: '请求精灵帮助', nextNodeId: null },
+        { id: 'choice-12-1-2', text: '悄悄躲起来', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-13': [
+    {
+      id: 'node-13-1',
+      storyId: 'story-13',
+      title: '序章：午夜十二点',
+      content: '传闻中，午夜十二点会有一列幽灵列车经过。今晚，我决定去一探究竟...',
+      choices: [
+        { id: 'choice-13-1-1', text: '登上列车', nextNodeId: null },
+        { id: 'choice-13-1-2', text: '在站台观望', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-14': [
+    {
+      id: 'node-14-1',
+      storyId: 'story-14',
+      title: '第一章：云朵上的小镇',
+      content: '乘坐热气球旅行的我，意外发现了一座漂浮在云端的小镇...',
+      choices: [
+        { id: 'choice-14-1-1', text: '降落一探究竟', nextNodeId: null },
+        { id: 'choice-14-1-2', text: '在空中绕行观察', nextNodeId: null }
+      ],
+      isEnding: false
+    }
+  ],
+  'story-15': [
+    {
+      id: 'node-15-1',
+      storyId: 'story-15',
+      title: '序章：废墟中的光',
+      content: '世界毁灭后的第一百年，少女米拉在废墟中寻找着生存的希望...',
+      choices: [
+        { id: 'choice-15-1-1', text: '走近那道光', nextNodeId: null },
+        { id: 'choice-15-1-2', text: '小心地绕开', nextNodeId: null }
+      ],
+      isEnding: false
+    }
   ]
 };
+
+const featuredTopics = [
+  {
+    id: 'topic-1',
+    title: '奇幻恋爱精选',
+    description: '跨越种族与时空的浪漫故事',
+    cover: '💕',
+    tags: ['奇幻', '恋爱'],
+    storyCount: 8,
+    color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+    sortOrder: 1
+  },
+  {
+    id: 'topic-2',
+    title: '治愈系故事集',
+    description: '温暖心灵的治愈系故事，陪你度过每一个温柔的夜晚',
+    cover: '🌿',
+    tags: ['治愈'],
+    storyCount: 7,
+    color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    sortOrder: 2
+  },
+  {
+    id: 'topic-3',
+    title: '科幻世界大冒险',
+    description: '穿越星际，探索未来，在科幻世界中开启奇妙旅程',
+    cover: '🚀',
+    tags: ['科幻', '冒险'],
+    storyCount: 5,
+    color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    sortOrder: 3
+  },
+  {
+    id: 'topic-4',
+    title: '古风古韵',
+    description: '梦回千年，在古风世界中邂逅浪漫',
+    cover: '🏮',
+    tags: ['古风'],
+    storyCount: 3,
+    color: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+    sortOrder: 4
+  },
+  {
+    id: 'topic-5',
+    title: '完本佳作',
+    description: '已完结的精品故事，放心入坑',
+    cover: '📚',
+    tags: [],
+    isCompleted: true,
+    storyCount: 8,
+    color: 'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
+    sortOrder: 5
+  },
+  {
+    id: 'topic-6',
+    title: '百合向精选',
+    description: '少女之间的细腻情感与温柔故事',
+    cover: '🌸',
+    tags: ['百合'],
+    storyCount: 3,
+    color: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+    sortOrder: 6
+  }
+];
 
 const comments = {
   'story-1': [
@@ -4305,5 +4729,6 @@ module.exports = {
   creationTasks,
   userTaskProgress,
   taskSubmissions,
-  taskRewards
+  taskRewards,
+  featuredTopics
 };

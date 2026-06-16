@@ -74,7 +74,128 @@
       </div>
     </div>
 
-    <div class="filter-section" ref="storiesSection">
+    <div class="topics-section" :class="{ 'mobile-topics': isMobile }">
+      <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+        <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">🎯 精选专题</h2>
+        <n-button text type="primary" size="small" @click="scrollToAllTopics">
+          查看全部专题 →
+        </n-button>
+      </div>
+      <div class="topics-grid" :class="{ 'mobile-topics-grid': isMobile }">
+        <div 
+          v-for="topic in topics.slice(0, isMobile ? 4 : 6)" 
+          :key="topic.id"
+          class="topic-card"
+          :class="{ 'mobile-topic-card': isMobile }"
+          :style="{ background: topic.color }"
+          @click="openTopic(topic.id)"
+        >
+          <div class="topic-icon">{{ topic.cover }}</div>
+          <div class="topic-content">
+            <h3 class="topic-title">{{ topic.title }}</h3>
+            <p class="topic-desc">{{ topic.description }}</p>
+            <span class="topic-count">{{ topic.storyCount }} 个故事</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <n-spin :show="loading" size="large">
+      <div v-for="section in sections" :key="section.id" class="story-section" ref="storiesSection">
+        <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+          <div class="section-title-wrap">
+            <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">{{ section.title }}</h2>
+            <span class="section-subtitle">{{ section.subtitle }}</span>
+          </div>
+          <n-button text type="primary" size="small" @click="viewMore(section.type)">
+            更多 →
+          </n-button>
+        </div>
+        <div class="stories-row" :class="{ 'mobile-stories-row': isMobile }">
+          <n-card 
+            v-for="story in section.stories" 
+            :key="story.id"
+            hoverable
+            class="story-card-horizontal"
+            :class="{ 'mobile-story-card-horizontal': isMobile }"
+            @click="openStory(story.id)"
+          >
+            <div class="story-card-h-cover" :class="{ 'mobile-story-card-h-cover': isMobile }">
+              {{ story.cover }}
+              <span v-if="favoriteStoryIds.includes(story.id)" class="fav-badge">⭐</span>
+              <span v-if="story.status === 'completed'" class="status-badge completed">完结</span>
+              <span v-else class="status-badge ongoing">连载中</span>
+            </div>
+            <div class="story-card-h-info">
+              <h3 class="story-card-h-title" :class="{ 'mobile-story-card-h-title': isMobile }">{{ story.title }}</h3>
+              <p class="story-card-h-summary" :class="{ 'mobile-story-card-h-summary': isMobile }">{{ story.summary }}</p>
+              <div class="story-card-h-tags">
+                <n-tag 
+                  v-for="tag in (story.tags || []).slice(0, 2)" 
+                  :key="tag" 
+                  size="small" 
+                  type="primary"
+                >
+                  {{ tag }}
+                </n-tag>
+              </div>
+              <div class="story-card-h-meta">
+                <span class="meta-item">
+                  <span class="meta-icon">👤</span>
+                  {{ story.authorName }}
+                </span>
+                <span class="meta-item">
+                  <span class="meta-icon">❤️</span>
+                  {{ formatNumber(story.likes) }}
+                </span>
+                <span class="meta-item">
+                  <span class="meta-icon">👁️</span>
+                  {{ formatNumber(story.views) }}
+                </span>
+              </div>
+            </div>
+          </n-card>
+        </div>
+      </div>
+    </n-spin>
+
+    <div class="all-topics-section" :class="{ 'mobile-all-topics': isMobile }" ref="allTopicsSection">
+      <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
+        <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">📚 全部专题</h2>
+      </div>
+      <div class="all-topics-grid" :class="{ 'mobile-all-topics-grid': isMobile }">
+        <div 
+          v-for="topic in topics" 
+          :key="topic.id"
+          class="all-topic-card"
+          :class="{ 'mobile-all-topic-card': isMobile }"
+          :style="{ background: topic.color }"
+          @click="openTopic(topic.id)"
+        >
+          <div class="all-topic-header">
+            <span class="all-topic-icon">{{ topic.cover }}</span>
+            <h3 class="all-topic-title">{{ topic.title }}</h3>
+          </div>
+          <p class="all-topic-desc">{{ topic.description }}</p>
+          <div class="all-topic-footer">
+            <span class="all-topic-count">{{ topic.storyCount }} 个故事</span>
+            <span class="all-topic-arrow">→</span>
+          </div>
+          <div v-if="topic.previewStories && topic.previewStories.length > 0" class="all-topic-preview">
+            <div 
+              v-for="(previewStory, idx) in topic.previewStories" 
+              :key="previewStory.id"
+              class="preview-story-item"
+            >
+              <span class="preview-rank">{{ idx + 1 }}</span>
+              <span class="preview-title">{{ previewStory.title }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section" v-if="stories.length > 0">
       <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
         <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">📚 故事广场</h2>
         <div class="filter-tabs">
@@ -98,7 +219,7 @@
       </div>
     </div>
 
-    <n-spin :show="loading" size="large">
+    <n-spin :show="loading" size="large" v-if="stories.length > 0">
       <div class="stories-grid" :class="{ 'mobile-stories-grid': isMobile }">
         <n-card 
           v-for="story in stories" 
@@ -145,7 +266,7 @@
       </div>
     </n-spin>
 
-    <div v-if="stories.length === 0 && !loading" class="empty-state" :class="{ 'mobile-empty': isMobile }">
+    <div v-if="stories.length === 0 && sections.length === 0 && !loading" class="empty-state" :class="{ 'mobile-empty': isMobile }">
       <div class="empty-icon" :class="{ 'mobile-empty-icon': isMobile }">📝</div>
       <p>还没有故事，快来创作第一个吧！</p>
       <n-button type="primary" :size="isMobile ? 'medium' : 'default'" @click="goToEditor">
@@ -207,7 +328,9 @@ const recentReads = ref([])
 const favoriteStoryIds = ref([])
 const favoriteWorldIds = ref([])
 
-const storiesSection = ref(null)
+const sections = ref([])
+const topics = ref([])
+const allTopicsSection = ref(null)
 
 const formatNumber = (num) => {
   if (!num) return 0
@@ -220,8 +343,23 @@ const formatNumber = (num) => {
   return num
 }
 
-const loadStories = async () => {
+const loadHomeRecommend = async () => {
   loading.value = true
+  try {
+    const res = await storyApi.getHomeRecommend({ userId, limit: isMobile.value ? 4 : 6 })
+    sections.value = res.data.sections || []
+    topics.value = res.data.topics || []
+    if (res.data.popularTags && res.data.popularTags.length > 0) {
+      allTags.value = res.data.popularTags.map(t => t.tag)
+    }
+  } catch (err) {
+    console.error('加载首页推荐失败:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadStories = async () => {
   try {
     const params = { sort: sortBy.value }
     if (selectedTag.value) {
@@ -231,8 +369,6 @@ const loadStories = async () => {
     stories.value = res.data.stories
   } catch (err) {
     console.error('加载故事失败:', err)
-  } finally {
-    loading.value = false
   }
 }
 
@@ -260,6 +396,14 @@ const openStory = (id) => {
 
 const openWorld = (id) => {
   router.push(`/world/${id}`)
+}
+
+const openTopic = (id) => {
+  router.push(`/topic/${id}`)
+}
+
+const viewMore = (type) => {
+  router.push({ path: '/stories', query: { sort: type } })
 }
 
 const goToEditor = () => {
@@ -316,10 +460,20 @@ const goToFavorites = () => {
 }
 
 const scrollToStories = () => {
-  storiesSection.value?.scrollIntoView({ behavior: 'smooth' })
+  const firstSection = document.querySelector('.story-section')
+  if (firstSection) {
+    firstSection.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+const scrollToAllTopics = () => {
+  if (allTopicsSection.value) {
+    allTopicsSection.value.scrollIntoView({ behavior: 'smooth' })
+  }
 }
 
 onMounted(() => {
+  loadHomeRecommend()
   loadStories()
   loadWorlds()
   loadRecentReads()
@@ -424,10 +578,6 @@ onMounted(() => {
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
-}
-
-.filter-section {
-  margin-bottom: 20px;
 }
 
 .quick-access-section {
@@ -543,20 +693,94 @@ onMounted(() => {
   font-size: 18px;
 }
 
-.fav-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+.topics-section {
+  margin-bottom: 40px;
+}
+
+.topics-section.mobile-topics {
+  margin-bottom: 28px;
+}
+
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.topics-grid.mobile-topics-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.topic-card {
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.topic-card.mobile-topic-card {
+  padding: 16px;
+  gap: 12px;
+}
+
+.topic-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.topic-card.mobile-topic-card .topic-icon {
+  font-size: 36px;
+}
+
+.topic-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.topic-title {
   font-size: 18px;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #333;
 }
 
-.story-cover {
-  position: relative;
+.topic-card.mobile-topic-card .topic-title {
+  font-size: 15px;
 }
 
-.filter-section {
-  margin-bottom: 20px;
+.topic-desc {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.topic-card.mobile-topic-card .topic-desc {
+  font-size: 12px;
+  -webkit-line-clamp: 1;
+}
+
+.topic-count {
+  font-size: 12px;
+  color: #888;
+  background: rgba(255,255,255,0.6);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .section-header {
@@ -570,6 +794,12 @@ onMounted(() => {
   margin-bottom: 14px;
 }
 
+.section-title-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
 .section-title {
   font-size: 24px;
   margin: 0;
@@ -578,6 +808,331 @@ onMounted(() => {
 
 .section-title.mobile-section-title {
   font-size: 18px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: #999;
+}
+
+.story-section {
+  margin-bottom: 40px;
+}
+
+.story-section:last-of-type {
+  margin-bottom: 30px;
+}
+
+.stories-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.stories-row.mobile-stories-row {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.story-card-horizontal {
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.story-card-horizontal:hover {
+  transform: translateY(-2px);
+}
+
+.story-card-horizontal :deep(.n-card__content) {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.story-card-horizontal.mobile-story-card-horizontal :deep(.n-card__content) {
+  padding: 14px;
+  gap: 12px;
+}
+
+.story-card-h-cover {
+  width: 100px;
+  height: 140px;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0e6ff 0%, #e0ccff 100%);
+  border-radius: 8px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.story-card-h-cover.mobile-story-card-h-cover {
+  width: 80px;
+  height: 110px;
+  font-size: 36px;
+}
+
+.status-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.status-badge.completed {
+  background: #52c41a;
+  color: white;
+}
+
+.status-badge.ongoing {
+  background: #1890ff;
+  color: white;
+}
+
+.story-card-h-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-card-h-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.story-card-h-title.mobile-story-card-h-title {
+  font-size: 15px;
+}
+
+.story-card-h-summary {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.story-card-h-summary.mobile-story-card-h-summary {
+  font-size: 12px;
+}
+
+.story-card-h-tags {
+  margin-bottom: 8px;
+}
+
+.story-card-h-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #999;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-icon {
+  font-size: 13px;
+}
+
+.fav-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.story-cover {
+  position: relative;
+  font-size: 60px;
+  text-align: center;
+  padding: 30px 0;
+  background: linear-gradient(135deg, #f0e6ff 0%, #e0ccff 100%);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.story-cover.mobile-story-cover {
+  font-size: 48px;
+  padding: 20px 0;
+  margin-bottom: 12px;
+  border-radius: 10px;
+}
+
+.all-topics-section {
+  margin: 50px 0 40px 0;
+}
+
+.all-topics-section.mobile-all-topics {
+  margin: 36px 0 28px 0;
+}
+
+.all-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.all-topics-grid.mobile-all-topics-grid {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.all-topic-card {
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.all-topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.all-topic-card.mobile-all-topic-card {
+  padding: 16px;
+}
+
+.all-topic-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.all-topic-icon {
+  font-size: 40px;
+}
+
+.all-topic-card.mobile-all-topic-card .all-topic-icon {
+  font-size: 32px;
+}
+
+.all-topic-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.all-topic-card.mobile-all-topic-card .all-topic-title {
+  font-size: 16px;
+}
+
+.all-topic-desc {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.all-topic-card.mobile-all-topic-card .all-topic-desc {
+  font-size: 12px;
+}
+
+.all-topic-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.all-topic-count {
+  font-size: 12px;
+  color: #888;
+  background: rgba(255,255,255,0.6);
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+.all-topic-arrow {
+  font-size: 16px;
+  color: #666;
+  font-weight: 600;
+}
+
+.all-topic-preview {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.preview-story-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.all-topic-card.mobile-all-topic-card .preview-story-item {
+  font-size: 12px;
+}
+
+.preview-rank {
+  width: 18px;
+  height: 18px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.preview-story-item:nth-child(1) .preview-rank {
+  background: #ff4d4f;
+  color: white;
+}
+
+.preview-story-item:nth-child(2) .preview-rank {
+  background: #ff7a45;
+  color: white;
+}
+
+.preview-story-item:nth-child(3) .preview-rank {
+  background: #ffa940;
+  color: white;
+}
+
+.preview-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #555;
+}
+
+.filter-section {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding-top: 30px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .tags-filter {
@@ -642,22 +1197,6 @@ onMounted(() => {
   padding: 14px;
 }
 
-.story-cover {
-  font-size: 60px;
-  text-align: center;
-  padding: 30px 0;
-  background: linear-gradient(135deg, #f0e6ff 0%, #e0ccff 100%);
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.story-cover.mobile-story-cover {
-  font-size: 48px;
-  padding: 20px 0;
-  margin-bottom: 12px;
-  border-radius: 10px;
-}
-
 .story-title {
   font-size: 18px;
   margin: 0 0 8px 0;
@@ -702,16 +1241,6 @@ onMounted(() => {
 .story-meta.mobile-story-meta {
   gap: 12px;
   font-size: 12px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.meta-icon {
-  font-size: 14px;
 }
 
 .empty-state {

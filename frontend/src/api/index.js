@@ -112,6 +112,18 @@ export const storyApi = {
 
   deleteStoryVersion(storyId, versionId) {
     return api.delete('/stories/' + storyId + '/versions/' + versionId)
+  },
+
+  getHomeRecommend(params = {}) {
+    return api.get('/stories/recommend/home', { params })
+  },
+
+  getFeaturedTopics(params = {}) {
+    return api.get('/stories/featured-topics', { params })
+  },
+
+  getFeaturedTopicDetail(id, params = {}) {
+    return api.get('/stories/featured-topics/' + id, { params })
   }
 }
 

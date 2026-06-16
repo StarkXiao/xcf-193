@@ -26,6 +26,7 @@ import ThemeHall from './views/ThemeHall.vue'
 import ThemeHallDetail from './views/ThemeHallDetail.vue'
 import CreationTaskCenter from './views/CreationTaskCenter.vue'
 import CreationTaskDetail from './views/CreationTaskDetail.vue'
+import TopicDetail from './views/TopicDetail.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -49,7 +50,8 @@ const routes = [
   { path: '/theme-halls', name: 'ThemeHall', component: ThemeHall },
   { path: '/theme-hall/:id', name: 'ThemeHallDetail', component: ThemeHallDetail },
   { path: '/creation-tasks', name: 'CreationTaskCenter', component: CreationTaskCenter },
-  { path: '/creation-task/:id', name: 'CreationTaskDetail', component: CreationTaskDetail }
+  { path: '/creation-task/:id', name: 'CreationTaskDetail', component: CreationTaskDetail },
+  { path: '/topic/:id', name: 'TopicDetail', component: TopicDetail }
 ]
 
 const router = createRouter({

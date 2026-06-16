@@ -8,6 +8,7 @@ let storiesData = store.stories;
 let storyNodesData = store.storyNodes;
 let favoritesData = store.favorites;
 let worldSettingsData = store.worldSettings;
+let featuredTopicsData = store.featuredTopics;
 
 router.get('/', (req, res) => {
   const { tag, sort, page = 1, limit = 10 } = req.query;
@@ -35,8 +36,12 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/:id', (req, res) => {
-  const story = storiesData.find(s => s.id === req.params.id);
+router.get('/:id', (req, res, next) => {
+  const { id } = req.params;
+  if (id === 'recommend' || id === 'featured-topics' || id === 'drafts') {
+    return next();
+  }
+  const story = storiesData.find(s => s.id === id);
   if (!story) {
     return res.status(404).json({ message: '故事不存在' });
   }
@@ -762,6 +767,292 @@ router.delete('/:id/versions/:versionId', (req, res) => {
   
   store.storyVersions.splice(versionIndex, 1);
   res.json({ message: '版本已删除' });
+});
+
+const calculateStoryScore = (story, userTags = []) => {
+  let score = 0;
+  
+  const likesScore = Math.log10(story.likes + 1) * 20;
+  score += likesScore;
+  
+  const viewsScore = Math.log10(story.views + 1) * 15;
+  score += viewsScore;
+  
+  const likeRatio = story.views > 0 ? story.likes / story.views : 0;
+  score += likeRatio * 50;
+  
+  if (story.status === 'completed') {
+    score += 15;
+  }
+  
+  if (userTags.length > 0) {
+    const matchedTags = story.tags.filter(tag => userTags.includes(tag));
+    score += matchedTags.length * 10;
+  }
+  
+  const now = new Date();
+  const updatedDate = new Date(story.updatedAt);
+  const daysSinceUpdate = Math.floor((now - updatedDate) / (1000 * 60 * 60 * 24));
+  if (daysSinceUpdate <= 7) {
+    score += 10;
+  } else if (daysSinceUpdate <= 30) {
+    score += 5;
+  }
+  
+  const createdDate = new Date(story.createdAt);
+  const daysSinceCreate = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+  if (daysSinceCreate <= 7) {
+    score += 8;
+  }
+  
+  if (story.auditStatus === 'approved') {
+    score += 5;
+  }
+  
+  return score;
+};
+
+const getApprovedStories = () => {
+  return storiesData.filter(s => s.auditStatus === 'approved');
+};
+
+const getUserTags = (userId) => {
+  if (!userId) return [];
+  const userFavorites = favoritesData[userId];
+  if (!userFavorites || !userFavorites.stories) return [];
+  
+  const tagCount = {};
+  userFavorites.stories.forEach(storyId => {
+    const story = storiesData.find(s => s.id === storyId);
+    if (story && story.tags) {
+      story.tags.forEach(tag => {
+        tagCount[tag] = (tagCount[tag] || 0) + 1;
+      });
+    }
+  });
+  
+  return Object.entries(tagCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([tag]) => tag);
+};
+
+const getStorySection = (stories, sectionType, limit = 6) => {
+  let filtered = [...stories];
+  
+  switch (sectionType) {
+    case 'featured':
+      return filtered
+        .map(s => ({ ...s, score: calculateStoryScore(s) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+    
+    case 'hot':
+      return filtered
+        .sort((a, b) => (b.likes + b.views * 0.3) - (a.likes + a.views * 0.3))
+        .slice(0, limit);
+    
+    case 'new':
+      return filtered
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, limit);
+    
+    case 'completed':
+      return filtered
+        .filter(s => s.status === 'completed')
+        .sort((a, b) => b.likes - a.likes)
+        .slice(0, limit);
+    
+    case 'trending':
+      return filtered
+        .map(s => {
+          const daysOld = Math.max(1, Math.floor((new Date() - new Date(s.createdAt)) / (1000 * 60 * 60 * 24)));
+          const momentum = (s.likes + s.views * 0.2) / Math.sqrt(daysOld);
+          return { ...s, momentum };
+        })
+        .sort((a, b) => b.momentum - a.momentum)
+        .slice(0, limit);
+    
+    default:
+      return filtered.slice(0, limit);
+  }
+};
+
+router.get('/recommend/home', (req, res) => {
+  const { userId, limit = 6 } = req.query;
+  const approvedStories = getApprovedStories();
+  const userTags = getUserTags(userId);
+  
+  const featuredStories = getStorySection(approvedStories, 'featured', parseInt(limit));
+  const hotStories = getStorySection(approvedStories, 'hot', parseInt(limit));
+  const newStories = getStorySection(approvedStories, 'new', parseInt(limit));
+  const completedStories = getStorySection(approvedStories, 'completed', parseInt(limit));
+  const trendingStories = getStorySection(approvedStories, 'trending', parseInt(limit));
+  
+  const sortedTopics = [...featuredTopicsData].sort((a, b) => a.sortOrder - b.sortOrder);
+  const topicsWithStories = sortedTopics.map(topic => {
+    let topicStories = approvedStories.filter(story => {
+      if (topic.isCompleted) {
+        return story.status === 'completed';
+      }
+      if (topic.tags && topic.tags.length > 0) {
+        return topic.tags.some(tag => story.tags.includes(tag));
+      }
+      return false;
+    });
+    topicStories = topicStories
+      .map(s => ({ ...s, score: calculateStoryScore(s, topic.tags) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+    
+    return {
+      ...topic,
+      previewStories: topicStories
+    };
+  });
+  
+  const allTags = [];
+  const tagCount = {};
+  approvedStories.forEach(story => {
+    story.tags.forEach(tag => {
+      tagCount[tag] = (tagCount[tag] || 0) + 1;
+    });
+  });
+  Object.entries(tagCount)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([tag, count]) => {
+      allTags.push({ tag, count });
+    });
+  
+  res.json({
+    sections: [
+      {
+        id: 'featured',
+        title: '✨ 精选推荐',
+        subtitle: '编辑精选，优质故事',
+        type: 'featured',
+        stories: featuredStories
+      },
+      {
+        id: 'trending',
+        title: '🔥 正在流行',
+        subtitle: '近期热门作品',
+        type: 'trending',
+        stories: trendingStories
+      },
+      {
+        id: 'new',
+        title: '🌟 新书速递',
+        subtitle: '最新上架的故事',
+        type: 'new',
+        stories: newStories
+      },
+      {
+        id: 'hot',
+        title: '💎 热门佳作',
+        subtitle: '最受欢迎的故事',
+        type: 'hot',
+        stories: hotStories
+      },
+      {
+        id: 'completed',
+        title: '📚 完本精品',
+        subtitle: '已完结，放心入坑',
+        type: 'completed',
+        stories: completedStories
+      }
+    ],
+    topics: topicsWithStories,
+    popularTags: allTags.slice(0, 15),
+    userPreferenceTags: userTags,
+    stats: {
+      totalStories: approvedStories.length,
+      completedStories: approvedStories.filter(s => s.status === 'completed').length,
+      totalTopics: sortedTopics.length
+    }
+  });
+});
+
+router.get('/featured-topics', (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  const approvedStories = getApprovedStories();
+  
+  const sortedTopics = [...featuredTopicsData].sort((a, b) => a.sortOrder - b.sortOrder);
+  const start = (page - 1) * limit;
+  const end = start + parseInt(limit);
+  const paginatedTopics = sortedTopics.slice(start, end);
+  
+  const topicsWithStories = paginatedTopics.map(topic => {
+    let topicStories = approvedStories.filter(story => {
+      if (topic.isCompleted) {
+        return story.status === 'completed';
+      }
+      if (topic.tags && topic.tags.length > 0) {
+        return topic.tags.some(tag => story.tags.includes(tag));
+      }
+      return false;
+    });
+    
+    return {
+      ...topic,
+      storyCount: topicStories.length,
+      previewStories: topicStories.slice(0, 3)
+    };
+  });
+  
+  res.json({
+    total: sortedTopics.length,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    topics: topicsWithStories
+  });
+});
+
+router.get('/featured-topics/:id', (req, res) => {
+  const { id } = req.params;
+  const { page = 1, limit = 10, sort = 'popular' } = req.query;
+  const approvedStories = getApprovedStories();
+  
+  const topic = featuredTopicsData.find(t => t.id === id);
+  if (!topic) {
+    return res.status(404).json({ message: '专题不存在' });
+  }
+  
+  let topicStories = approvedStories.filter(story => {
+    if (topic.isCompleted) {
+      return story.status === 'completed';
+    }
+    if (topic.tags && topic.tags.length > 0) {
+      return topic.tags.some(tag => story.tags.includes(tag));
+    }
+    return false;
+  });
+  
+  if (sort === 'newest') {
+    topicStories.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sort === 'popular') {
+    topicStories.sort((a, b) => (b.likes + b.views * 0.3) - (a.likes + a.views * 0.3));
+  } else if (sort === 'rating') {
+    topicStories = topicStories
+      .map(s => ({ ...s, score: calculateStoryScore(s, topic.tags) }))
+      .sort((a, b) => b.score - a.score);
+  }
+  
+  const start = (page - 1) * limit;
+  const end = start + parseInt(limit);
+  const paginatedStories = topicStories.slice(start, end);
+  
+  res.json({
+    topic: {
+      ...topic,
+      storyCount: topicStories.length
+    },
+    total: topicStories.length,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    sort,
+    stories: paginatedStories
+  });
 });
 
 module.exports = router;
