@@ -74,6 +74,27 @@
       </div>
     </div>
 
+    <div v-if="userPreferenceTags.length > 0" class="preference-section" :class="{ 'mobile-preference': isMobile }">
+      <div class="preference-header">
+        <span class="preference-icon">🎯</span>
+        <span class="preference-title">猜你喜欢</span>
+        <span class="preference-desc">根据你的收藏偏好智能推荐</span>
+      </div>
+      <div class="preference-tags">
+        <n-tag 
+          v-for="tag in userPreferenceTags" 
+          :key="tag" 
+          type="primary" 
+          :size="isMobile ? 'small' : 'medium'"
+          :bordered="false"
+          class="preference-tag"
+          @click="filterByTag(tag)"
+        >
+          {{ tag }}
+        </n-tag>
+      </div>
+    </div>
+
     <div class="topics-section" :class="{ 'mobile-topics': isMobile }">
       <div class="section-header" :class="{ 'mobile-section-header': isMobile }">
         <h2 class="section-title" :class="{ 'mobile-section-title': isMobile }">🎯 精选专题</h2>
@@ -331,6 +352,7 @@ const favoriteWorldIds = ref([])
 const sections = ref([])
 const topics = ref([])
 const allTopicsSection = ref(null)
+const userPreferenceTags = ref([])
 
 const formatNumber = (num) => {
   if (!num) return 0
@@ -349,6 +371,7 @@ const loadHomeRecommend = async () => {
     const res = await storyApi.getHomeRecommend({ userId, limit: isMobile.value ? 4 : 6 })
     sections.value = res.data.sections || []
     topics.value = res.data.topics || []
+    userPreferenceTags.value = res.data.userPreferenceTags || []
     if (res.data.popularTags && res.data.popularTags.length > 0) {
       allTags.value = res.data.popularTags.map(t => t.tag)
     }
@@ -388,6 +411,17 @@ const toggleTag = (tag) => {
     selectedTag.value = tag
   }
   loadStories()
+}
+
+const filterByTag = (tag) => {
+  selectedTag.value = tag
+  loadStories()
+  setTimeout(() => {
+    const storySection = document.querySelector('.story-square-section')
+    if (storySection) {
+      storySection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, 100)
 }
 
 const openStory = (id) => {
@@ -590,6 +624,57 @@ onMounted(() => {
   flex-direction: column;
   gap: 20px;
   margin-bottom: 24px;
+}
+
+.preference-section {
+  margin-bottom: 32px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  color: white;
+}
+
+.preference-section.mobile-preference {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.preference-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.preference-icon {
+  font-size: 24px;
+}
+
+.preference-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.preference-desc {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-left: auto;
+}
+
+.preference-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preference-tag {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.preference-tag:hover {
+  transform: scale(1.05);
 }
 
 .quick-access-block {

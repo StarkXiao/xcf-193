@@ -786,8 +786,17 @@ const calculateStoryScore = (story, userTags = []) => {
   }
   
   if (userTags.length > 0) {
-    const matchedTags = story.tags.filter(tag => userTags.includes(tag));
-    score += matchedTags.length * 10;
+    let tagMatchScore = 0;
+    let matchedCount = 0;
+    userTags.forEach(userTag => {
+      if (story.tags.includes(userTag.tag)) {
+        tagMatchScore += 15 * userTag.weight;
+        matchedCount++;
+      }
+    });
+    score += tagMatchScore;
+    const matchRatio = matchedCount / Math.max(userTags.length, 1);
+    score += matchRatio * 25;
   }
   
   const now = new Date();
@@ -822,52 +831,93 @@ const getUserTags = (userId) => {
   if (!userFavorites || !userFavorites.stories) return [];
   
   const tagCount = {};
+  let totalFavorites = 0;
   userFavorites.stories.forEach(storyId => {
     const story = storiesData.find(s => s.id === storyId);
     if (story && story.tags) {
+      totalFavorites++;
       story.tags.forEach(tag => {
         tagCount[tag] = (tagCount[tag] || 0) + 1;
       });
     }
   });
   
-  return Object.entries(tagCount)
+  const sortedTags = Object.entries(tagCount)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([tag]) => tag);
+    .map(([tag, count]) => ({
+      tag,
+      count,
+      weight: count / Math.max(totalFavorites, 1)
+    }));
+  
+  return sortedTags;
 };
 
-const getStorySection = (stories, sectionType, limit = 6) => {
+const getStorySection = (stories, sectionType, limit = 6, userTags = []) => {
   let filtered = [...stories];
+  const hasUserTags = userTags.length > 0;
+  
+  const calcTagBonus = (story) => {
+    if (!hasUserTags) return 0;
+    let bonus = 0;
+    userTags.forEach(userTag => {
+      if (story.tags.includes(userTag.tag)) {
+        bonus += userTag.weight;
+      }
+    });
+    return bonus;
+  };
   
   switch (sectionType) {
     case 'featured':
       return filtered
-        .map(s => ({ ...s, score: calculateStoryScore(s) }))
+        .map(s => ({ ...s, score: calculateStoryScore(s, userTags) }))
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
     
     case 'hot':
       return filtered
-        .sort((a, b) => (b.likes + b.views * 0.3) - (a.likes + a.views * 0.3))
+        .map(s => {
+          let hotScore = s.likes + s.views * 0.3;
+          const tagBonus = calcTagBonus(s);
+          hotScore += tagBonus * 120;
+          return { ...s, hotScore };
+        })
+        .sort((a, b) => b.hotScore - a.hotScore)
         .slice(0, limit);
     
     case 'new':
       return filtered
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .map(s => {
+          const daysOld = Math.floor((new Date() - new Date(s.createdAt)) / (1000 * 60 * 60 * 24));
+          let newScore = -daysOld;
+          const tagBonus = calcTagBonus(s);
+          newScore -= tagBonus * 3;
+          return { ...s, newScore };
+        })
+        .sort((a, b) => a.newScore - b.newScore)
         .slice(0, limit);
     
     case 'completed':
       return filtered
         .filter(s => s.status === 'completed')
-        .sort((a, b) => b.likes - a.likes)
+        .map(s => {
+          let completedScore = s.likes;
+          const tagBonus = calcTagBonus(s);
+          completedScore += tagBonus * 150;
+          return { ...s, completedScore };
+        })
+        .sort((a, b) => b.completedScore - a.completedScore)
         .slice(0, limit);
     
     case 'trending':
       return filtered
         .map(s => {
           const daysOld = Math.max(1, Math.floor((new Date() - new Date(s.createdAt)) / (1000 * 60 * 60 * 24)));
-          const momentum = (s.likes + s.views * 0.2) / Math.sqrt(daysOld);
+          let momentum = (s.likes + s.views * 0.2) / Math.sqrt(daysOld);
+          const tagBonus = calcTagBonus(s);
+          momentum *= (1 + tagBonus * 0.5);
           return { ...s, momentum };
         })
         .sort((a, b) => b.momentum - a.momentum)
@@ -883,11 +933,11 @@ router.get('/recommend/home', (req, res) => {
   const approvedStories = getApprovedStories();
   const userTags = getUserTags(userId);
   
-  const featuredStories = getStorySection(approvedStories, 'featured', parseInt(limit));
-  const hotStories = getStorySection(approvedStories, 'hot', parseInt(limit));
-  const newStories = getStorySection(approvedStories, 'new', parseInt(limit));
-  const completedStories = getStorySection(approvedStories, 'completed', parseInt(limit));
-  const trendingStories = getStorySection(approvedStories, 'trending', parseInt(limit));
+  const featuredStories = getStorySection(approvedStories, 'featured', parseInt(limit), userTags);
+  const hotStories = getStorySection(approvedStories, 'hot', parseInt(limit), userTags);
+  const newStories = getStorySection(approvedStories, 'new', parseInt(limit), userTags);
+  const completedStories = getStorySection(approvedStories, 'completed', parseInt(limit), userTags);
+  const trendingStories = getStorySection(approvedStories, 'trending', parseInt(limit), userTags);
   
   const sortedTopics = [...featuredTopicsData].sort((a, b) => a.sortOrder - b.sortOrder);
   const topicsWithStories = sortedTopics.map(topic => {
@@ -964,7 +1014,7 @@ router.get('/recommend/home', (req, res) => {
     ],
     topics: topicsWithStories,
     popularTags: allTags.slice(0, 15),
-    userPreferenceTags: userTags,
+    userPreferenceTags: userTags.map(t => t.tag),
     stats: {
       totalStories: approvedStories.length,
       completedStories: approvedStories.filter(s => s.status === 'completed').length,
