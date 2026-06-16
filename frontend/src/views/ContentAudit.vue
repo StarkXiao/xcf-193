@@ -123,6 +123,204 @@
             </div>
           </n-tab-pane>
 
+          <n-tab-pane name="reports" tab="🚨 举报管理">
+            <div class="tab-content">
+              <div class="filter-bar">
+                <n-radio-group v-model:value="reportStatus" @update:value="loadReports">
+                  <n-radio-button value="">全部状态</n-radio-button>
+                  <n-radio-button value="pending">待处理</n-radio-button>
+                  <n-radio-button value="processing">处理中</n-radio-button>
+                  <n-radio-button value="resolved">已处理</n-radio-button>
+                  <n-radio-button value="rejected">已驳回</n-radio-button>
+                </n-radio-group>
+                <n-radio-group v-model:value="reportType" @update:value="loadReports">
+                  <n-radio-button value="">全部类型</n-radio-button>
+                  <n-radio-button value="story">故事</n-radio-button>
+                  <n-radio-button value="comment">评论</n-radio-button>
+                  <n-radio-button value="world_entry">设定条目</n-radio-button>
+                </n-radio-group>
+              </div>
+
+              <div v-if="reports.length === 0" class="empty-state">
+                <div class="empty-icon">✨</div>
+                <div class="empty-text">暂无举报记录</div>
+              </div>
+
+              <div v-else class="reports-list">
+                <n-card 
+                  v-for="report in reports" 
+                  :key="report.id"
+                  hoverable
+                  class="report-item"
+                >
+                  <div class="report-header">
+                    <div class="report-status" :class="report.status">
+                      {{ getReportStatusLabel(report.status) }}
+                    </div>
+                    <div class="report-type-badge" :class="report.targetType">
+                      {{ getTypeLabel(report.targetType) }}
+                    </div>
+                    <div class="report-time">{{ report.createdAt }}</div>
+                  </div>
+
+                  <div class="report-body">
+                    <div class="report-reason">
+                      <span class="report-label">举报原因：</span>
+                      <n-tag size="small" type="warning">{{ report.reasonLabel }}</n-tag>
+                    </div>
+                    <div class="report-target">
+                      <span class="report-label">举报内容：</span>
+                      <span class="report-value">{{ report.targetTitle }}</span>
+                    </div>
+                    <div class="report-desc" v-if="report.description">
+                      <span class="report-label">详细描述：</span>
+                      <span class="report-value">{{ report.description }}</span>
+                    </div>
+                    <div class="report-reporter">
+                      <span class="report-label">举报人：</span>
+                      <span class="report-value">{{ report.reporterName }}</span>
+                    </div>
+                    <div class="report-handle" v-if="report.handlerName">
+                      <span class="report-label">处理人：</span>
+                      <span class="report-value">{{ report.handlerName }}</span>
+                    </div>
+                    <div class="report-handle-result" v-if="report.handleResult">
+                      <span class="report-label">处理结果：</span>
+                      <span class="report-value">
+                        {{ report.handleResult === 'take_down' ? '已下架' : '举报不成立' }}
+                      </span>
+                    </div>
+                    <div class="report-handle-remark" v-if="report.handleRemark">
+                      <span class="report-label">处理备注：</span>
+                      <span class="report-value">{{ report.handleRemark }}</span>
+                    </div>
+                  </div>
+
+                  <div class="report-actions" v-if="report.status === 'pending' || report.status === 'processing'">
+                    <n-button 
+                      size="small"
+                      @click="showTakeDownDialog(report)"
+                      type="error"
+                    >
+                      下架内容
+                    </n-button>
+                    <n-button 
+                      size="small"
+                      @click="showDismissDialog(report)"
+                    >
+                      驳回举报
+                    </n-button>
+                    <n-button 
+                      size="small"
+                      @click="markReportProcessing(report)"
+                      v-if="report.status === 'pending'"
+                    >
+                      标记处理中
+                    </n-button>
+                  </div>
+                </n-card>
+              </div>
+
+              <div v-if="reportsTotal > reportPageSize" class="pagination">
+                <n-pagination
+                  v-model:page="reportCurrentPage"
+                  :page-size="reportPageSize"
+                  :item-count="reportsTotal"
+                  @update:page="loadReports"
+                />
+              </div>
+            </div>
+          </n-tab-pane>
+
+          <n-tab-pane name="taken-down" tab="⬇️ 已下架">
+            <div class="tab-content">
+              <div class="filter-bar">
+                <n-radio-group v-model:value="takenDownType" @update:value="loadTakenDownItems">
+                  <n-radio-button value="">全部</n-radio-button>
+                  <n-radio-button value="story">故事</n-radio-button>
+                  <n-radio-button value="world">设定</n-radio-button>
+                  <n-radio-button value="world_entry">设定条目</n-radio-button>
+                  <n-radio-button value="comment">评论</n-radio-button>
+                </n-radio-group>
+              </div>
+
+              <div v-if="takenDownItems.length === 0" class="empty-state">
+                <div class="empty-icon">📦</div>
+                <div class="empty-text">暂无已下架内容</div>
+              </div>
+
+              <div v-else class="taken-down-list">
+                <n-card 
+                  v-for="item in takenDownItems" 
+                  :key="`${item.type}-${item.id}`"
+                  hoverable
+                  class="taken-down-item"
+                >
+                  <div class="item-header">
+                    <div class="item-type-badge" :class="item.type">
+                      {{ getTypeLabel(item.type) }}
+                    </div>
+                    <div class="item-time">下架时间：{{ item.takenDownAt || item.createdAt }}</div>
+                  </div>
+
+                  <div class="item-body">
+                    <div class="item-cover" v-if="item.cover">{{ item.cover }}</div>
+                    <div class="item-main">
+                      <h3 class="item-title">{{ item.title }}</h3>
+                      <p class="item-summary" v-if="item.summary || item.content">
+                        {{ item.summary || item.content }}
+                      </p>
+                      <div class="item-meta">
+                        <span class="meta-item">
+                          👤 {{ item.authorName }}
+                        </span>
+                        <span class="meta-item" v-if="item.storyTitle">
+                          📖 {{ item.storyTitle }}
+                        </span>
+                        <span class="meta-item" v-if="item.worldName">
+                          🌍 {{ item.worldName }}
+                        </span>
+                        <span class="meta-item" v-if="item.category">
+                          📂 {{ item.category }}
+                        </span>
+                      </div>
+                      <div class="item-reject-reason" v-if="item.rejectReason">
+                        <span class="reject-label">下架原因：</span>
+                        <span class="reject-value">{{ item.rejectReason }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="item-actions">
+                    <n-select 
+                      v-model:value="restoreLevels[`${item.type}-${item.id}`]" 
+                      placeholder="恢复等级"
+                      :options="levelOptions"
+                      size="small"
+                      style="width: 120px"
+                    />
+                    <n-button 
+                      type="success" 
+                      size="small"
+                      @click="handleRestore(item)"
+                    >
+                      恢复上架
+                    </n-button>
+                  </div>
+                </n-card>
+              </div>
+
+              <div v-if="takenDownTotal > takenDownPageSize" class="pagination">
+                <n-pagination
+                  v-model:page="takenDownCurrentPage"
+                  :page-size="takenDownPageSize"
+                  :item-count="takenDownTotal"
+                  @update:page="loadTakenDownItems"
+                />
+              </div>
+            </div>
+          </n-tab-pane>
+
           <n-tab-pane name="logs" tab="📜 审核日志">
             <div class="tab-content">
               <div class="filter-bar">
@@ -130,12 +328,15 @@
                   <n-radio-button value="">全部类型</n-radio-button>
                   <n-radio-button value="story">故事</n-radio-button>
                   <n-radio-button value="world">设定</n-radio-button>
+                  <n-radio-button value="world_entry">设定条目</n-radio-button>
                   <n-radio-button value="comment">评论</n-radio-button>
                 </n-radio-group>
                 <n-radio-group v-model:value="logFilterAction" @update:value="loadAuditLogs">
                   <n-radio-button value="">全部操作</n-radio-button>
                   <n-radio-button value="approve">通过</n-radio-button>
                   <n-radio-button value="reject">驳回</n-radio-button>
+                  <n-radio-button value="take_down">下架</n-radio-button>
+                  <n-radio-button value="restore">恢复</n-radio-button>
                 </n-radio-group>
               </div>
 
@@ -150,7 +351,7 @@
                       {{ getTypeLabel(log.targetType) }}
                     </div>
                     <div class="log-action" :class="log.action">
-                      {{ log.action === 'approve' ? '✅ 通过' : '❌ 驳回' }}
+                      {{ getLogActionLabel(log.action) }}
                     </div>
                     <div class="log-time">{{ log.createdAt }}</div>
                   </div>
@@ -208,13 +409,52 @@
         />
       </div>
     </n-modal>
+
+    <n-modal 
+      v-model:show="takeDownDialogVisible" 
+      preset="dialog"
+      title="下架内容"
+      :positive-text="'确认下架'"
+      :negative-text="'取消'"
+      positive-button-props="{ type: 'error' }"
+      @positive-click="handleTakeDown"
+    >
+      <div class="take-down-form">
+        <p class="dialog-desc">确定要下架该内容吗？下架后内容将不再对公众可见。</p>
+        <n-input 
+          v-model:value="takeDownReason" 
+          type="textarea"
+          placeholder="请输入下架原因..."
+          :rows="4"
+        />
+      </div>
+    </n-modal>
+
+    <n-modal 
+      v-model:show="dismissDialogVisible" 
+      preset="dialog"
+      title="驳回举报"
+      :positive-text="'确认驳回'"
+      :negative-text="'取消'"
+      @positive-click="handleDismiss"
+    >
+      <div class="dismiss-form">
+        <p class="dialog-desc">确定要驳回该举报吗？</p>
+        <n-input 
+          v-model:value="dismissReason" 
+          type="textarea"
+          placeholder="请输入驳回理由（可选）..."
+          :rows="4"
+        />
+      </div>
+    </n-modal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { useMessage } from 'naive-ui'
-import { auditApi } from '../api'
+import { auditApi, reportApi } from '../api'
 
 const message = useMessage()
 
@@ -228,6 +468,19 @@ const pendingTotal = ref(0)
 const currentPage = ref(1)
 const pageSize = 10
 
+const reportStatus = ref('')
+const reportType = ref('')
+const reports = ref([])
+const reportsTotal = ref(0)
+const reportCurrentPage = ref(1)
+const reportPageSize = 10
+
+const takenDownType = ref('')
+const takenDownItems = ref([])
+const takenDownTotal = ref(0)
+const takenDownCurrentPage = ref(1)
+const takenDownPageSize = 10
+
 const logFilterType = ref('')
 const logFilterAction = ref('')
 const auditLogs = ref([])
@@ -236,6 +489,7 @@ const logCurrentPage = ref(1)
 const logPageSize = 10
 
 const selectedLevels = reactive({})
+const restoreLevels = reactive({})
 const levelOptions = [
   { label: 'G 全年龄', value: 'G' },
   { label: 'PG 辅导级', value: 'PG' },
@@ -246,6 +500,14 @@ const levelOptions = [
 const rejectDialogVisible = ref(false)
 const rejectReason = ref('')
 const currentRejectItem = ref(null)
+
+const takeDownDialogVisible = ref(false)
+const takeDownReason = ref('')
+const currentTakeDownReport = ref(null)
+
+const dismissDialogVisible = ref(false)
+const dismissReason = ref('')
+const currentDismissReport = ref(null)
 
 const loadStats = async () => {
   try {
@@ -279,6 +541,44 @@ const loadPendingItems = async () => {
   }
 }
 
+const loadReports = async () => {
+  try {
+    const res = await reportApi.getReports({
+      status: reportStatus.value || undefined,
+      targetType: reportType.value || undefined,
+      page: reportCurrentPage.value,
+      limit: reportPageSize
+    })
+    reports.value = res.data.reports
+    reportsTotal.value = res.data.total
+  } catch (err) {
+    console.error('加载举报列表失败:', err)
+    message.error('加载举报列表失败')
+  }
+}
+
+const loadTakenDownItems = async () => {
+  try {
+    const res = await auditApi.getTakenDownItems({
+      type: takenDownType.value || undefined,
+      page: takenDownCurrentPage.value,
+      limit: takenDownPageSize
+    })
+    takenDownItems.value = res.data.items
+    takenDownTotal.value = res.data.total
+    
+    takenDownItems.value.forEach(item => {
+      const key = `${item.type}-${item.id}`
+      if (!restoreLevels[key]) {
+        restoreLevels[key] = 'G'
+      }
+    })
+  } catch (err) {
+    console.error('加载已下架列表失败:', err)
+    message.error('加载已下架列表失败')
+  }
+}
+
 const loadAuditLogs = async () => {
   try {
     const res = await auditApi.getAuditLogs({
@@ -299,9 +599,30 @@ const getTypeLabel = (type) => {
   const labels = {
     story: '故事',
     world: '设定',
+    world_entry: '设定条目',
     comment: '评论'
   }
   return labels[type] || type
+}
+
+const getReportStatusLabel = (status) => {
+  const labels = {
+    pending: '待处理',
+    processing: '处理中',
+    resolved: '已处理',
+    rejected: '已驳回'
+  }
+  return labels[status] || status
+}
+
+const getLogActionLabel = (action) => {
+  const labels = {
+    approve: '✅ 通过',
+    reject: '❌ 驳回',
+    take_down: '⬇️ 下架',
+    restore: '⬆️ 恢复'
+  }
+  return labels[action] || action
 }
 
 const getLevelTagType = (level) => {
@@ -358,6 +679,7 @@ const handleReject = async () => {
     rejectDialogVisible.value = false
     loadStats()
     loadPendingItems()
+    loadTakenDownItems()
     return true
   } catch (err) {
     console.error('审核驳回失败:', err)
@@ -366,15 +688,129 @@ const handleReject = async () => {
   }
 }
 
+const showTakeDownDialog = (report) => {
+  currentTakeDownReport.value = report
+  takeDownReason.value = ''
+  takeDownDialogVisible.value = true
+}
+
+const handleTakeDown = async () => {
+  if (!takeDownReason.value.trim()) {
+    message.warning('请填写下架原因')
+    return false
+  }
+  
+  const report = currentTakeDownReport.value
+  if (!report) return false
+  
+  try {
+    await reportApi.handleReport(report.id, {
+      result: 'take_down',
+      remark: takeDownReason.value,
+      handlerId: 'admin-1',
+      handlerName: '管理员'
+    })
+    message.success('已下架内容')
+    takeDownDialogVisible.value = false
+    loadReports()
+    loadTakenDownItems()
+    loadAuditLogs()
+    return true
+  } catch (err) {
+    console.error('下架失败:', err)
+    message.error('操作失败')
+    return false
+  }
+}
+
+const showDismissDialog = (report) => {
+  currentDismissReport.value = report
+  dismissReason.value = ''
+  dismissDialogVisible.value = true
+}
+
+const handleDismiss = async () => {
+  const report = currentDismissReport.value
+  if (!report) return false
+  
+  try {
+    await reportApi.handleReport(report.id, {
+      result: 'dismiss',
+      remark: dismissReason.value || '举报不成立',
+      handlerId: 'admin-1',
+      handlerName: '管理员'
+    })
+    message.success('已驳回举报')
+    dismissDialogVisible.value = false
+    loadReports()
+    return true
+  } catch (err) {
+    console.error('驳回举报失败:', err)
+    message.error('操作失败')
+    return false
+  }
+}
+
+const markReportProcessing = async (report) => {
+  try {
+    await reportApi.updateReportStatus(report.id, {
+      status: 'processing',
+      handlerId: 'admin-1',
+      handlerName: '管理员',
+      remark: '正在核实中'
+    })
+    message.success('已标记为处理中')
+    loadReports()
+  } catch (err) {
+    console.error('标记失败:', err)
+    message.error('操作失败')
+  }
+}
+
+const handleRestore = async (item) => {
+  const key = `${item.type}-${item.id}`
+  const level = restoreLevels[key]
+  
+  try {
+    await auditApi.restoreContent(item.type, item.id, {
+      auditLevel: level || undefined,
+      auditorId: 'admin-1',
+      auditorName: '管理员'
+    })
+    message.success('已恢复上架')
+    loadStats()
+    loadTakenDownItems()
+    loadPendingItems()
+    loadAuditLogs()
+  } catch (err) {
+    console.error('恢复失败:', err)
+    message.error('操作失败')
+  }
+}
+
 const loadAll = async () => {
   loading.value = true
   await Promise.all([
     loadStats(),
     loadPendingItems(),
+    loadReports(),
+    loadTakenDownItems(),
     loadAuditLogs()
   ])
   loading.value = false
 }
+
+watch(activeTab, (newTab) => {
+  if (newTab === 'reports') {
+    loadReports()
+  } else if (newTab === 'taken-down') {
+    loadTakenDownItems()
+  } else if (newTab === 'logs') {
+    loadAuditLogs()
+  } else if (newTab === 'pending') {
+    loadPendingItems()
+  }
+})
 
 onMounted(() => {
   loadAll()
@@ -678,8 +1114,145 @@ onMounted(() => {
   color: #ddd;
 }
 
-.reject-form {
+.reject-form,
+.take-down-form,
+.dismiss-form {
   padding: 12px 0;
+}
+
+.dialog-desc {
+  margin: 0 0 16px 0;
+  color: #888;
+  font-size: 14px;
+}
+
+.reports-list,
+.taken-down-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-item,
+.taken-down-item {
+  border-radius: 12px;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.report-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.report-status.pending {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.report-status.processing {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.report-status.resolved {
+  background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+}
+
+.report-status.rejected {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+}
+
+.report-type-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.report-type-badge.story {
+  background: linear-gradient(135deg, #9d4edd 0%, #c77dff 100%);
+}
+
+.report-type-badge.world_entry {
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+}
+
+.report-type-badge.comment {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+}
+
+.report-time {
+  margin-left: auto;
+  font-size: 12px;
+  color: #888;
+}
+
+.report-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.report-reason,
+.report-target,
+.report-desc,
+.report-reporter,
+.report-handle,
+.report-handle-result,
+.report-handle-remark {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.report-label {
+  color: #888;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.report-value {
+  color: #ddd;
+  flex: 1;
+  word-break: break-all;
+}
+
+.report-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.item-reject-reason {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+}
+
+.reject-label {
+  color: #ef4444;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.reject-value {
+  color: #fca5a5;
+  flex: 1;
 }
 
 @media (max-width: 768px) {

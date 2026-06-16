@@ -11,9 +11,17 @@ let worldSettingsData = store.worldSettings;
 let featuredTopicsData = store.featuredTopics;
 let nodeReadingEventsData = store.nodeReadingEvents;
 
+const filterAvailableStories = (stories) => {
+  return stories.filter(s => !s.takenDown && s.auditStatus !== 'rejected');
+};
+
 router.get('/', (req, res) => {
-  const { tag, sort, page = 1, limit = 10 } = req.query;
+  const { tag, sort, page = 1, limit = 10, includeTakenDown = false } = req.query;
   let result = [...storiesData];
+
+  if (includeTakenDown !== 'true') {
+    result = filterAvailableStories(result);
+  }
 
   if (tag) {
     result = result.filter(story => story.tags.includes(tag));
@@ -892,7 +900,7 @@ const calculateStoryScore = (story, userTags = []) => {
 };
 
 const getApprovedStories = () => {
-  return storiesData.filter(s => s.auditStatus === 'approved');
+  return storiesData.filter(s => s.auditStatus === 'approved' && !s.takenDown);
 };
 
 const getUserTags = (userId) => {

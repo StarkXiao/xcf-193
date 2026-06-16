@@ -528,6 +528,52 @@ export const auditApi = {
 
   getAuditLevels() {
     return api.get('/audit/levels')
+  },
+
+  takeDownContent(type, id, data) {
+    return api.post('/audit/' + type + '/' + id + '/take-down', data)
+  },
+
+  restoreContent(type, id, data) {
+    return api.post('/audit/' + type + '/' + id + '/restore', data)
+  },
+
+  getTakenDownItems(params = {}) {
+    return api.get('/audit/taken-down', { params })
+  }
+}
+
+export const reportApi = {
+  getReportReasons() {
+    return api.get('/reports/reasons')
+  },
+
+  getReportStats() {
+    return api.get('/reports/stats')
+  },
+
+  getReports(params = {}) {
+    return api.get('/reports', { params })
+  },
+
+  getReport(id) {
+    return api.get('/reports/' + id)
+  },
+
+  submitReport(data) {
+    return api.post('/reports', data)
+  },
+
+  updateReportStatus(id, data) {
+    return api.put('/reports/' + id + '/status', data)
+  },
+
+  handleReport(id, data) {
+    return api.post('/reports/' + id + '/handle', data)
+  },
+
+  getUserReports(userId, params = {}) {
+    return api.get('/reports/user/' + userId, { params })
   }
 }
 

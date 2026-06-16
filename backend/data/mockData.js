@@ -4518,6 +4518,134 @@ const auditStats = {
   }
 };
 
+const REPORT_REASONS = [
+  { value: 'spam', label: '垃圾广告' },
+  { value: 'pornography', label: '色情低俗' },
+  { value: 'violence', label: '暴力血腥' },
+  { value: 'illegal', label: '违法违规' },
+  { value: 'plagiarism', label: '抄袭侵权' },
+  { value: 'harassment', label: '人身攻击/骚扰' },
+  { value: 'rumor', label: '虚假信息/谣言' },
+  { value: 'other', label: '其他问题' }
+];
+
+const reports = [
+  {
+    id: 'report-1',
+    targetType: 'story',
+    targetId: 'story-6',
+    targetTitle: '机甲少女的誓言',
+    reporterId: 'user-1',
+    reporterName: '月下独酌',
+    reason: 'violence',
+    reasonLabel: '暴力血腥',
+    description: '故事中包含大量机甲战斗的血腥描写，不适合青少年阅读。',
+    status: 'pending',
+    createdAt: '2024-05-10 14:30:00',
+    handledAt: null,
+    handlerId: null,
+    handlerName: null,
+    handleResult: null,
+    handleRemark: null
+  },
+  {
+    id: 'report-2',
+    targetType: 'comment',
+    targetId: 'comment-3',
+    targetTitle: '评论-结局太感人了，哭了好久...',
+    reporterId: 'user-2',
+    reporterName: '星河漫步者',
+    reason: 'spam',
+    reasonLabel: '垃圾广告',
+    description: '这条评论看起来像是刷评论的机器人发的。',
+    status: 'processing',
+    createdAt: '2024-05-12 09:15:00',
+    handledAt: '2024-05-12 10:00:00',
+    handlerId: 'admin-1',
+    handlerName: '管理员',
+    handleResult: null,
+    handleRemark: '正在核实中'
+  },
+  {
+    id: 'report-3',
+    targetType: 'world_entry',
+    targetId: 'entry-5',
+    targetTitle: '星际联邦',
+    worldId: 'world-2',
+    reporterId: 'user-3',
+    reporterName: '梦境织者',
+    reason: 'plagiarism',
+    reasonLabel: '抄袭侵权',
+    description: '这个设定条目抄袭了某部知名科幻作品的设定。',
+    status: 'resolved',
+    createdAt: '2024-05-08 16:45:00',
+    handledAt: '2024-05-09 11:20:00',
+    handlerId: 'admin-2',
+    handlerName: '审核员小王',
+    handleResult: 'take_down',
+    handleRemark: '经核实确有抄袭嫌疑，已下架该条目'
+  },
+  {
+    id: 'report-4',
+    targetType: 'story',
+    targetId: 'story-11',
+    targetTitle: '赛博朋克夜曲',
+    reporterId: 'user-2',
+    reporterName: '星河漫步者',
+    reason: 'pornography',
+    reasonLabel: '色情低俗',
+    description: '故事中含有不适宜的内容描写。',
+    status: 'rejected',
+    createdAt: '2024-04-28 11:00:00',
+    handledAt: '2024-04-29 09:30:00',
+    handlerId: 'admin-1',
+    handlerName: '管理员',
+    handleResult: 'dismiss',
+    handleRemark: '经审核内容符合 PG 等级标准，举报不成立'
+  },
+  {
+    id: 'report-5',
+    targetType: 'comment',
+    targetId: 'comment-7',
+    targetTitle: '评论-京城烟火这个结局太圆满了...',
+    reporterId: 'user-1',
+    reporterName: '月下独酌',
+    reason: 'harassment',
+    reasonLabel: '人身攻击/骚扰',
+    description: '该评论带有讽刺和人身攻击意味。',
+    status: 'resolved',
+    createdAt: '2024-03-01 15:20:00',
+    handledAt: '2024-03-02 11:20:00',
+    handlerId: 'admin-1',
+    handlerName: '管理员',
+    handleResult: 'take_down',
+    handleRemark: '已下架该违规评论'
+  }
+];
+
+const reportStats = {
+  total: 5,
+  pending: 1,
+  processing: 1,
+  resolved: 2,
+  rejected: 1,
+  byType: {
+    story: 2,
+    comment: 2,
+    world_entry: 1
+  },
+  byReason: {
+    spam: 1,
+    pornography: 1,
+    violence: 1,
+    plagiarism: 1,
+    harassment: 1,
+    illegal: 0,
+    rumor: 0,
+    other: 0
+  }
+};
+
 const themeHalls = [
   {
     id: 'hall-1',
@@ -5538,5 +5666,8 @@ module.exports = {
   taskSubmissions,
   taskRewards,
   featuredTopics,
-  nodeReadingEvents
+  nodeReadingEvents,
+  REPORT_REASONS,
+  reports,
+  reportStats
 };
