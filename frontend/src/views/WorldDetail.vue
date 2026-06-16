@@ -12,18 +12,56 @@
         <div class="world-header-card">
           <div class="world-cover-large">{{ world.cover }}</div>
           <div class="world-main-info">
-            <h1 class="world-title">{{ world.name }}</h1>
+            <div class="world-title-row">
+              <h1 class="world-title">{{ world.name }}</h1>
+              <n-tag v-if="world.auditStatus === 'approved'" type="success" size="small">已审核</n-tag>
+              <n-tag v-else-if="world.auditStatus === 'pending'" type="warning" size="small">审核中</n-tag>
+              <n-tag v-else type="default" size="small">未审核</n-tag>
+            </div>
             <p class="world-desc">{{ world.description }}</p>
+            
+            <div class="world-categories-preview" v-if="worldCategories.length > 0">
+              <span class="cat-label">包含分类：</span>
+              <n-tag
+                v-for="cat in worldCategories.slice(0, 6)"
+                :key="cat"
+                size="small"
+                type="info"
+                style="margin-right: 6px; margin-bottom: 4px;"
+              >
+                {{ cat }}
+              </n-tag>
+              <n-tag
+                v-if="worldCategories.length > 6"
+                size="small"
+                type="default"
+              >
+                +{{ worldCategories.length - 6 }}
+              </n-tag>
+            </div>
+
             <div class="world-meta">
-              <span class="meta-item">
+              <span class="meta-item" title="作者">
                 <span class="meta-icon">👤</span>
                 {{ world.authorName }}
               </span>
-              <span class="meta-item">
-                <span class="meta-icon">📝</span>
-                {{ world.entries?.length || 0 }} 条目
+              <span class="meta-item" title="创建时间">
+                <span class="meta-icon">📅</span>
+                {{ world.createdAt }}
               </span>
-              <span class="meta-item">
+              <span class="meta-item" title="条目数">
+                <span class="meta-icon">📝</span>
+                {{ totalEntries }} 条目
+              </span>
+              <span class="meta-item" title="分类数">
+                <span class="meta-icon">🏷️</span>
+                {{ worldCategories.length }} 分类
+              </span>
+              <span class="meta-item" title="被引用次数">
+                <span class="meta-icon">🔗</span>
+                {{ totalReferences }} 引用
+              </span>
+              <span class="meta-item" title="喜欢数">
                 <span class="meta-icon">❤️</span>
                 {{ world.likes }}
               </span>
@@ -52,19 +90,47 @@
         <div class="entries-section">
           <div class="section-header">
             <h2 class="section-title">📚 设定条目</h2>
-            <div class="category-filter">
-              <n-tag 
-                v-for="cat in categories" 
-                :key="cat"
-                :type="selectedCategory === cat ? 'primary' : 'default'"
-                :checkable="true"
-                :checked="selectedCategory === cat"
-                @click="toggleCategory(cat)"
-                style="margin-right: 8px; cursor: pointer;"
+          </div>
+
+          <div class="entries-toolbar">
+            <div class="toolbar-left">
+              <n-input
+                v-model:value="entryKeyword"
+                placeholder="搜索条目标题或内容..."
+                clearable
+                size="small"
+                class="entry-search"
+                @keyup.enter="loadEntries"
+                @update:value="onEntryKeywordChange"
               >
-                {{ cat }}
-              </n-tag>
+                <template #prefix>🔍</template>
+              </n-input>
+              <n-select
+                v-model:value="entrySort"
+                :options="entrySortOptions"
+                size="small"
+                style="width: 140px"
+                @update:value="loadEntries"
+              />
             </div>
+            <div class="result-count" v-if="totalEntries > 0">
+              显示 <span class="highlight">{{ filteredEntries.length }}</span> / {{ totalEntries }} 条
+            </div>
+          </div>
+
+          <div class="category-filter">
+            <n-tag 
+              v-for="cat in categories" 
+              :key="cat"
+              :type="selectedCategory === cat ? 'primary' : 'default'"
+              :checkable="true"
+              :checked="selectedCategory === cat"
+              class="cat-tag"
+              @click="toggleCategory(cat)"
+            >
+              {{ cat }}
+              <span v-if="cat !== '全部'" class="cat-count">({{ getCategoryCount(cat) }})</span>
+            </n-tag>
           </div>
 
           <div class="entries-grid">
@@ -75,17 +141,28 @@
               class="entry-card"
               @click="selectedEntry = entry"
             >
-              <n-tag size="small" type="primary" class="entry-category">
-                {{ entry.category }}
-              </n-tag>
-              <h3 class="entry-title">{{ entry.title }}</h3>
+              <div class="entry-card-header">
+                <n-tag size="small" type="primary" class="entry-category">
+                  {{ entry.category }}
+                </n-tag>
+                <n-tag v-if="entry.referencedStories?.length > 0" size="small" type="info" class="entry-ref-count">
+                  🔗 {{ entry.referencedStories.length }}
+                </n-tag>
+              </div>
+              <h3 class="entry-title" :title="entry.title">{{ entry.title }}</h3>
               <p class="entry-content-preview">{{ entry.content }}</p>
             </n-card>
           </div>
 
           <div v-if="filteredEntries.length === 0" class="empty-entries">
-            <div class="empty-icon">📝</div>
-            <p>暂无相关条目</p>
+            <div class="empty-icon">{{ entryKeyword ? '🔍' : '📝' }}</div>
+            <p>{{ entryKeyword ? '没有找到匹配的条目' : '暂无相关条目' }}</p>
+            <p class="empty-hint" v-if="entryKeyword || selectedCategory !== '全部'">
+              试试其他关键词或分类
+            </p>
+            <n-button v-if="entryKeyword || selectedCategory !== '全部'" size="small" @click="resetEntryFilters">
+              重置筛选
+            </n-button>
           </div>
         </div>
       </div>
@@ -94,14 +171,29 @@
     <n-modal 
       v-model:show="showEntryModal" 
       preset="card"
-      :title="selectedEntry?.title || ''"
       style="width: 650px"
     >
+      <template #header>
+        <div class="modal-header">
+          <span>{{ selectedEntry?.title || '' }}</span>
+          <n-tag v-if="selectedEntry" type="primary" size="small">
+            {{ selectedEntry.category }}
+          </n-tag>
+        </div>
+      </template>
       <div v-if="selectedEntry" class="entry-detail">
-        <n-tag type="primary" style="margin-bottom: 16px;">
-          {{ selectedEntry.category }}
-        </n-tag>
-        <p class="entry-detail-content">{{ selectedEntry.content }}</p>
+        <div class="entry-detail-meta">
+          <span class="meta-item" v-if="selectedEntry.referencedStories?.length > 0">
+            <span class="meta-icon">🔗</span>
+            被引用 {{ selectedEntry.referencedStories.length }} 次
+          </span>
+        </div>
+
+        <n-divider style="margin: 16px 0;">
+          <span style="font-size: 13px; color: #888;">设定内容</span>
+        </n-divider>
+
+        <div class="entry-detail-content">{{ selectedEntry.content }}</div>
         
         <n-divider v-if="selectedEntry.referencedStories?.length > 0" style="margin: 24px 0 16px 0;">
           <span style="font-size: 14px; color: #666;">📖 引用此设定的故事</span>
@@ -144,6 +236,8 @@ import {
   NModal,
   NDivider,
   NAlert,
+  NInput,
+  NSelect,
   useMessage
 } from 'naive-ui'
 import { worldApi, userApi } from '../api'
@@ -155,34 +249,78 @@ const userId = 'user-1'
 
 const world = ref(null)
 const loading = ref(false)
+const loadingEntries = ref(false)
 const isLiked = ref(false)
 const isFavorited = ref(false)
 const selectedCategory = ref('全部')
 const selectedEntry = ref(null)
+const entryKeyword = ref('')
+const entrySort = ref('default')
+const entries = ref([])
+const categories = ref(['全部'])
+const totalEntries = ref(0)
+
+let entrySearchTimer = null
+
+const entrySortOptions = [
+  { label: '默认顺序', value: 'default' },
+  { label: '按名称排序', value: 'title' },
+  { label: '按分类排序', value: 'category' },
+  { label: '引用最多', value: 'references' }
+]
 
 const showEntryModal = computed({
   get: () => !!selectedEntry.value,
   set: (val) => { if (!val) selectedEntry.value = null }
 })
 
-const categories = computed(() => {
-  if (!world.value?.entries) return ['全部']
-  const cats = [...new Set(world.value.entries.map(e => e.category))]
-  return ['全部', ...cats]
+const worldCategories = computed(() => {
+  if (!world.value?.entries) return []
+  return [...new Set(world.value.entries.map(e => e.category))]
+})
+
+const totalReferences = computed(() => {
+  if (!world.value?.entries) return 0
+  return world.value.entries.reduce((sum, e) => sum + (e.referencedStories?.length || 0), 0)
 })
 
 const filteredEntries = computed(() => {
-  if (!world.value?.entries) return []
-  if (selectedCategory.value === '全部') return world.value.entries
-  return world.value.entries.filter(e => e.category === selectedCategory.value)
+  return entries.value
 })
+
+const getCategoryCount = (cat) => {
+  if (!world.value?.entries) return 0
+  return world.value.entries.filter(e => e.category === cat).length
+}
+
+const onEntryKeywordChange = () => {
+  if (entrySearchTimer) clearTimeout(entrySearchTimer)
+  entrySearchTimer = setTimeout(() => {
+    loadEntries()
+  }, 300)
+}
+
+const toggleCategory = (cat) => {
+  selectedCategory.value = cat
+  loadEntries()
+}
+
+const resetEntryFilters = () => {
+  entryKeyword.value = ''
+  selectedCategory.value = '全部'
+  loadEntries()
+}
 
 const loadWorld = async () => {
   loading.value = true
   try {
     const res = await worldApi.getWorld(route.params.id)
     world.value = res.data
+    if (res.data.entries) {
+      totalEntries.value = res.data.entries.length
+    }
     checkFavorite()
+    loadEntries()
     
     const entryId = route.query.entryId
     if (entryId && world.value?.entries) {
@@ -197,6 +335,29 @@ const loadWorld = async () => {
     console.error('加载世界设定失败:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const loadEntries = async () => {
+  if (!world.value) return
+  loadingEntries.value = true
+  try {
+    const params = {}
+    if (entryKeyword.value) params.keyword = entryKeyword.value
+    if (selectedCategory.value) params.category = selectedCategory.value
+    if (entrySort.value && entrySort.value !== 'default') params.sort = entrySort.value
+    
+    const res = await worldApi.getWorldEntries(route.params.id, params)
+    entries.value = res.data.entries
+    categories.value = res.data.categories
+    totalEntries.value = world.value?.entries?.length || 0
+  } catch (err) {
+    console.error('加载条目失败:', err)
+    if (world.value?.entries) {
+      entries.value = world.value.entries
+    }
+  } finally {
+    loadingEntries.value = false
   }
 }
 
@@ -251,10 +412,6 @@ const toggleLike = async () => {
   } catch (err) {
     console.error('点赞失败:', err)
   }
-}
-
-const toggleCategory = (cat) => {
-  selectedCategory.value = cat
 }
 
 const goBack = () => {
@@ -314,11 +471,20 @@ onMounted(() => {
 
 .world-main-info {
   flex: 1;
+  min-width: 0;
+}
+
+.world-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .world-title {
   font-size: 28px;
-  margin: 0 0 10px 0;
+  margin: 0;
   color: #333;
 }
 
@@ -329,27 +495,39 @@ onMounted(() => {
   margin: 0 0 16px 0;
 }
 
+.world-categories-preview {
+  margin-bottom: 16px;
+}
+
+.cat-label {
+  font-size: 13px;
+  color: #888;
+  margin-right: 8px;
+}
+
 .world-meta {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: 13px;
   color: #888;
+  flex-wrap: wrap;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .meta-icon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .world-actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .entries-section {
@@ -360,7 +538,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -371,10 +549,58 @@ onMounted(() => {
   color: #333;
 }
 
+.entries-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.entry-search {
+  width: 280px;
+}
+
+.result-count {
+  font-size: 13px;
+  color: #666;
+}
+
+.result-count .highlight {
+  color: #9d4edd;
+  font-weight: 600;
+}
+
 .category-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.cat-tag {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cat-tag:hover {
+  opacity: 0.85;
+}
+
+.cat-count {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-left: 2px;
 }
 
 .entries-grid {
@@ -392,14 +618,28 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
-.entry-category {
+.entry-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.entry-category {
+  margin-bottom: 0;
+}
+
+.entry-ref-count {
+  margin-bottom: 0;
 }
 
 .entry-title {
   font-size: 16px;
   margin: 0 0 8px 0;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .entry-content-preview {
@@ -424,11 +664,36 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 
+.empty-hint {
+  font-size: 13px;
+  color: #bbb;
+  margin: 4px 0 16px !important;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.entry-detail-meta {
+  margin-bottom: 8px;
+}
+
+.entry-detail-meta .meta-item {
+  font-size: 13px;
+  color: #888;
+}
+
 .entry-detail-content {
   font-size: 15px;
   line-height: 1.8;
   color: #444;
   margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .referenced-stories {

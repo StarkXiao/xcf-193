@@ -11,11 +11,56 @@
       </n-button>
     </div>
 
-    <div class="filter-bar">
-      <n-radio-group v-model:value="sortBy" size="medium" @update:value="loadWorlds">
-        <n-radio-button value="newest">最新</n-radio-button>
-        <n-radio-button value="popular">热门</n-radio-button>
-      </n-radio-group>
+    <div class="filter-toolbar">
+      <div class="filter-left">
+        <n-input
+          v-model:value="keyword"
+          placeholder="搜索世界名称、描述、作者或设定条目..."
+          class="search-input"
+          clearable
+          size="medium"
+          @keyup.enter="loadWorlds"
+          @update:value="onKeywordChange"
+        >
+          <template #prefix>🔍</template>
+        </n-input>
+      </div>
+      <div class="filter-right">
+        <n-select
+          v-model:value="sortBy"
+          :options="sortOptions"
+          size="medium"
+          style="width: 140px"
+          @update:value="loadWorlds"
+        />
+      </div>
+    </div>
+
+    <div class="category-filter" v-if="allCategories.length > 0">
+      <n-tag
+        :type="selectedCategory === null ? 'primary' : 'default'"
+        :checkable="true"
+        :checked="selectedCategory === null"
+        class="category-tag"
+        @click="selectCategory(null)"
+      >
+        全部分类
+      </n-tag>
+      <n-tag
+        v-for="cat in allCategories"
+        :key="cat"
+        :type="selectedCategory === cat ? 'primary' : 'default'"
+        :checkable="true"
+        :checked="selectedCategory === cat"
+        class="category-tag"
+        @click="selectCategory(cat)"
+      >
+        {{ cat }}
+      </n-tag>
+    </div>
+
+    <div v-if="total > 0" class="result-info">
+      共找到 <span class="highlight">{{ total }}</span> 个世界设定
     </div>
 
     <n-spin :show="loading" size="large">
@@ -29,8 +74,27 @@
         >
           <div class="world-cover">{{ world.cover }}</div>
           <div class="world-info">
-            <h3 class="world-name">{{ world.name }}</h3>
-            <p class="world-desc">{{ world.description }}</p>
+            <h3 class="world-name" :title="world.name">{{ world.name }}</h3>
+            <p class="world-desc" :title="world.description">{{ world.description }}</p>
+            <div class="world-categories" v-if="world.entries && world.entries.length > 0">
+              <n-tag
+                v-for="cat in getWorldCategories(world.entries).slice(0, 3)"
+                :key="cat"
+                size="small"
+                type="info"
+                class="cat-tag"
+              >
+                {{ cat }}
+              </n-tag>
+              <n-tag
+                v-if="getWorldCategories(world.entries).length > 3"
+                size="small"
+                type="default"
+                class="cat-tag"
+              >
+                +{{ getWorldCategories(world.entries).length - 3 }}
+              </n-tag>
+            </div>
             <div class="world-stats">
               <span class="stat-item">
                 <span class="stat-icon">📝</span>
@@ -39,6 +103,10 @@
               <span class="stat-item">
                 <span class="stat-icon">❤️</span>
                 {{ world.likes }}
+              </span>
+              <span class="stat-item">
+                <span class="stat-icon">📅</span>
+                {{ world.createdAt }}
               </span>
             </div>
             <div class="world-author">
@@ -51,13 +119,20 @@
     </n-spin>
 
     <div v-if="worlds.length === 0 && !loading" class="empty-state">
-      <div class="empty-icon">🌍</div>
-      <p>还没有世界设定</p>
-      <p class="hint">创建第一个世界观，开启你的幻想之旅吧！</p>
-      <n-button type="primary" @click="goToEditor">
-        <template #icon>✨</template>
-        开始创建
-      </n-button>
+      <div class="empty-icon">{{ keyword || selectedCategory ? '🔍' : '🌍' }}</div>
+      <p>{{ keyword || selectedCategory ? '没有找到匹配的世界设定' : '还没有世界设定' }}</p>
+      <p class="hint">
+        {{ keyword || selectedCategory ? '试试换个搜索词或分类' : '创建第一个世界观，开启你的幻想之旅吧！' }}
+      </p>
+      <n-space justify="center">
+        <n-button v-if="keyword || selectedCategory" @click="resetFilters">
+          重置筛选
+        </n-button>
+        <n-button type="primary" @click="goToEditor">
+          <template #icon>✨</template>
+          {{ keyword || selectedCategory ? '去创建' : '开始创建' }}
+        </n-button>
+      </n-space>
     </div>
   </div>
 </template>
@@ -65,25 +140,73 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { NButton, NCard, NSpin, NRadioGroup, NRadioButton } from 'naive-ui'
+import { NButton, NCard, NSpin, NInput, NSelect, NTag, NSpace } from 'naive-ui'
 import { worldApi } from '../api'
 
 const router = useRouter()
 
 const worlds = ref([])
+const total = ref(0)
 const loading = ref(false)
 const sortBy = ref('popular')
+const keyword = ref('')
+const selectedCategory = ref(null)
+const allCategories = ref([])
+
+let searchTimer = null
+
+const sortOptions = [
+  { label: '🔥 最热门', value: 'popular' },
+  { label: '🕐 最新创建', value: 'newest' },
+  { label: '📚 条目最多', value: 'entries' },
+  { label: '🔤 名称排序', value: 'name' }
+]
+
+const onKeywordChange = () => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    loadWorlds()
+  }, 300)
+}
+
+const selectCategory = (cat) => {
+  selectedCategory.value = cat
+  loadWorlds()
+}
+
+const getWorldCategories = (entries) => {
+  return [...new Set(entries.map(e => e.category))]
+}
+
+const loadCategories = async () => {
+  try {
+    const res = await worldApi.getWorldCategories()
+    allCategories.value = res.data.categories
+  } catch (err) {
+    console.error('加载分类失败:', err)
+  }
+}
 
 const loadWorlds = async () => {
   loading.value = true
   try {
-    const res = await worldApi.getWorlds({ sort: sortBy.value })
+    const params = { sort: sortBy.value }
+    if (keyword.value) params.keyword = keyword.value
+    if (selectedCategory.value) params.category = selectedCategory.value
+    const res = await worldApi.getWorlds(params)
     worlds.value = res.data.worlds
+    total.value = res.data.total
   } catch (err) {
     console.error('加载世界设定失败:', err)
   } finally {
     loading.value = false
   }
+}
+
+const resetFilters = () => {
+  keyword.value = ''
+  selectedCategory.value = null
+  loadWorlds()
 }
 
 const openWorld = (id) => {
@@ -95,6 +218,7 @@ const goToEditor = () => {
 }
 
 onMounted(() => {
+  loadCategories()
   loadWorlds()
 })
 </script>
@@ -126,8 +250,56 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.filter-bar {
-  margin-bottom: 24px;
+.filter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-left {
+  flex: 1;
+  min-width: 280px;
+}
+
+.search-input {
+  max-width: 500px;
+}
+
+.filter-right {
+  flex-shrink: 0;
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.category-tag {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.category-tag:hover {
+  opacity: 0.85;
+}
+
+.result-info {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.result-info .highlight {
+  color: #9d4edd;
+  font-weight: 600;
 }
 
 .worlds-grid {
@@ -158,6 +330,9 @@ onMounted(() => {
   font-size: 18px;
   margin: 0 0 8px 0;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .world-desc {
@@ -171,12 +346,24 @@ onMounted(() => {
   overflow: hidden;
 }
 
+.world-categories {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cat-tag {
+  cursor: default;
+}
+
 .world-stats {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 12px;
-  font-size: 13px;
+  font-size: 12px;
   color: #999;
+  flex-wrap: wrap;
 }
 
 .stat-item {
@@ -186,7 +373,7 @@ onMounted(() => {
 }
 
 .stat-icon {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .world-author {

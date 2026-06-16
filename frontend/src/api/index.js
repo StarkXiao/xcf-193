@@ -163,6 +163,14 @@ export const worldApi = {
   getWorld(id) {
     return api.get('/worlds/' + id)
   },
+
+  getWorldEntries(worldId, params = {}) {
+    return api.get('/worlds/' + worldId + '/entries', { params })
+  },
+
+  getWorldCategories() {
+    return api.get('/worlds/categories/list')
+  },
   
   createWorld(data) {
     return api.post('/worlds', data)

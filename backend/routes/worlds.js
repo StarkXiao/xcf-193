@@ -10,13 +10,40 @@ let storiesData = store.stories;
 let storyNodesData = store.storyNodes;
 
 router.get('/', (req, res) => {
-  const { sort, page = 1, limit = 10 } = req.query;
+  const { sort, page = 1, limit = 10, keyword, category, authorId } = req.query;
   let result = [...worldSettingsData];
+
+  if (keyword) {
+    const kw = keyword.toLowerCase();
+    result = result.filter(w => 
+      w.name.toLowerCase().includes(kw) ||
+      w.description.toLowerCase().includes(kw) ||
+      w.authorName.toLowerCase().includes(kw) ||
+      (w.entries && w.entries.some(e => 
+        e.title.toLowerCase().includes(kw) || 
+        e.content.toLowerCase().includes(kw)
+      ))
+    );
+  }
+
+  if (category) {
+    result = result.filter(w => 
+      w.entries && w.entries.some(e => e.category === category)
+    );
+  }
+
+  if (authorId) {
+    result = result.filter(w => w.authorId === authorId);
+  }
 
   if (sort === 'newest') {
     result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } else if (sort === 'popular') {
     result.sort((a, b) => b.likes - a.likes);
+  } else if (sort === 'entries') {
+    result.sort((a, b) => (b.entries?.length || 0) - (a.entries?.length || 0));
+  } else if (sort === 'name') {
+    result.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
   }
 
   const start = (page - 1) * limit;
@@ -31,12 +58,64 @@ router.get('/', (req, res) => {
   });
 });
 
+router.get('/categories/list', (req, res) => {
+  const categories = new Set();
+  worldSettingsData.forEach(w => {
+    if (w.entries) {
+      w.entries.forEach(e => categories.add(e.category));
+    }
+  });
+  res.json({
+    categories: Array.from(categories)
+  });
+});
+
 router.get('/:id', (req, res) => {
   const world = worldSettingsData.find(w => w.id === req.params.id);
   if (!world) {
     return res.status(404).json({ message: '世界设定不存在' });
   }
   res.json(world);
+});
+
+router.get('/:id/entries', (req, res) => {
+  const { id } = req.params;
+  const { keyword, category, sort } = req.query;
+  const world = worldSettingsData.find(w => w.id === id);
+  
+  if (!world) {
+    return res.status(404).json({ message: '世界设定不存在' });
+  }
+
+  let entries = [...(world.entries || [])];
+
+  if (keyword) {
+    const kw = keyword.toLowerCase();
+    entries = entries.filter(e => 
+      e.title.toLowerCase().includes(kw) || 
+      e.content.toLowerCase().includes(kw)
+    );
+  }
+
+  if (category && category !== '全部') {
+    entries = entries.filter(e => e.category === category);
+  }
+
+  if (sort === 'title') {
+    entries.sort((a, b) => a.title.localeCompare(b.title, 'zh'));
+  } else if (sort === 'category') {
+    entries.sort((a, b) => a.category.localeCompare(b.category, 'zh'));
+  } else if (sort === 'references') {
+    entries.sort((a, b) => (b.referencedStories?.length || 0) - (a.referencedStories?.length || 0));
+  }
+
+  const categories = [...new Set((world.entries || []).map(e => e.category))];
+
+  res.json({
+    total: entries.length,
+    categories: ['全部', ...categories],
+    entries
+  });
 });
 
 router.post('/', (req, res) => {
