@@ -251,6 +251,164 @@
             </n-spin>
           </div>
         </n-card>
+
+        <n-card title="📊 数据反馈" class="feedback-card" v-if="story.id">
+          <template #header-extra>
+            <n-button size="small" text @click="loadNodeFeedback">
+              刷新
+            </n-button>
+          </template>
+          <n-spin :show="loadingNodeFeedback" size="small">
+            <div v-if="!nodeFeedback" class="empty-feedback">
+              <p>暂无数据</p>
+              <p class="hint">故事发布后才有阅读数据</p>
+            </div>
+            <div v-else class="feedback-content">
+              <div class="feedback-summary">
+                <div class="summary-item">
+                  <div class="summary-value">{{ nodeFeedback.summary.totalReads }}</div>
+                  <div class="summary-label">总阅读人数</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-value">{{ nodeFeedback.summary.avgCompletionRate }}%</div>
+                  <div class="summary-label">平均完成率</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-value">{{ nodeFeedback.summary.totalComments }}</div>
+                  <div class="summary-label">总评论数</div>
+                </div>
+              </div>
+
+              <div class="sentiment-overview">
+                <div class="sentiment-label">整体情绪</div>
+                <div class="sentiment-bar">
+                  <div 
+                    class="sentiment-segment positive" 
+                    :style="{ width: (nodeFeedback.summary.overallSentiment.positive * 100) + '%' }"
+                  >
+                    <span v-if="nodeFeedback.summary.overallSentiment.positive > 0.15">😊</span>
+                  </div>
+                  <div 
+                    class="sentiment-segment neutral" 
+                    :style="{ width: (nodeFeedback.summary.overallSentiment.neutral * 100) + '%' }"
+                  >
+                    <span v-if="nodeFeedback.summary.overallSentiment.neutral > 0.15">😐</span>
+                  </div>
+                  <div 
+                    class="sentiment-segment negative" 
+                    :style="{ width: (nodeFeedback.summary.overallSentiment.negative * 100) + '%' }"
+                  >
+                    <span v-if="nodeFeedback.summary.overallSentiment.negative > 0.15">😞</span>
+                  </div>
+                </div>
+                <div class="sentiment-numbers">
+                  <span class="pos">正面 {{ Math.round(nodeFeedback.summary.overallSentiment.positive * 100) }}%</span>
+                  <span class="neu">中性 {{ Math.round(nodeFeedback.summary.overallSentiment.neutral * 100) }}%</span>
+                  <span class="neg">负面 {{ Math.round(nodeFeedback.summary.overallSentiment.negative * 100) }}%</span>
+                </div>
+              </div>
+
+              <n-divider style="margin: 12px 0;">节点数据</n-divider>
+
+              <div class="feedback-nodes-list">
+                <div 
+                  v-for="nodeData in nodeFeedback.nodes" 
+                  :key="nodeData.nodeId"
+                  class="feedback-node-item"
+                  :class="{ expanded: expandedFeedbackNodeId === nodeData.nodeId }"
+                >
+                  <div class="feedback-node-header" @click="toggleFeedbackNode(nodeData.nodeId)">
+                    <span class="node-name">
+                      {{ nodeData.isEnding ? '🏁 ' : '📄 ' }}{{ nodeData.title }}
+                    </span>
+                    <span class="node-expand-icon">{{ expandedFeedbackNodeId === nodeData.nodeId ? '▲' : '▼' }}</span>
+                  </div>
+
+                  <div class="feedback-node-metrics">
+                    <div class="metric mini">
+                      <span class="metric-label">访问</span>
+                      <span class="metric-value">{{ nodeData.visitors }}</span>
+                    </div>
+                    <div class="metric mini">
+                      <span class="metric-label">流失率</span>
+                      <span class="metric-value" :class="{ 'high-drop': nodeData.dropOffRate > 30 }">
+                        {{ nodeData.dropOffRate }}%
+                      </span>
+                    </div>
+                    <div class="metric mini">
+                      <span class="metric-label">停留</span>
+                      <span class="metric-value">{{ nodeData.avgTimeSpent }}s</span>
+                    </div>
+                  </div>
+
+                  <div v-if="expandedFeedbackNodeId === nodeData.nodeId" class="feedback-node-detail">
+                    <div v-if="nodeData.choices && nodeData.choices.length > 0" class="choices-section">
+                      <div class="detail-subtitle">热门选项</div>
+                      <div 
+                        v-for="choice in nodeData.choices" 
+                        :key="choice.id"
+                        class="choice-stat-item"
+                      >
+                        <div class="choice-info">
+                          <span class="choice-text">{{ choice.text }}</span>
+                          <span class="choice-count">{{ choice.selectCount }} 人</span>
+                        </div>
+                        <div class="choice-bar-bg">
+                          <div 
+                            class="choice-bar-fill" 
+                            :style="{ width: choice.selectRate + '%' }"
+                          ></div>
+                        </div>
+                        <div class="choice-rate">{{ choice.selectRate }}%</div>
+                      </div>
+                    </div>
+
+                    <div class="comments-section">
+                      <div class="detail-subtitle">
+                        评论情绪 ({{ nodeData.comments.totalCount }} 条)
+                      </div>
+                      <div class="mini-sentiment-bar">
+                        <div 
+                          class="sentiment-segment positive" 
+                          :style="{ width: (nodeData.comments.sentiment.positive * 100) + '%' }"
+                        ></div>
+                        <div 
+                          class="sentiment-segment neutral" 
+                          :style="{ width: (nodeData.comments.sentiment.neutral * 100) + '%' }"
+                        ></div>
+                        <div 
+                          class="sentiment-segment negative" 
+                          :style="{ width: (nodeData.comments.sentiment.negative * 100) + '%' }"
+                        ></div>
+                      </div>
+
+                      <div v-if="nodeData.comments.topComments && nodeData.comments.topComments.length > 0" class="top-comments">
+                        <div 
+                          v-for="comment in nodeData.comments.topComments" 
+                          :key="comment.id"
+                          class="top-comment-item"
+                        >
+                          <div class="comment-header">
+                            <span class="comment-avatar">{{ comment.avatar }}</span>
+                            <span class="comment-username">{{ comment.username }}</span>
+                            <span 
+                              class="comment-sentiment-tag"
+                              :class="comment.sentiment"
+                            >
+                              {{ comment.sentiment === 'positive' ? '😊 正面' : comment.sentiment === 'negative' ? '😞 负面' : '😐 中性' }}
+                            </span>
+                          </div>
+                          <div class="comment-content">{{ comment.content }}</div>
+                          <div class="comment-likes">👍 {{ comment.likes }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </n-spin>
+        </n-card>
       </div>
 
       <div v-else-if="activeMobileTab === 'info'" class="mobile-panel">
@@ -467,6 +625,169 @@
                 </template>
                 确定删除这个版本吗？
               </n-popconfirm>
+            </div>
+          </div>
+        </n-spin>
+      </div>
+
+      <div v-else-if="activeMobileTab === 'feedback'" class="mobile-panel">
+        <div class="mobile-panel-header">
+          <span class="mobile-panel-title">📊 数据反馈</span>
+          <n-button size="small" text @click="loadNodeFeedback" :disabled="!story.id">
+            刷新
+          </n-button>
+        </div>
+        <n-spin :show="loadingNodeFeedback">
+          <div v-if="!story.id" class="empty-feedback">
+            <p>请先保存故事</p>
+            <p class="hint">保存发布后才有阅读数据</p>
+          </div>
+          <div v-else-if="!nodeFeedback" class="empty-feedback">
+            <p>暂无数据</p>
+            <p class="hint">故事发布后才有阅读数据</p>
+          </div>
+          <div v-else class="feedback-content mobile-feedback-content">
+            <div class="feedback-summary">
+              <div class="summary-item">
+                <div class="summary-value">{{ nodeFeedback.summary.totalReads }}</div>
+                <div class="summary-label">总阅读人数</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-value">{{ nodeFeedback.summary.avgCompletionRate }}%</div>
+                <div class="summary-label">平均完成率</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-value">{{ nodeFeedback.summary.totalComments }}</div>
+                <div class="summary-label">总评论数</div>
+              </div>
+            </div>
+
+            <div class="sentiment-overview">
+              <div class="sentiment-label">整体情绪</div>
+              <div class="sentiment-bar">
+                <div 
+                  class="sentiment-segment positive" 
+                  :style="{ width: (nodeFeedback.summary.overallSentiment.positive * 100) + '%' }"
+                >
+                  <span v-if="nodeFeedback.summary.overallSentiment.positive > 0.15">😊</span>
+                </div>
+                <div 
+                  class="sentiment-segment neutral" 
+                  :style="{ width: (nodeFeedback.summary.overallSentiment.neutral * 100) + '%' }"
+                >
+                  <span v-if="nodeFeedback.summary.overallSentiment.neutral > 0.15">😐</span>
+                </div>
+                <div 
+                  class="sentiment-segment negative" 
+                  :style="{ width: (nodeFeedback.summary.overallSentiment.negative * 100) + '%' }"
+                >
+                  <span v-if="nodeFeedback.summary.overallSentiment.negative > 0.15">😞</span>
+                </div>
+              </div>
+              <div class="sentiment-numbers">
+                <span class="pos">正面 {{ Math.round(nodeFeedback.summary.overallSentiment.positive * 100) }}%</span>
+                <span class="neu">中性 {{ Math.round(nodeFeedback.summary.overallSentiment.neutral * 100) }}%</span>
+                <span class="neg">负面 {{ Math.round(nodeFeedback.summary.overallSentiment.negative * 100) }}%</span>
+              </div>
+            </div>
+
+            <n-divider style="margin: 12px 0;">节点数据</n-divider>
+
+            <div class="feedback-nodes-list">
+              <div 
+                v-for="nodeData in nodeFeedback.nodes" 
+                :key="nodeData.nodeId"
+                class="feedback-node-item"
+                :class="{ expanded: expandedFeedbackNodeId === nodeData.nodeId }"
+              >
+                <div class="feedback-node-header" @click="toggleFeedbackNode(nodeData.nodeId)">
+                  <span class="node-name">
+                    {{ nodeData.isEnding ? '🏁 ' : '📄 ' }}{{ nodeData.title }}
+                  </span>
+                  <span class="node-expand-icon">{{ expandedFeedbackNodeId === nodeData.nodeId ? '▲' : '▼' }}</span>
+                </div>
+
+                <div class="feedback-node-metrics">
+                  <div class="metric mini">
+                    <span class="metric-label">访问</span>
+                    <span class="metric-value">{{ nodeData.visitors }}</span>
+                  </div>
+                  <div class="metric mini">
+                    <span class="metric-label">流失率</span>
+                    <span class="metric-value" :class="{ 'high-drop': nodeData.dropOffRate > 30 }">
+                      {{ nodeData.dropOffRate }}%
+                    </span>
+                  </div>
+                  <div class="metric mini">
+                    <span class="metric-label">停留</span>
+                    <span class="metric-value">{{ nodeData.avgTimeSpent }}s</span>
+                  </div>
+                </div>
+
+                <div v-if="expandedFeedbackNodeId === nodeData.nodeId" class="feedback-node-detail">
+                  <div v-if="nodeData.choices && nodeData.choices.length > 0" class="choices-section">
+                    <div class="detail-subtitle">热门选项</div>
+                    <div 
+                      v-for="choice in nodeData.choices" 
+                      :key="choice.id"
+                      class="choice-stat-item"
+                    >
+                      <div class="choice-info">
+                        <span class="choice-text">{{ choice.text }}</span>
+                        <span class="choice-count">{{ choice.selectCount }} 人</span>
+                      </div>
+                      <div class="choice-bar-bg">
+                        <div 
+                          class="choice-bar-fill" 
+                          :style="{ width: choice.selectRate + '%' }"
+                        ></div>
+                      </div>
+                      <div class="choice-rate">{{ choice.selectRate }}%</div>
+                    </div>
+                  </div>
+
+                  <div class="comments-section">
+                    <div class="detail-subtitle">
+                      评论情绪 ({{ nodeData.comments.totalCount }} 条)
+                    </div>
+                    <div class="mini-sentiment-bar">
+                      <div 
+                        class="sentiment-segment positive" 
+                        :style="{ width: (nodeData.comments.sentiment.positive * 100) + '%' }"
+                      ></div>
+                      <div 
+                        class="sentiment-segment neutral" 
+                        :style="{ width: (nodeData.comments.sentiment.neutral * 100) + '%' }"
+                      ></div>
+                      <div 
+                        class="sentiment-segment negative" 
+                        :style="{ width: (nodeData.comments.sentiment.negative * 100) + '%' }"
+                      ></div>
+                    </div>
+
+                    <div v-if="nodeData.comments.topComments && nodeData.comments.topComments.length > 0" class="top-comments">
+                      <div 
+                        v-for="comment in nodeData.comments.topComments" 
+                        :key="comment.id"
+                        class="top-comment-item"
+                      >
+                        <div class="comment-header">
+                          <span class="comment-avatar">{{ comment.avatar }}</span>
+                          <span class="comment-username">{{ comment.username }}</span>
+                          <span 
+                            class="comment-sentiment-tag"
+                            :class="comment.sentiment"
+                          >
+                            {{ comment.sentiment === 'positive' ? '😊 正面' : comment.sentiment === 'negative' ? '😞 负面' : '😐 中性' }}
+                          </span>
+                        </div>
+                        <div class="comment-content">{{ comment.content }}</div>
+                        <div class="comment-likes">👍 {{ comment.likes }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </n-spin>
@@ -725,7 +1046,7 @@ import {
   useMessage,
   useDialog
 } from 'naive-ui'
-import { storyApi, worldApi } from '../api'
+import { storyApi, worldApi, analyticsApi } from '../api'
 import { useResponsive } from '../composables/useResponsive'
 
 const route = useRoute()
@@ -745,7 +1066,8 @@ const mobileTabs = [
   { key: 'nodes', label: '章节', icon: '📚' },
   { key: 'edit', label: '编辑', icon: '✏️' },
   { key: 'drafts', label: '草稿', icon: '📝' },
-  { key: 'versions', label: '版本', icon: '📜' }
+  { key: 'versions', label: '版本', icon: '📜' },
+  { key: 'feedback', label: '数据', icon: '📊' }
 ]
 
 const story = ref({
@@ -787,6 +1109,10 @@ const showWorldPicker = ref(false)
 const pickerWorldId = ref(null)
 const pickerWorld = ref(null)
 const allWorlds = ref([])
+
+const nodeFeedback = ref(null)
+const loadingNodeFeedback = ref(false)
+const expandedFeedbackNodeId = ref(null)
 const loadingWorlds = ref(false)
 const pickerSelectedEntries = ref([])
 
@@ -830,6 +1156,7 @@ const loadStory = async () => {
         activeMobileTab.value = 'edit'
       }
     }
+    loadNodeFeedback()
   } catch (err) {
     console.error('加载故事失败:', err)
     message.error('加载故事失败')
@@ -1167,6 +1494,35 @@ const loadDrafts = async () => {
   } finally {
     loadingDrafts.value = false
   }
+}
+
+const loadNodeFeedback = async () => {
+  if (!story.value.id) {
+    nodeFeedback.value = null
+    return
+  }
+  loadingNodeFeedback.value = true
+  try {
+    const res = await analyticsApi.getNodeFeedback(story.value.id)
+    nodeFeedback.value = res.data
+  } catch (err) {
+    console.error('加载节点反馈数据失败:', err)
+  } finally {
+    loadingNodeFeedback.value = false
+  }
+}
+
+const toggleFeedbackNode = (nodeId) => {
+  if (expandedFeedbackNodeId.value === nodeId) {
+    expandedFeedbackNodeId.value = null
+  } else {
+    expandedFeedbackNodeId.value = nodeId
+  }
+}
+
+const getNodeFeedbackData = (nodeId) => {
+  if (!nodeFeedback.value?.nodes) return null
+  return nodeFeedback.value.nodes.find(n => n.nodeId === nodeId)
 }
 
 const openDraft = async (draft) => {
@@ -2278,5 +2634,360 @@ watch(activeMobileTab, (tab) => {
 
 .version-actions-row .n-button {
   flex: 1;
+}
+
+.feedback-card {
+  margin-top: 12px;
+}
+
+.empty-feedback {
+  text-align: center;
+  padding: 30px 0;
+  color: #999;
+}
+
+.empty-feedback p {
+  margin: 4px 0;
+}
+
+.empty-feedback .hint {
+  font-size: 12px;
+  color: #bbb;
+}
+
+.feedback-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 12px 0;
+  padding: 12px 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.sentiment-overview {
+  margin: 12px 0;
+}
+
+.sentiment-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.sentiment-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.mini-sentiment-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f0f0f0;
+  margin: 6px 0;
+}
+
+.sentiment-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.3s;
+}
+
+.sentiment-segment span {
+  font-size: 14px;
+}
+
+.sentiment-segment.positive {
+  background: linear-gradient(135deg, #52c41a, #73d13d);
+}
+
+.sentiment-segment.neutral {
+  background: linear-gradient(135deg, #d9d9d9, #bfbfbf);
+}
+
+.sentiment-segment.negative {
+  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+}
+
+.sentiment-numbers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.sentiment-numbers .pos {
+  color: #52c41a;
+}
+
+.sentiment-numbers .neu {
+  color: #999;
+}
+
+.sentiment-numbers .neg {
+  color: #ff4d4f;
+}
+
+.feedback-nodes-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.feedback-node-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.feedback-node-item.expanded {
+  border-color: #d6e4ff;
+}
+
+.feedback-node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #fafafa;
+  cursor: pointer;
+  user-select: none;
+}
+
+.feedback-node-header:hover {
+  background: #f0f5ff;
+}
+
+.node-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.node-expand-icon {
+  font-size: 10px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.feedback-node-metrics {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fff;
+}
+
+.metric.mini {
+  flex: 1;
+  text-align: center;
+  padding: 6px 4px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.metric.mini .metric-label {
+  display: block;
+  font-size: 10px;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.metric.mini .metric-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.metric.mini .metric-value.high-drop {
+  color: #ff4d4f;
+}
+
+.feedback-node-detail {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.detail-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+
+.choices-section {
+  margin-bottom: 12px;
+}
+
+.choice-stat-item {
+  margin-bottom: 8px;
+}
+
+.choice-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.choice-text {
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.choice-count {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.choice-bar-bg {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.choice-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.choice-rate {
+  font-size: 11px;
+  color: #666;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.choice-stat-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.choice-stat-item .choice-info {
+  width: 100%;
+}
+
+.choice-stat-item .choice-bar-bg {
+  flex: 1;
+}
+
+.comments-section {
+  margin-top: 4px;
+}
+
+.top-comments {
+  margin-top: 10px;
+}
+
+.top-comment-item {
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.comment-avatar {
+  font-size: 14px;
+}
+
+.comment-username {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.comment-sentiment-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.comment-sentiment-tag.positive {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.comment-sentiment-tag.neutral {
+  background: #f5f5f5;
+  color: #999;
+}
+
+.comment-sentiment-tag.negative {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+
+.comment-content {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.comment-likes {
+  font-size: 11px;
+  color: #999;
+  text-align: right;
+}
+
+.mobile-feedback-content {
+  padding: 0 4px;
+}
+
+@media (max-width: 768px) {
+  .feedback-nodes-list {
+    max-height: none;
+  }
 }
 </style>

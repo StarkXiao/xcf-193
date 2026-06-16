@@ -5440,6 +5440,64 @@ const taskRewards = [
   }
 ];
 
+const nodeReadingEvents = {
+  'story-1': (function generateEvents() {
+    const events = [];
+    const nodes = [
+      { id: 'node-1-1', visitors: 1024, dropOffRate: 23.2, avgTime: 125 },
+      { id: 'node-1-2a', visitors: 620, dropOffRate: 18.5, avgTime: 142 },
+      { id: 'node-1-2b', visitors: 404, dropOffRate: 25.8, avgTime: 98 },
+      { id: 'node-1-3a', visitors: 342, dropOffRate: 0, avgTime: 180 },
+      { id: 'node-1-3b', visitors: 278, dropOffRate: 0, avgTime: 165 },
+      { id: 'node-1-3c', visitors: 256, dropOffRate: 12.5, avgTime: 110 },
+      { id: 'node-1-3d', visitors: 148, dropOffRate: 0, avgTime: 85 },
+      { id: 'node-1-4a', visitors: 130, dropOffRate: 0, avgTime: 200 },
+      { id: 'node-1-4b', visitors: 126, dropOffRate: 0, avgTime: 190 }
+    ];
+
+    nodes.forEach(node => {
+      for (let i = 0; i < node.visitors; i++) {
+        const dropOff = i < node.visitors * (node.dropOffRate / 100);
+        const event = {
+          id: `event-${node.id}-${i}`,
+          userId: `reader-${i % 200}`,
+          nodeId: node.id,
+          enteredAt: `2024-05-20 ${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}:00`,
+          leftAt: null,
+          selectedChoiceId: null,
+          nextNodeId: null,
+          timeSpent: Math.floor(node.avgTime + (Math.random() - 0.5) * 40)
+        };
+
+        if (!dropOff) {
+          event.leftAt = `2024-05-20 ${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}:00`;
+          if (node.id === 'node-1-1') {
+            const choseA = i < 620;
+            event.selectedChoiceId = choseA ? 'choice-1-1-1' : 'choice-1-1-2';
+            event.nextNodeId = choseA ? 'node-1-2a' : 'node-1-2b';
+          } else if (node.id === 'node-1-2a') {
+            const choseA = i < 342;
+            event.selectedChoiceId = choseA ? 'choice-1-2a-1' : 'choice-1-2a-2';
+            event.nextNodeId = choseA ? 'node-1-3a' : 'node-1-3b';
+          } else if (node.id === 'node-1-2b') {
+            const choseA = i < 256;
+            event.selectedChoiceId = choseA ? 'choice-1-2b-1' : 'choice-1-2b-2';
+            event.nextNodeId = choseA ? 'node-1-3c' : 'node-1-3d';
+          } else if (node.id === 'node-1-3c') {
+            const choseA = i < 130;
+            event.selectedChoiceId = choseA ? 'choice-1-3c-1' : 'choice-1-3c-2';
+            event.nextNodeId = choseA ? 'node-1-4a' : 'node-1-4b';
+          }
+        }
+
+        events.push(event);
+      }
+    });
+
+    return events;
+  })()
+};
+
 module.exports = {
   users,
   stories,
@@ -5479,5 +5537,6 @@ module.exports = {
   userTaskProgress,
   taskSubmissions,
   taskRewards,
-  featuredTopics
+  featuredTopics,
+  nodeReadingEvents
 };

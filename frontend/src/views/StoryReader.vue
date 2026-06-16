@@ -365,6 +365,9 @@ const showHotPanel = ref(false)
 
 const readerRef = ref(null)
 
+let nodeEnterTime = 0
+let hasTrackedCurrentNode = false
+
 const themeOptions = [
   { key: 'default', label: '默认', bg: '#fafafa', text: '#444' },
   { key: 'sepia', label: '护眼', bg: '#f4ecd8', text: '#5b4636' },
@@ -570,6 +573,7 @@ const loadStory = async () => {
     storyApi.viewStory(storyId.value)
     checkFavorite()
     saveReadingProgress()
+    setTimeout(() => trackNodeEnter(), 300)
     
     try {
       const refRes = await storyApi.getStoryReferences(storyId.value)
@@ -635,6 +639,7 @@ const toggleFavorite = async () => {
 const makeChoice = (choice) => {
   const nextNode = allNodes.value.find(n => n.id === choice.nextNodeId)
   if (nextNode) {
+    trackNodeChoice(choice)
     nextNode._choiceText = choice.text
     currentNode.value = nextNode
     currentNodeId.value = nextNode.id
@@ -642,17 +647,20 @@ const makeChoice = (choice) => {
     showBranchPanel.value = false
     window.scrollTo({ top: 0, behavior: 'smooth' })
     saveReadingProgress()
+    setTimeout(() => trackNodeEnter(), 100)
   }
 }
 
 const jumpToNode = (index) => {
   if (index < history.value.length) {
+    hasTrackedCurrentNode = false
     history.value = history.value.slice(0, index + 1)
     currentNode.value = history.value[index]
     currentNodeId.value = history.value[index].id
     showBranchPanel.value = false
     window.scrollTo({ top: 0, behavior: 'smooth' })
     saveReadingProgress()
+    setTimeout(() => trackNodeEnter(), 100)
   }
 }
 
@@ -660,12 +668,14 @@ const restartStory = () => {
   if (story.value?.startNodeId) {
     const startNode = allNodes.value.find(n => n.id === story.value.startNodeId)
     if (startNode) {
+      hasTrackedCurrentNode = false
       currentNode.value = startNode
       currentNodeId.value = startNode.id
       history.value = [startNode]
       showBranchPanel.value = false
       window.scrollTo({ top: 0, behavior: 'smooth' })
       saveReadingProgress()
+      setTimeout(() => trackNodeEnter(), 100)
     }
   }
 }
@@ -697,6 +707,37 @@ const saveReadingProgress = async () => {
   } catch (err) {
     console.error('保存阅读进度失败:', err)
   }
+}
+
+const trackNodeEnter = () => {
+  if (!storyId.value || !currentNodeId.value || hasTrackedCurrentNode) return
+  hasTrackedCurrentNode = true
+  nodeEnterTime = Date.now()
+  try {
+    storyApi.trackNodeEvent(storyId.value, currentNodeId.value, {
+      userId: userId,
+      eventType: 'enter'
+    })
+  } catch (err) {
+    console.error('记录节点进入事件失败:', err)
+  }
+}
+
+const trackNodeChoice = (choice) => {
+  if (!storyId.value || !currentNodeId.value) return
+  const timeSpent = Math.floor((Date.now() - nodeEnterTime) / 1000)
+  try {
+    storyApi.trackNodeEvent(storyId.value, currentNodeId.value, {
+      userId: userId,
+      eventType: 'choice',
+      choiceId: choice.id,
+      nextNodeId: choice.nextNodeId,
+      timeSpent: timeSpent
+    })
+  } catch (err) {
+    console.error('记录选择事件失败:', err)
+  }
+  hasTrackedCurrentNode = false
 }
 
 const goBack = () => {

@@ -66,6 +66,10 @@ export const storyApi = {
     return api.get('/stories/' + storyId + '/references')
   },
 
+  trackNodeEvent(storyId, nodeId, data) {
+    return api.post('/stories/' + storyId + '/nodes/' + nodeId + '/track', data)
+  },
+
   getDrafts(userId) {
     return api.get('/stories/drafts/user/' + userId)
   },
@@ -486,6 +490,10 @@ export const analyticsApi = {
 
   getEndingDistribution(userId, params = {}) {
     return api.get('/analytics/author/' + userId + '/ending-distribution', { params })
+  },
+
+  getNodeFeedback(storyId) {
+    return api.get('/analytics/story/' + storyId + '/node-feedback')
   }
 }
 

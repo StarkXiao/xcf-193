@@ -9,6 +9,7 @@ let storyNodesData = store.storyNodes;
 let favoritesData = store.favorites;
 let worldSettingsData = store.worldSettings;
 let featuredTopicsData = store.featuredTopics;
+let nodeReadingEventsData = store.nodeReadingEvents;
 
 router.get('/', (req, res) => {
   const { tag, sort, page = 1, limit = 10 } = req.query;
@@ -1102,6 +1103,50 @@ router.get('/featured-topics/:id', (req, res) => {
     limit: parseInt(limit),
     sort,
     stories: paginatedStories
+  });
+});
+
+router.post('/:storyId/nodes/:nodeId/track', (req, res) => {
+  const { storyId, nodeId } = req.params;
+  const { userId, eventType, choiceId, nextNodeId, timeSpent } = req.body;
+
+  if (!nodeReadingEventsData[storyId]) {
+    nodeReadingEventsData[storyId] = [];
+  }
+
+  const newEvent = {
+    id: `event-${uuidv4()}`,
+    userId: userId || 'anonymous',
+    nodeId,
+    eventType: eventType || 'enter',
+    enteredAt: new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(/\//g, '-'),
+    leftAt: null,
+    selectedChoiceId: choiceId || null,
+    nextNodeId: nextNodeId || null,
+    timeSpent: timeSpent || 0
+  };
+
+  if (eventType === 'choice' || eventType === 'leave') {
+    newEvent.leftAt = new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(/\//g, '-');
+  }
+
+  nodeReadingEventsData[storyId].push(newEvent);
+
+  res.status(201).json({
+    message: '事件记录成功',
+    event: newEvent
   });
 });
 
