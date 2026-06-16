@@ -499,343 +499,342 @@
                     </div>
                   </n-card>
                   <n-card hoverable class="achievement-summary-card">
-                      <div class="summary-metric">
-                        <span class="summary-metric-icon">🎯</span>
-                        <div>
-                          <div class="summary-metric-value">{{ endingAchievements.totalEndings }}</div>
-                          <div class="summary-metric-label">结局总数</div>
-                        </div>
-                      </div>
-                    </n-card>
-                    <n-card hoverable class="achievement-summary-card">
-                      <div class="summary-metric">
-                        <span class="summary-metric-icon">👥</span>
-                        <div>
-                          <div class="summary-metric-value">{{ endingAchievements.totalReaders }}</div>
-                          <div class="summary-metric-label">总阅读人数</div>
-                        </div>
-                      </div>
-                    </n-card>
-                    <n-card hoverable class="achievement-summary-card">
-                      <div class="summary-metric">
-                        <span class="summary-metric-icon">🔄</span>
-                        <div>
-                          <div class="summary-metric-value">{{ endingAchievements.averageEndingsPerReader }}</div>
-                          <div class="summary-metric-label">人均达成结局数</div>
-                        </div>
-                      </div>
-                    </n-card>
-                  </div>
-
-                  <div class="section-title">结局达成趋势</div>
-                  <n-card hoverable class="trend-card">
-                    <div class="chart-bars weekly-bars">
-                      <div 
-                        v-for="item in endingAchievements.achievementTrend" 
-                        :key="item.date"
-                        class="chart-bar-group"
-                      >
-                        <div class="bar-wrapper tall">
-                          <div 
-                            class="bar bar-endings" 
-                            :style="{ height: (item.newAchievements / getMaxNewAchievements(endingAchievements.achievementTrend) * 100) + '%' }"
-                          >
-                            <div class="bar-tooltip">新增 {{ item.newAchievements }} 个</div>
-                          </div>
-                        </div>
-                        <div class="bar-label">{{ item.date.slice(5) }}</div>
+                    <div class="summary-metric">
+                      <span class="summary-metric-icon">🎯</span>
+                      <div>
+                        <div class="summary-metric-value">{{ endingAchievements.totalEndings }}</div>
+                        <div class="summary-metric-label">结局总数</div>
                       </div>
                     </div>
                   </n-card>
+                  <n-card hoverable class="achievement-summary-card">
+                    <div class="summary-metric">
+                      <span class="summary-metric-icon">👥</span>
+                      <div>
+                        <div class="summary-metric-value">{{ endingAchievements.totalReaders }}</div>
+                        <div class="summary-metric-label">总阅读人数</div>
+                      </div>
+                    </div>
+                  </n-card>
+                  <n-card hoverable class="achievement-summary-card">
+                    <div class="summary-metric">
+                      <span class="summary-metric-icon">🔄</span>
+                      <div>
+                        <div class="summary-metric-value">{{ endingAchievements.averageEndingsPerReader }}</div>
+                        <div class="summary-metric-label">人均达成结局数</div>
+                      </div>
+                    </div>
+                  </n-card>
+                </div>
 
-                  <div class="section-title">各结局达成情况</div>
-                  <n-card hoverable class="endings-detail-card">
+                <div class="section-title">结局达成趋势</div>
+                <n-card hoverable class="trend-card">
+                  <div class="chart-bars weekly-bars">
                     <div 
-                      v-for="(ending, idx) in endingAchievements.endings" 
-                      :key="ending.id"
-                      class="ending-detail-item"
+                      v-for="item in endingAchievements.achievementTrend" 
+                      :key="item.date"
+                      class="chart-bar-group"
                     >
-                      <div class="ending-detail-header">
-                        <div class="ending-detail-rank" :class="'rank-' + (idx + 1)">{{ idx + 1 }}</div>
-                        <div class="ending-detail-info">
-                          <div class="ending-detail-title">{{ ending.title }}</div>
-                          <n-tag :type="getEndingTypeTag(ending.endingType)" size="small">
-                            {{ getEndingTypeLabel(ending.endingType) }}
-                          </n-tag>
-                        </div>
-                        <div class="ending-detail-stats">
-                          <div class="ending-detail-count">{{ ending.achievementCount }} 人达成</div>
-                          <div class="ending-detail-rate">{{ ending.achievementRate }}%</div>
+                      <div class="bar-wrapper tall">
+                        <div 
+                          class="bar bar-endings" 
+                          :style="{ height: (item.newAchievements / getMaxNewAchievements(endingAchievements.achievementTrend) * 100) + '%' }"
+                        >
+                          <div class="bar-tooltip">新增 {{ item.newAchievements }} 个</div>
                         </div>
                       </div>
-                      <div class="ending-detail-bar-wrapper">
+                      <div class="bar-label">{{ item.date.slice(5) }}</div>
+                    </div>
+                  </div>
+                </n-card>
+
+                <div class="section-title">各结局达成情况</div>
+                <n-card hoverable class="endings-detail-card">
+                  <div 
+                    v-for="(ending, idx) in endingAchievements.endings" 
+                    :key="ending.id"
+                    class="ending-detail-item"
+                  >
+                    <div class="ending-detail-header">
+                      <div class="ending-detail-rank" :class="'rank-' + (idx + 1)">{{ idx + 1 }}</div>
+                      <div class="ending-detail-info">
+                        <div class="ending-detail-title">{{ ending.title }}</div>
+                        <n-tag :type="getEndingTypeTag(ending.endingType)" size="small">
+                          {{ getEndingTypeLabel(ending.endingType) }}
+                        </n-tag>
+                      </div>
+                      <div class="ending-detail-stats">
+                        <div class="ending-detail-count">{{ ending.achievementCount }} 人达成</div>
+                        <div class="ending-detail-rate">{{ ending.achievementRate }}%</div>
+                      </div>
+                    </div>
+                    <div class="ending-detail-bar-wrapper">
+                      <div 
+                        class="ending-detail-bar"
+                        :style="{ width: ending.achievementRate + '%' }"
+                      ></div>
+                    </div>
+                    <div class="ending-detail-meta">
+                      <span class="meta-item">首次达成: {{ ending.firstReachedAt }}</span>
+                      <span class="meta-item">本周新增: {{ ending.recentWeekCount }}</span>
+                      <span :class="['meta-trend', ending.trend]">
+                        {{ ending.trend === 'up' ? '↑ 上升' : ending.trend === 'down' ? '↓ 下降' : '→ 平稳' }}
+                      </span>
+                    </div>
+                  </div>
+                </n-card>
+              </div>
+
+              <div v-if="popularBranches" class="ending-section">
+                <div class="section-title">🔥 热门分支排行</div>
+                <div class="branch-ranking-header">
+                  <n-radio-group v-model:value="branchSortBy" size="small" @update:value="onBranchSortChange">
+                    <n-radio value="selectCount">按选择人数</n-radio>
+                    <n-radio value="selectRate">按选择比例</n-radio>
+                  </n-radio-group>
+                </div>
+                <n-card hoverable class="branch-ranking-card">
+                  <div 
+                    v-for="branch in popularBranches.ranking" 
+                    :key="branch.choiceId"
+                    class="branch-rank-item"
+                  >
+                    <div class="branch-rank-number" :class="'rank-' + branch.rank">{{ branch.rank }}</div>
+                    <div class="branch-rank-content">
+                      <div class="branch-rank-node">{{ branch.nodeTitle }}</div>
+                      <div class="branch-rank-choice">
+                        <span class="choice-label">选项:</span>
+                        <span class="choice-text">{{ branch.choiceText }}</span>
+                      </div>
+                      <div class="branch-rank-bar-wrapper">
                         <div 
-                          class="ending-detail-bar"
-                          :style="{ width: ending.achievementRate + '%' }"
+                          class="branch-rank-bar"
+                          :style="{ width: branch.selectRate + '%' }"
                         ></div>
                       </div>
-                      <div class="ending-detail-meta">
-                        <span class="meta-item">首次达成: {{ ending.firstReachedAt }}</span>
-                        <span class="meta-item">本周新增: {{ ending.recentWeekCount }}</span>
-                        <span :class="['meta-trend', ending.trend]">
-                          {{ ending.trend === 'up' ? '↑ 上升' : ending.trend === 'down' ? '↓ 下降' : '→ 平稳' }}
-                        </span>
+                    </div>
+                    <div class="branch-rank-stats">
+                      <div class="branch-rank-count">{{ branch.selectCount }} 人</div>
+                      <div class="branch-rank-rate">{{ branch.selectRate }}%</div>
+                      <div v-if="branch.isKeyBranch" class="branch-rank-tag">
+                        <n-tag size="small" type="warning">关键分支</n-tag>
                       </div>
+                      <div v-if="branch.leadsToEnding" class="branch-rank-tag">
+                        <n-tag size="small" type="success">通向结局</n-tag>
+                      </div>
+                    </div>
+                  </div>
+                </n-card>
+
+                <div class="section-title">关键分支节点</div>
+                <div class="key-branch-points">
+                  <n-card 
+                    v-for="point in popularBranches.keyBranchPoints" 
+                    :key="point.nodeId"
+                    hoverable
+                    class="key-point-card"
+                  >
+                    <div class="key-point-header">
+                      <div class="key-point-title">{{ point.title }}</div>
+                      <n-tag v-if="point.isFirstLevel" size="small" type="primary">一级分支</n-tag>
+                    </div>
+                    <div class="key-point-stats">
+                      <span class="key-point-stat">
+                        <span class="stat-label">访问人数</span>
+                        <span class="stat-value">{{ point.visitors }}</span>
+                      </span>
+                      <span class="key-point-stat">
+                        <span class="stat-label">分支数量</span>
+                        <span class="stat-value">{{ point.branchCount }}</span>
+                      </span>
                     </div>
                   </n-card>
                 </div>
+              </div>
 
-                <div v-if="popularBranches" class="ending-section">
-                  <div class="section-title">🔥 热门分支排行</div>
-                  <div class="branch-ranking-header">
-                    <n-radio-group v-model:value="branchSortBy" size="small" @update:value="onBranchSortChange">
-                      <n-radio value="selectCount">按选择人数</n-radio>
-                      <n-radio value="selectRate">按选择比例</n-radio>
-                    </n-radio-group>
-                  </div>
-                  <n-card hoverable class="branch-ranking-card">
-                    <div 
-                      v-for="branch in popularBranches.ranking" 
-                      :key="branch.choiceId"
-                      class="branch-rank-item"
-                    >
-                      <div class="branch-rank-number" :class="'rank-' + branch.rank">{{ branch.rank }}</div>
-                      <div class="branch-rank-content">
-                        <div class="branch-rank-node">{{ branch.nodeTitle }}</div>
-                        <div class="branch-rank-choice">
-                          <span class="choice-label">选项:</span>
-                          <span class="choice-text">{{ branch.choiceText }}</span>
-                        </div>
-                        <div class="branch-rank-bar-wrapper">
-                          <div 
-                            class="branch-rank-bar"
-                            :style="{ width: branch.selectRate + '%' }"
-                          ></div>
-                        </div>
-                      </div>
-                      <div class="branch-rank-stats">
-                        <div class="branch-rank-count">{{ branch.selectCount }} 人</div>
-                        <div class="branch-rank-rate">{{ branch.selectRate }}%</div>
-                        <div v-if="branch.isKeyBranch" class="branch-rank-tag">
-                          <n-tag size="small" type="warning">关键分支</n-tag>
-                        </div>
-                        <div v-if="branch.leadsToEnding" class="branch-rank-tag">
-                          <n-tag size="small" type="success">通向结局</n-tag>
-                        </div>
-                      </div>
-                    </div>
-                  </n-card>
+              <div v-if="endingDistribution" class="ending-section">
+                <div class="section-title">👥 读者结局分布</div>
+                
+                <div class="distribution-tabs">
+                  <n-radio-group v-model:value="distributionView" size="small">
+                    <n-radio value="gender">按性别</n-radio>
+                    <n-radio value="age">按年龄</n-radio>
+                    <n-radio value="region">按地域</n-radio>
+                    <n-radio value="type">按类型</n-radio>
+                  </n-radio-group>
+                </div>
 
-                  <div class="section-title">关键分支节点</div>
-                  <div class="key-branch-points">
-                    <n-card 
-                      v-for="point in popularBranches.keyBranchPoints" 
-                      :key="point.nodeId"
-                      hoverable
-                      class="key-point-card"
-                    >
-                      <div class="key-point-header">
-                        <div class="key-point-title">{{ point.title }}</div>
-                        <n-tag v-if="point.isFirstLevel" size="small" type="primary">一级分支</n-tag>
+                <div v-if="distributionView === 'gender'" class="distribution-content">
+                  <div class="distribution-grid">
+                    <n-card v-for="(endings, gender) in endingDistribution.story?.byGender || {}" :key="gender" hoverable class="distribution-card">
+                      <div class="distribution-card-title">
+                        <span class="gender-icon">{{ getGenderLabel(gender) }}</span>
                       </div>
-                      <div class="key-point-stats">
-                        <span class="key-point-stat">
-                          <span class="stat-label">访问人数</span>
-                          <span class="stat-value">{{ point.visitors }}</span>
-                        </span>
-                        <span class="key-point-stat">
-                          <span class="stat-label">分支数量</span>
-                          <span class="stat-value">{{ point.branchCount }}</span>
-                        </span>
+                      <div class="distribution-list">
+                        <div 
+                          v-for="ending in endings" 
+                          :key="ending.endingId"
+                          class="distribution-item"
+                        >
+                          <div class="distribution-item-header">
+                            <span class="distribution-item-name">{{ ending.endingTitle }}</span>
+                            <span class="distribution-item-rate">{{ ending.rate }}%</span>
+                          </div>
+                          <div class="distribution-item-bar-wrapper">
+                            <div 
+                              class="distribution-item-bar"
+                              :class="'bar-gender-' + gender"
+                              :style="{ width: ending.rate + '%' }"
+                            ></div>
+                          </div>
+                          <div class="distribution-item-count">{{ ending.count }} 人</div>
+                        </div>
                       </div>
                     </n-card>
                   </div>
                 </div>
 
-                <div v-if="endingDistribution" class="ending-section">
-                  <div class="section-title">👥 读者结局分布</div>
-                  
-                  <div class="distribution-tabs">
-                    <n-radio-group v-model:value="distributionView" size="small">
-                      <n-radio value="gender">按性别</n-radio>
-                      <n-radio value="age">按年龄</n-radio>
-                      <n-radio value="region">按地域</n-radio>
-                      <n-radio value="type">按类型</n-radio>
-                    </n-radio-group>
-                  </div>
-
-                  <div v-if="distributionView === 'gender'" class="distribution-content">
-                    <div class="distribution-grid">
-                      <n-card v-for="(endings, gender in endingDistribution.story?.byGender || {}" :key="gender" hoverable class="distribution-card">
-                        <div class="distribution-card-title">
-                          <span class="gender-icon">{{ getGenderLabel(gender) }}</span>
-                        </div>
-                        <div class="distribution-list">
-                          <div 
-                            v-for="ending in endings" 
-                            :key="ending.endingId"
-                            class="distribution-item"
-                          >
-                            <div class="distribution-item-header">
-                              <span class="distribution-item-name">{{ ending.endingTitle }}</span>
-                              <span class="distribution-item-rate">{{ ending.rate }}%</span>
-                            </div>
-                            <div class="distribution-item-bar-wrapper">
-                              <div 
-                                class="distribution-item-bar"
-                                :class="'bar-gender-' + gender"
-                                :style="{ width: ending.rate + '%' }"
-                              ></div>
-                            </div>
-                            <div class="distribution-item-count">{{ ending.count }} 人</div>
+                <div v-else-if="distributionView === 'age'" class="distribution-content">
+                  <div class="distribution-grid">
+                    <n-card v-for="(endings, ageGroup) in endingDistribution.story?.byAgeGroup || {}" :key="ageGroup" hoverable class="distribution-card">
+                      <div class="distribution-card-title">
+                        <span class="age-label">{{ ageGroup }}岁</span>
+                      </div>
+                      <div class="distribution-list">
+                        <div 
+                          v-for="ending in endings" 
+                          :key="ending.endingId"
+                          class="distribution-item"
+                        >
+                          <div class="distribution-item-header">
+                            <span class="distribution-item-name">{{ ending.endingTitle }}</span>
+                            <span class="distribution-item-rate">{{ ending.rate }}%</span>
                           </div>
-                        </div>
-                      </n-card>
-                    </div>
-                  </div>
-
-                  <div v-else-if="distributionView === 'age'" class="distribution-content">
-                    <div class="distribution-grid">
-                      <n-card v-for="(endings, ageGroup in endingDistribution.story?.byAgeGroup || {}" :key="ageGroup" hoverable class="distribution-card">
-                        <div class="distribution-card-title">
-                          <span class="age-label">{{ ageGroup }}岁</span>
-                        </div>
-                        <div class="distribution-list">
-                          <div 
-                            v-for="ending in endings" 
-                            :key="ending.endingId"
-                            class="distribution-item"
-                          >
-                            <div class="distribution-item-header">
-                              <span class="distribution-item-name">{{ ending.endingTitle }}</span>
-                              <span class="distribution-item-rate">{{ ending.rate }}%</span>
-                            </div>
-                            <div class="distribution-item-bar-wrapper">
-                              <div 
-                                class="distribution-item-bar bar-age"
-                                :style="{ width: ending.rate + '%' }"
-                              ></div>
-                            </div>
-                            <div class="distribution-item-count">{{ ending.count }} 人</div>
+                          <div class="distribution-item-bar-wrapper">
+                            <div 
+                              class="distribution-item-bar bar-age"
+                              :style="{ width: ending.rate + '%' }"
+                            ></div>
                           </div>
+                          <div class="distribution-item-count">{{ ending.count }} 人</div>
                         </div>
-                      </n-card>
-                    </div>
+                      </div>
+                    </n-card>
                   </div>
+                </div>
 
-                  <div v-else-if="distributionView === 'region'" class="distribution-content">
-                    <div class="distribution-grid">
-                      <n-card v-for="(endings, region in endingDistribution.story?.byRegion || {}" :key="region" hoverable class="distribution-card">
-                        <div class="distribution-card-title">
-                          <span class="region-label">{{ region }}</span>
-                        </div>
-                        <div class="distribution-list">
-                          <div 
-                            v-for="ending in endings" 
-                            :key="ending.endingId"
-                            class="distribution-item"
-                          >
-                            <div class="distribution-item-header">
-                              <span class="distribution-item-name">{{ ending.endingTitle }}</span>
-                              <span class="distribution-item-rate">{{ ending.rate }}%</span>
-                            </div>
-                            <div class="distribution-item-bar-wrapper">
-                              <div 
-                                class="distribution-item-bar bar-region"
-                                :style="{ width: ending.rate + '%' }"
-                              ></div>
-                            </div>
-                            <div class="distribution-item-count">{{ ending.count }} 人</div>
+                <div v-else-if="distributionView === 'region'" class="distribution-content">
+                  <div class="distribution-grid">
+                    <n-card v-for="(endings, region) in endingDistribution.story?.byRegion || {}" :key="region" hoverable class="distribution-card">
+                      <div class="distribution-card-title">
+                        <span class="region-label">{{ region }}</span>
+                      </div>
+                      <div class="distribution-list">
+                        <div 
+                          v-for="ending in endings" 
+                          :key="ending.endingId"
+                          class="distribution-item"
+                        >
+                          <div class="distribution-item-header">
+                            <span class="distribution-item-name">{{ ending.endingTitle }}</span>
+                            <span class="distribution-item-rate">{{ ending.rate }}%</span>
                           </div>
+                          <div class="distribution-item-bar-wrapper">
+                            <div 
+                              class="distribution-item-bar bar-region"
+                              :style="{ width: ending.rate + '%' }"
+                            ></div>
+                          </div>
+                          <div class="distribution-item-count">{{ ending.count }} 人</div>
                         </div>
-                      </n-card>
-                    </div>
+                      </div>
+                    </n-card>
                   </div>
+                </div>
 
-                  <div v-else-if="distributionView === 'type'" class="distribution-content">
-                    <n-card hoverable class="type-distribution-card">
-                      <div class="type-pie-section">
-                        <div class="pie-chart">
-                          <div class="pie-center">
-                            <div class="pie-total">结局类型</div>
-                          </div>
-                          <svg viewBox="0 0 100 100" class="pie-svg">
-                            <circle 
-                              v-for="(type, idx) in endingDistribution.story?.endingTypeDistribution || []"
-                              :key="type.type"
-                              cx="50" cy="50" r="40" 
-                              fill="none" 
-                              :stroke="getEndingTypeColor(type.type)"
-                              :stroke-width="20"
-                              :stroke-dasharray="type.rate * 2.51 + ' ' + 251"
-                              :stroke-dashoffset="getTypeStrokeOffset(idx, endingDistribution.story?.endingTypeDistribution || [])"
-                              transform="rotate(-90 50 50)"
-                            />
-                          </svg>
+                <div v-else-if="distributionView === 'type'" class="distribution-content">
+                  <n-card hoverable class="type-distribution-card">
+                    <div class="type-pie-section">
+                      <div class="pie-chart">
+                        <div class="pie-center">
+                          <div class="pie-total">结局类型</div>
                         </div>
-                        <div class="type-legend">
-                          <div 
-                            v-for="type in endingDistribution.story?.endingTypeDistribution || []"
+                        <svg viewBox="0 0 100 100" class="pie-svg">
+                          <circle 
+                            v-for="(type, idx) in endingDistribution.story?.endingTypeDistribution || []"
                             :key="type.type"
-                            class="legend-item"
-                          >
-                            <span class="legend-dot" :style="{ background: getEndingTypeColor(type.type) }"></span>
-                            <span>{{ type.label }}</span>
-                            <span class="legend-value">{{ type.rate }}%</span>
-                          </div>
-                        </div>
+                            cx="50" cy="50" r="40" 
+                            fill="none" 
+                            :stroke="getEndingTypeColor(type.type)"
+                            :stroke-width="20"
+                            :stroke-dasharray="type.rate * 2.51 + ' ' + 251"
+                            :stroke-dashoffset="getTypeStrokeOffset(idx, endingDistribution.story?.endingTypeDistribution || [])"
+                            transform="rotate(-90 50 50)"
+                          />
+                        </svg>
                       </div>
-                    </n-card>
-                  </div>
-
-                  <div class="section-title">完读路径分析</div>
-                  <n-card hoverable class="path-analysis-card">
-                    <div class="path-stats">
-                      <div class="path-stat-item">
-                        <span class="path-stat-icon">📏</span>
-                        <div class="path-stat-info">
-                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.avgStepsToEnding || 0 }}</div>
-                          <div class="path-stat-label">平均步长</div>
+                      <div class="type-legend">
+                        <div 
+                          v-for="type in endingDistribution.story?.endingTypeDistribution || []"
+                          :key="type.type"
+                          class="legend-item"
+                        >
+                          <span class="legend-dot" :style="{ background: getEndingTypeColor(type.type) }"></span>
+                          <span>{{ type.label }}</span>
+                          <span class="legend-value">{{ type.rate }}%</span>
                         </div>
-                      </div>
-                      <div class="path-stat-item">
-                        <span class="path-stat-icon">⚡</span>
-                        <div class="path-stat-info">
-                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.fastestPath || '' }}</div>
-                          <div class="path-stat-label">最快路径</div>
-                        </div>
-                      </div>
-                      <div class="path-stat-item">
-                        <span class="path-stat-icon">🔥</span>
-                        <div class="path-stat-info">
-                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.mostPopularPath || '' }}</div>
-                          <div class="path-stat-label">最热门路径</div>
-                        </div>
-                      </div>
-                      <div class="path-stat-item">
-                        <span class="path-stat-icon">🔁</span>
-                        <div class="path-stat-info">
-                          <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.avgReplayCount || 0 }}</div>
-                          <div class="path-stat-label">平均重玩次数</div>
-                        </div>
-                      </div>
-                    </div>
-                  </n-card>
-
-                  <div class="section-title">💡 数据洞察</div>
-                  <n-card hoverable class="insights-card">
-                    <div class="insights-list">
-                      <div 
-                        v-for="(insight, idx) in endingDistribution.overallInsights || []" 
-                        :key="idx"
-                        class="insight-item"
-                      >
-                        <span class="insight-icon">{{ getInsightIcon(insight.type) }}</span>
-                        <span class="insight-text">{{ insight.insight }}</span>
                       </div>
                     </div>
                   </n-card>
                 </div>
+
+                <div class="section-title">完读路径分析</div>
+                <n-card hoverable class="path-analysis-card">
+                  <div class="path-stats">
+                    <div class="path-stat-item">
+                      <span class="path-stat-icon">📏</span>
+                      <div class="path-stat-info">
+                        <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.avgStepsToEnding || 0 }}</div>
+                        <div class="path-stat-label">平均步长</div>
+                      </div>
+                    </div>
+                    <div class="path-stat-item">
+                      <span class="path-stat-icon">⚡</span>
+                      <div class="path-stat-info">
+                        <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.fastestPath || '' }}</div>
+                        <div class="path-stat-label">最快路径</div>
+                      </div>
+                    </div>
+                    <div class="path-stat-item">
+                      <span class="path-stat-icon">🔥</span>
+                      <div class="path-stat-info">
+                        <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.mostPopularPath || '' }}</div>
+                        <div class="path-stat-label">最热门路径</div>
+                      </div>
+                    </div>
+                    <div class="path-stat-item">
+                      <span class="path-stat-icon">🔁</span>
+                      <div class="path-stat-info">
+                        <div class="path-stat-value">{{ endingDistribution.story?.completionPaths?.avgReplayCount || 0 }}</div>
+                        <div class="path-stat-label">平均重玩次数</div>
+                      </div>
+                    </div>
+                  </div>
+                </n-card>
+
+                <div class="section-title">💡 数据洞察</div>
+                <n-card hoverable class="insights-card">
+                  <div class="insights-list">
+                    <div 
+                      v-for="(insight, idx) in endingDistribution.overallInsights || []" 
+                      :key="idx"
+                      class="insight-item"
+                    >
+                      <span class="insight-icon">{{ getInsightIcon(insight.type) }}</span>
+                      <span class="insight-text">{{ insight.insight }}</span>
+                    </div>
+                  </div>
+                </n-card>
               </div>
             </div>
           </n-tab-pane>
